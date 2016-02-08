@@ -1,0 +1,10 @@
+bin/FRAG
+bin/*.log
+obj/
+src/freetype-gl
+src/kit
+src/shaders
+src/scripts
+__pycache__/
+*.make
+Makefile

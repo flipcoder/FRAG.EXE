@@ -1,0 +1,16 @@
+{
+    "options": {
+        "env": {
+            "CXX": "clang++"
+        },
+        "makefile_params": [
+            "CXX='clang++'"
+        ]
+    },
+
+    "required": {
+        "flipcoder/qor": {
+            "link": "Qor"
+        }
+    }
+}
