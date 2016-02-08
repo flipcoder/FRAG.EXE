@@ -1,0 +1,34 @@
+{
+    "name": "Player",
+    "sensitivity": 0.5,
+    "input": {
+        "binds": {
+            "e": [
+                "up",
+                "forward"
+            ],
+            "up": "up",
+            "s": "left",
+            "d": [
+                "down",
+                "back"
+            ],
+            "f": "right",
+            "mouse left": "fire",
+            "w": "use",
+            "mouse right": "zoom",
+            "k": "shoot",
+            "j": "strafe",
+            "left shift": "sprint",
+            "i": "action",
+            "t": "reload",
+            "y": "chat",
+            "return": "select",
+            "space": [
+                "jump",
+                "select"
+            ],
+            "a": "crouch"
+        }
+    }
+}
