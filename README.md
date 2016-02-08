@@ -1,6 +1,7 @@
 # FRAG.EXE
 
-Basic first perseon shooter demonstration with my own engine (Qor)
+Basic first person shooter demonstration.
+Written in C++11 using my own engine (Qor).
     
 Work in progress, not all files are uploaded yet.
 
