@@ -1,7 +1,5 @@
-Repository for the Qor first person shooter demo, FRAG.EXE
+Basic first perseon shooter demonstration with my own engine (Qor)
 
-Starting the transition to a new repository for the Qor demo.
-
-More files will be here soon, once the transition is complete.
+Work in progress, not all files are uploaded yet.
 
 Engine here: http://github.com/flipcoder/qor
