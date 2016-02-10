@@ -256,7 +256,7 @@ void GameState :: logic(Freq::Time t)
         //    if(light_timeline->elapsed(Freq::Time(50)))
         //        lp->detach();
         //});
-        m_pRoot->add(l);
+        //m_pRoot->add(l);
         
         m_pViewModel->recoil(Freq::Time(50), Freq::Time(500));
 
