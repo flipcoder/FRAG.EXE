@@ -61,7 +61,7 @@ class GameState:
         
     private:
 
-        void decal(glm::vec3 contact, glm::vec3 normal, glm::mat4 observer);
+        void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up);
         
         Qor* m_pQor = nullptr;
         Input* m_pInput = nullptr;

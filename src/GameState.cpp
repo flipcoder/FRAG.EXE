@@ -43,7 +43,7 @@ void GameState :: preload()
     m_pPlayerMesh->set_physics(Node::Physics::DYNAMIC);
     m_pPlayerMesh->set_physics_shape(Node::CAPSULE);
     m_pPlayerMesh->friction(1.0f);
-    m_pPlayerMesh->mass(10.0f);
+    m_pPlayerMesh->mass(80.0f);
     m_pPlayerMesh->inertia(false);
     m_pCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     //m_pRoot->add(m_pCamera);
@@ -112,15 +112,8 @@ void GameState :: preload()
     //    m_pCamera
     //);
     
-    m_pRoot->add(m_pQor->make<Mesh>("theDunes.obj"));
+    m_pRoot->add(m_pQor->make<Mesh>("gothicTower.obj"));
     m_pController = m_pQor->session()->profile(0)->controller();
-    m_pPlayer = kit::init_shared<PlayerInterface3D>(
-        m_pController,
-        m_pCamera,
-        m_pPlayerMesh,
-        m_pQor->session()->profile(0)->config()
-    );
-    m_pPlayer->speed(12.0f);
     //m_pPlayer->fly();
     
     const bool ads = false;
@@ -167,9 +160,13 @@ void GameState :: preload()
 
     btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
     pmesh_body->setActivationState(DISABLE_DEACTIVATION);
-    pmesh_body->setAngularFactor(btVector3(0,0,0));
+    //pmesh_body->setAngularFactor(btVector3(0,0,0));
+    pmesh_body->setCcdMotionThreshold(0.001f);
+    pmesh_body->setCcdSweptSphereRadius(0.25f);
+    //pmesh_body->setRestitution(10.0f);
+    //pmesh_body->setDamping(0.0f, 0.0f);
     ////pmesh_body->setRestitution(0.0f);
-    m_pPhysics->world()->setGravity(btVector3(0.0, -9.8, 0.0));
+    m_pPhysics->world()->setGravity(btVector3(0.0, -25.0, 0.0));
 }
 
 GameState :: ~GameState()
@@ -179,6 +176,20 @@ GameState :: ~GameState()
 
 void GameState :: enter()
 {
+    m_pPlayer = kit::init_shared<PlayerInterface3D>(
+        m_pController,
+        m_pCamera,
+        m_pPlayerMesh,
+        m_pQor->session()->profile(0)->config()
+    );
+    m_pPlayer->speed(12.0f);
+    btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
+    m_pPlayer->on_jump([pmesh_body]{
+        pmesh_body->applyImpulse(
+            btVector3(0.0f, 1000.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)
+        );
+    });
+    
     m_pPipeline->shader(1)->use();
     m_pPipeline->override_shader(PassType::NORMAL, m_Shader);
      
@@ -231,6 +242,22 @@ void GameState :: logic(Freq::Time t)
         m_pCamera->add(s);
         s->play();
         s->detach_on_done();
+
+        //auto l = make_shared<Light>();
+        //l->position(m_pViewModel->position(Space::WORLD));
+        //l->move(m_pViewModel->orient_to_world(vec3(0.0f, 0.0f, 1.0f)));
+        //l->diffuse(Color(1.0f,1.0f,1.0f));
+        //l->specular(Color(1.0f,1.0f,1.0f));
+        //l->atten(glm::vec3(0.0f, 0.5f, 0.01f));
+        //auto light_timeline = make_shared<Freq::Timeline>();
+        //Light* lp = l.get();
+        //l->on_tick.connect([lp, light_timeline](Freq::Time t){
+        //    light_timeline->logic(t);
+        //    if(light_timeline->elapsed(Freq::Time(50)))
+        //        lp->detach();
+        //});
+        m_pRoot->add(l);
+        
         m_pViewModel->recoil(Freq::Time(50), Freq::Time(500));
 
         for(int i=0; i<8; ++i)
@@ -251,11 +278,7 @@ void GameState :: logic(Freq::Time t)
             );
             if(std::get<0>(hit))
             {
-                decal(
-                    std::get<1>(hit),
-                    std::get<2>(hit),
-                    *m_pCamera->matrix(Space::WORLD)
-                );
+                decal(std::get<1>(hit), std::get<2>(hit), Matrix::up(*m_pCamera->matrix(Space::WORLD)));
             }
         }
     }
@@ -285,28 +308,31 @@ void GameState :: logic(Freq::Time t)
     else if(m_pInput->key(SDLK_r))
         m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, -t.s()));
 
-    LOGf("model pos %s", Vector::to_string(m_pViewModel->model_pos()));
-    LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
+    //LOGf("model pos %s", Vector::to_string(m_pViewModel->model_pos()));
+    //LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
 }
 
-void GameState :: decal(glm::vec3 contact, glm::vec3 normal, glm::mat4 observer)
+void GameState :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up)
 {
-    const float decal_scale = 0.1f;
+    const float decal_scale = 0.05f;
     auto m = make_shared<Mesh>(make_shared<MeshGeometry>(Prefab::quad(
-        glm::vec2(-decal_scale, -decal_scale),
-        glm::vec2(decal_scale, decal_scale)
+        glm::vec2(decal_scale, decal_scale),
+        glm::vec2(-decal_scale, -decal_scale)
     )));
     m->add_modifier(make_shared<Wrap>(Prefab::quad_wrap()));
     m->material(make_shared<MeshMaterial>(m_pDecal));
-    m->position(contact + glm::vec3(0.0f, 0.0f, 0.001f));
+    auto right = glm::cross(normal, up);
+    LOGf("right: %s", Vector::to_string(right));
+    up = glm::cross(normal, right);
+    LOGf("up: %s", Vector::to_string(up));
+    *m->matrix() = glm::mat4(glm::mat3(
+        right, up, normal
+    ));
+    LOGf("matrix: %s", Matrix::to_string(*m->matrix()));
+    m->position(contact);
+    m->move(normal * 0.01f);
     m->pend();
     m_pRoot->add(m);
-    //auto l = make_shared<Light>();
-    //l->position(contact);
-    //l->diffuse(Color(1.0f, 0.2f, 0.2f, 1.0f));
-    //l->specular(Color(1.0f, 0.2f, 0.2f, 1.0f));
-    //l->atten(glm::vec3(0.0f, 0.1f, 0.01f));
-    //m_pRoot->add(l);
 }
 
 void GameState :: render() const
