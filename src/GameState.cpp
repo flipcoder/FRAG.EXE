@@ -112,7 +112,7 @@ void GameState :: preload()
     //    m_pCamera
     //);
     
-    m_pRoot->add(m_pQor->make<Mesh>("gothicTower.obj"));
+    m_pRoot->add(m_pQor->make<Mesh>("apartment_scene.obj"));
     m_pController = m_pQor->session()->profile(0)->controller();
     //m_pPlayer->fly();
     
@@ -314,7 +314,7 @@ void GameState :: logic(Freq::Time t)
 
 void GameState :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up)
 {
-    const float decal_scale = 0.05f;
+    const float decal_scale = 0.1f;
     auto m = make_shared<Mesh>(make_shared<MeshGeometry>(Prefab::quad(
         glm::vec2(decal_scale, decal_scale),
         glm::vec2(-decal_scale, -decal_scale)
@@ -322,13 +322,13 @@ void GameState :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up)
     m->add_modifier(make_shared<Wrap>(Prefab::quad_wrap()));
     m->material(make_shared<MeshMaterial>(m_pDecal));
     auto right = glm::cross(normal, up);
-    LOGf("right: %s", Vector::to_string(right));
+    //LOGf("right: %s", Vector::to_string(right));
     up = glm::cross(normal, right);
-    LOGf("up: %s", Vector::to_string(up));
-    *m->matrix() = glm::mat4(glm::mat3(
+    //LOGf("up: %s", Vector::to_string(up));
+    *m->matrix() = glm::mat4(glm::orthonormalize(glm::mat3(
         right, up, normal
-    ));
-    LOGf("matrix: %s", Matrix::to_string(*m->matrix()));
+    )));
+    //LOGf("matrix: %s", Matrix::to_string(*m->matrix()));
     m->position(contact);
     m->move(normal * 0.01f);
     m->pend();
