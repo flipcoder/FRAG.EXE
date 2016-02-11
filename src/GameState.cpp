@@ -154,19 +154,19 @@ void GameState :: preload()
     //m_pScript->execute_file("mods/"+ m_Filename +"/__init__.py");
     //m_pScript->execute_string("preload()");
     
-    m_pPlayerMesh->position(vec3(-2.0f, 2.0f, 0.0f));
+    m_pPlayerMesh->position(vec3(-4.0f, 2.0f, 0.0f));
     m_pPhysics = make_shared<Physics>(m_pRoot.get(), this);
     m_pPhysics->generate(m_pRoot.get(), (unsigned)Physics::GenerateFlag::RECURSIVE);
 
     btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
     pmesh_body->setActivationState(DISABLE_DEACTIVATION);
     //pmesh_body->setAngularFactor(btVector3(0,0,0));
-    pmesh_body->setCcdMotionThreshold(0.001f);
-    pmesh_body->setCcdSweptSphereRadius(0.25f);
-    //pmesh_body->setRestitution(10.0f);
+    pmesh_body->setCcdMotionThreshold(1.0f);
+    //pmesh_body->setCcdSweptSphereRadius(0.25f);
+    pmesh_body->setRestitution(0.0f);
     //pmesh_body->setDamping(0.0f, 0.0f);
     ////pmesh_body->setRestitution(0.0f);
-    m_pPhysics->world()->setGravity(btVector3(0.0, -25.0, 0.0));
+    m_pPhysics->world()->setGravity(btVector3(0.0, -40.0, 0.0));
 }
 
 GameState :: ~GameState()
@@ -183,6 +183,7 @@ void GameState :: enter()
         m_pQor->session()->profile(0)->config()
     );
     m_pPlayer->speed(12.0f);
+    //m_pPlayer->fly(true);
     btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
     m_pPlayer->on_jump([pmesh_body]{
         pmesh_body->applyImpulse(
@@ -236,7 +237,9 @@ void GameState :: logic(Freq::Time t)
     if(m_pController->button("zoom").pressed_now())
         m_pViewModel->zoom(not m_pViewModel->zoomed());
     
-    if(m_pController->button("fire").pressed_now()) {
+    if(m_pController->button("fire") &&
+       m_pViewModel->idle()
+    ){
         //Sound::play(m_pCamera.get(), "shotgun.wav", m_pQor->resources());
         auto s = m_pQor->make<Sound>("shotgun3.wav");
         m_pCamera->add(s);
@@ -258,7 +261,7 @@ void GameState :: logic(Freq::Time t)
         //});
         //m_pRoot->add(l);
         
-        m_pViewModel->recoil(Freq::Time(50), Freq::Time(500));
+        m_pViewModel->recoil(Freq::Time(50), Freq::Time(700));
 
         for(int i=0; i<8; ++i)
         {
@@ -278,10 +281,16 @@ void GameState :: logic(Freq::Time t)
             );
             if(std::get<0>(hit))
             {
-                decal(std::get<1>(hit), std::get<2>(hit), Matrix::up(*m_pCamera->matrix(Space::WORLD)));
+                decal(
+                    std::get<1>(hit),
+                    std::get<2>(hit),
+                    Matrix::up(*m_pCamera->matrix(Space::WORLD))
+                );
             }
         }
     }
+
+    //LOGf("pos: %s, %s", t.s() % m_pPlayerMesh->position().y);
 
     //LOGf("children: %s", m_pRoot->num_subnodes());
 
@@ -295,18 +304,18 @@ void GameState :: logic(Freq::Time t)
     
     //m_pViewModel->position(m_pCamera->position(Space::WORLD));
 
-    if(m_pInput->key(SDLK_DOWN))
-        m_pViewModel->zoomed_model_move(glm::vec3(0.0f, -t.s(), 0.0f));
-    else if(m_pInput->key(SDLK_UP))
-        m_pViewModel->zoomed_model_move(glm::vec3(0.0f, t.s(), 0.0f));
-    else if(m_pInput->key(SDLK_LEFT))
-        m_pViewModel->zoomed_model_move(glm::vec3(-t.s(), 0.0f, 0.0f));
-    else if(m_pInput->key(SDLK_RIGHT))
-        m_pViewModel->zoomed_model_move(glm::vec3(t.s(), 0.0f, 0.0f));
-    else if(m_pInput->key(SDLK_w))
-        m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, t.s()));
-    else if(m_pInput->key(SDLK_r))
-        m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, -t.s()));
+    //if(m_pInput->key(SDLK_DOWN))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, -t.s(), 0.0f));
+    //else if(m_pInput->key(SDLK_UP))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, t.s(), 0.0f));
+    //else if(m_pInput->key(SDLK_LEFT))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(-t.s(), 0.0f, 0.0f));
+    //else if(m_pInput->key(SDLK_RIGHT))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(t.s(), 0.0f, 0.0f));
+    //else if(m_pInput->key(SDLK_w))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, t.s()));
+    //else if(m_pInput->key(SDLK_r))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, -t.s()));
 
     //LOGf("model pos %s", Vector::to_string(m_pViewModel->model_pos()));
     //LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
