@@ -17,6 +17,8 @@
 using namespace std;
 using namespace glm;
 
+const unsigned GameState :: MAX_DECALS = 32;
+
 GameState :: GameState(
     Qor* engine
     //std::string fn
@@ -40,11 +42,11 @@ void GameState :: preload()
         vec3(0.2f, 0.6f, 0.2f)
     ));
     m_pPlayerMesh->disable_physics();
-    m_pPlayerMesh->set_physics(Node::Physics::DYNAMIC);
-    m_pPlayerMesh->set_physics_shape(Node::CAPSULE);
+    //m_pPlayerMesh->set_physics(Node::Physics::DYNAMIC);
+    //m_pPlayerMesh->set_physics_shape(Node::CAPSULE);
     m_pPlayerMesh->friction(1.0f);
     m_pPlayerMesh->mass(80.0f);
-    m_pPlayerMesh->inertia(false);
+    m_pPlayerMesh->inertia(true);
     m_pCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     //m_pRoot->add(m_pCamera);
     m_pPlayerMesh->add(m_pCamera);
@@ -80,30 +82,30 @@ void GameState :: preload()
     );
     
     auto l = make_shared<Light>();
-    l->diffuse(Color(1.0f, 0.2f, 0.2f, 1.0f));
-    l->specular(Color(1.0f, 0.2f, 0.2f, 1.0f));
+    l->diffuse(Color(1.0f, 1.0f, 1.0f, 1.0f));
+    l->specular(Color(0.1f, 0.1f, 0.1f, 1.0f));
     //l->diffuse(Color(1.0f, 1.0f, 1.0f));
     //l->specular(Color(1.0f, 1.0f, 1.0f));
-    l->atten(glm::vec3(0.0f, 0.1f, 0.01f));
+    l->atten(glm::vec3(0.0f, 0.0f, 0.5f));
     m_pRoot->add(l);
 
-    l = make_shared<Light>();
-    l->position(glm::vec3(10.0f, 0.0f, 0.0f));
-    //l->diffuse(Color(1.0f, 1.0f, 1.0f));
-    //l->specular(Color(1.0f, 1.0f, 1.0f));
-    l->diffuse(Color(0.2f, 0.2f, 1.0f, 1.0f));
-    l->specular(Color(0.2f, 0.2f, 1.0f, 1.0f));
-    l->atten(glm::vec3(0.0f, 0.1f, 0.01f));
-    m_pRoot->add(l);
+    //l = make_shared<Light>();
+    //l->position(glm::vec3(10.0f, 0.0f, 0.0f));
+    ////l->diffuse(Color(1.0f, 1.0f, 1.0f));
+    ////l->specular(Color(1.0f, 1.0f, 1.0f));
+    //l->diffuse(Color(0.2f, 0.2f, 1.0f, 1.0f));
+    //l->specular(Color(0.2f, 0.2f, 0.2f, 1.0f));
+    //l->atten(glm::vec3(0.0f, 0.1f, 0.01f));
+    //m_pRoot->add(l);
 
-    l = make_shared<Light>();
-    l->position(glm::vec3(20.0f, 0.0f, 0.0f));
-    //l->diffuse(Color(1.0f, 1.0f, 1.0f));
-    //l->specular(Color(1.0f, 1.0f, 1.0f));
-    l->diffuse(Color(0.2f, 1.0f, 0.2f, 1.0f));
-    l->specular(Color(0.2f, 1.0f, 0.2f, 1.0f));
-    l->atten(glm::vec3(0.0f, 0.1f, 0.01f));
-    m_pRoot->add(l);
+    //l = make_shared<Light>();
+    //l->position(glm::vec3(20.0f, 0.0f, 0.0f));
+    ////l->diffuse(Color(1.0f, 1.0f, 1.0f));
+    ////l->specular(Color(1.0f, 1.0f, 1.0f));
+    //l->diffuse(Color(0.2f, 0.2f, 0.2f, 1.0f));
+    //l->specular(Color(0.2f, 1.0f, 0.2f, 1.0f));
+    //l->atten(glm::vec3(0.0f, 0.1f, 0.01f));
+    //m_pRoot->add(l);
 
     //m_pPipeline = make_shared<Pipeline>(
     //    m_pQor->window(),
@@ -112,12 +114,14 @@ void GameState :: preload()
     //    m_pCamera
     //);
     
-    m_pRoot->add(m_pQor->make<Mesh>("apartment_scene.obj"));
+    //m_pRoot->add(m_pQor->make<Mesh>("apartment_scene.obj"));
+    auto scene = m_pQor->make<Scene>("thehall.json");
+    m_pRoot->add(scene->root());
     m_pController = m_pQor->session()->profile(0)->controller();
-    //m_pPlayer->fly();
     
     const bool ads = false;
     auto gun = m_pQor->make<Mesh>("gun_tacticalsupershotgun.obj");
+    //auto gun = m_pQor->make<Mesh>("gun_bullpup.obj");
     //auto gun = m_pQor->make<Mesh>("glock.obj");
     m_pViewModel = make_shared<ViewModel>(m_pCamera, gun);
     gun->disable_physics();
@@ -158,15 +162,15 @@ void GameState :: preload()
     m_pPhysics = make_shared<Physics>(m_pRoot.get(), this);
     m_pPhysics->generate(m_pRoot.get(), (unsigned)Physics::GenerateFlag::RECURSIVE);
 
-    btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
-    pmesh_body->setActivationState(DISABLE_DEACTIVATION);
+    //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
+    //pmesh_body->setActivationState(DISABLE_DEACTIVATION);
     //pmesh_body->setAngularFactor(btVector3(0,0,0));
-    pmesh_body->setCcdMotionThreshold(1.0f);
-    //pmesh_body->setCcdSweptSphereRadius(0.25f);
-    pmesh_body->setRestitution(0.0f);
-    //pmesh_body->setDamping(0.0f, 0.0f);
-    ////pmesh_body->setRestitution(0.0f);
-    m_pPhysics->world()->setGravity(btVector3(0.0, -40.0, 0.0));
+    //pmesh_body->setCcdMotionThreshold(1.0f);
+    ////pmesh_body->setCcdSweptSphereRadius(0.25f);
+    //pmesh_body->setRestitution(0.0f);
+    ////pmesh_body->setDamping(0.0f, 0.0f);
+    //////pmesh_body->setRestitution(0.0f);
+    //m_pPhysics->world()->setGravity(btVector3(0.0, -40.0, 0.0));
 }
 
 GameState :: ~GameState()
@@ -183,13 +187,13 @@ void GameState :: enter()
         m_pQor->session()->profile(0)->config()
     );
     m_pPlayer->speed(12.0f);
-    //m_pPlayer->fly(true);
-    btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
-    m_pPlayer->on_jump([pmesh_body]{
-        pmesh_body->applyImpulse(
-            btVector3(0.0f, 1000.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)
-        );
-    });
+    m_pPlayer->fly();
+    //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
+    //m_pPlayer->on_jump([pmesh_body]{
+    //    pmesh_body->applyImpulse(
+    //        btVector3(0.0f, 1000.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)
+    //    );
+    //});
     
     m_pPipeline->shader(1)->use();
     m_pPipeline->override_shader(PassType::NORMAL, m_Shader);
@@ -341,6 +345,12 @@ void GameState :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up)
     m->position(contact);
     m->move(normal * 0.01f);
     m->pend();
+    m_Decals.push_back(m);
+    while(m_Decals.size() > MAX_DECALS) {
+        auto f = m_Decals.front();
+        f->detach();
+        m_Decals.pop_front();
+    }
     m_pRoot->add(m);
 }
 

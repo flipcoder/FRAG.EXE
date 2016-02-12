@@ -82,11 +82,14 @@ class GameState:
         std::shared_ptr<Controller> m_pController;
         std::shared_ptr<Scene> m_pScene;
         std::shared_ptr<ITexture> m_pDecal;
+        std::deque<std::shared_ptr<Mesh>> m_Decals;
 
         std::string m_Filename;
 
         unsigned m_Shader = ~0u;
         unsigned m_ColorShader = ~0u;
+        
+        static const unsigned MAX_DECALS;
 };
 
 #endif
