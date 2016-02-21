@@ -1,0 +1,1551 @@
+
+// Warsow entity definition file for Q3Radiant
+// Version: 1.2
+// Last updated: 13/09/2008
+
+
+//=============================================================================
+
+WORLDSPAWN ENTITY
+
+//=============================================================================
+
+/*QUAKED worldspawn (0 0 0) ?
+Only used for the world.
+-------- KEYS --------
+message : text to print at user logon. Used for name of level.
+music : path/name of looping .wav file used for level's music (eg. music/sonic5.wav).
+ambient : Adds a constant value to overall lighting. Use is not recommended. Ambient light will have a tendency to flatten out variations in light and shade.
+_color : RGB value for ambient light color (default is 0 0 0).
+_keeplights : Keep light entities in the BSP. Normally stripped out by the BSP process and read from the .map file by the lighting phase (Warsow needs this to be set to 1!).
+gridsize : granularity of the lightgrid created by q3map. Value is three integers separated by spaces, representing number of units between grid points in X Y Z. Default gridsize value is 128 128 256. Use larger powers of 2 to reduce BSP size and compile time on very large maps.
+_blocksize : q3map always splits the BSP tree along the planes X=_blocksize*n and Y=_blocksize*n. Default _blocksize value is 1024. Increase the blocksize using larger powers of 2 to reduce compile times on very large maps with a low structural brush density.
+gravity : gravity of level (default is normal gravity: 800).
+colorCorrection : path to the default global color correction LUT for the level.*/
+
+
+//=============================================================================
+
+WEAPON_* ENTITIES
+
+//=============================================================================
+
+/*QUAKED weapon_machinegun (1 0 .5) (-16 -16 -16) (16 16 48) SUSPENDED
+Machinegun weapon pickup
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned, if any listed, it won't spawn at the rest.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons/machinegun/machinegun.md3"
+*/
+
+//=============================================================================
+
+/*QUAKED weapon_riotgun (1 0 .5) (-16 -16 -16) (16 16 48) SUSPENDED
+Riot Gun
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+The amount of time it takes for an item in the team to respawn is determined by the "wait" value of the item that was picked up previously. So if one of the items in the team has it's "wait" key set to -1 (never respawn), the random respawning cycle of the teamed items will stop after that item is picked up.
+In Warsow, "wait" will be understood only as delay for spawning the item once the map starts. Respawn item times depend on the gametype and can't be selected by the mapper.
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons/riotgun/riotgun.md3"
+*/
+
+//=============================================================================
+
+/*QUAKED weapon_grenadelauncher (1 0 .5) (-16 -16 -16) (16 16 48) SUSPENDED
+Grenade Launcher
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+The amount of time it takes for an item in the team to respawn is determined by the "wait" value of the item that was picked up previously. So if one of the items in the team has it's "wait" key set to -1 (never respawn), the random respawning cycle of the teamed items will stop after that item is picked up.
+In Warsow, "wait" will be understood only as delay for spawning the item once the map starts. Respawn item times depend on the gametype and can't be selected by the mapper.
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons/glauncher/glauncher.md3"
+*/
+
+//=============================================================================
+
+/*QUAKED weapon_rocketlauncher (1 0 .5) (-16 -16 -16) (16 16 48) SUSPENDED
+Rocket Launcher
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+The amount of time it takes for an item in the team to respawn is determined by the "wait" value of the item that was picked up previously. So if one of the items in the team has it's "wait" key set to -1 (never respawn), the random respawning cycle of the teamed items will stop after that item is picked up.
+In Warsow, "wait" will be understood only as delay for spawning the item once the map starts. Respawn item times depend on the gametype and can't be selected by the mapper.
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons/rlauncher/rlauncher.md3"
+*/
+
+//=============================================================================
+
+/*QUAKED weapon_plasmagun (1 0 .5) (-16 -16 -16) (16 16 48) SUSPENDED
+Plasma Gun
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+The amount of time it takes for an item in the team to respawn is determined by the "wait" value of the item that was picked up previously. So if one of the items in the team has it's "wait" key set to -1 (never respawn), the random respawning cycle of the teamed items will stop after that item is picked up.
+In Warsow, "wait" will be understood only as delay for spawning the item once the map starts. Respawn item times depend on the gametype and can't be selected by the mapper.
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons/plasmagun/plasmagun.md3"
+*/
+
+//=============================================================================
+
+/*QUAKED weapon_electrobolt (1 0 .5) (-16 -16 -16) (16 16 48) SUSPENDED
+ElectroBolt
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+The amount of time it takes for an item in the team to respawn is determined by the "wait" value of the item that was picked up previously. So if one of the items in the team has it's "wait" key set to -1 (never respawn), the random respawning cycle of the teamed items will stop after that item is picked up.
+In Warsow, "wait" will be understood only as delay for spawning the item once the map starts. Respawn item times depend on the gametype and can't be selected by the mapper.
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons/electrobolt/electrobolt.md3"
+*/
+
+//=============================================================================
+
+/*QUAKED weapon_lasergun (1 0 .5) (-16 -16 -16) (16 16 48) SUSPENDED
+Lasergun
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+The amount of time it takes for an item in the team to respawn is determined by the "wait" value of the item that was picked up previously. So if one of the items in the team has it's "wait" key set to -1 (never respawn), the random respawning cycle of the teamed items will stop after that item is picked up.
+In Warsow, "wait" will be understood only as delay for spawning the item once the map starts. Respawn item times depend on the gametype and can't be selected by the mapper.
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons/lasergun/lasergun.md3"
+*/
+
+//=============================================================================
+
+AMMO_* ENTITIES
+
+//=============================================================================
+
+/*QUAKED ammo_machinegun (.3 .3 1) (-16 -16 -16) (16 16 48) SUSPENDED
+bullets
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/ammo/ammobox/ammobox.md3"
+*/
+
+//=============================================================================
+
+/*QUAKED ammo_riotgun (.3 .3 1) (-16 -16 -16) (16 16 48) SUSPENDED
+riotgun ammos
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/ammo/ammobox/ammobox.md3"
+*/
+
+//=============================================================================
+
+/*QUAKED ammo_grenadelauncher (.3 .3 1) (-16 -16 -16) (16 16 48) SUSPENDED
+grenade launcher ammos
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/ammo/ammobox/ammobox.md3"
+*/
+
+//=============================================================================
+
+/*QUAKED ammo_rocketlauncher (.3 .3 1) (-16 -16 -16) (16 16 48) SUSPENDED
+rocket launcher ammos
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/ammo/ammobox/ammobox.md3"
+*/
+
+//=============================================================================
+
+/*QUAKED ammo_plasmagun (.3 .3 1) (-16 -16 -16) (16 16 48) SUSPENDED
+plasma gun ammos
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/ammo/ammobox/ammobox.md3"
+*/
+
+//=============================================================================
+
+/*QUAKED ammo_electrobolt (.3 .3 1) (-16 -16 -16) (16 16 48) SUSPENDED
+electrobolt ammos
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/ammo/ammobox/ammobox.md3"
+*/
+
+//=============================================================================
+
+/*QUAKED ammo_lasergun (.3 .3 1) (-16 -16 -16) (16 16 48) SUSPENDED
+lasergun ammos
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/ammo/ammobox/ammobox.md3"
+*/
+
+//=============================================================================
+
+ITEM_* ENTITIES
+
+//=============================================================================
+
+/*QUAKED item_armor_shard (0 .7 0) (-16 -16 -16) (16 16 48) SUSPENDED
+Armor Shard
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/armor/shard/shard.md3"*/
+
+//=============================================================================
+
+/*QUAKED item_armor_ga (0 .7 0) (-16 -16 -16) (16 16 48) SUSPENDED
+Green Armor
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/armor/ga/ga.md3"*/
+
+//=============================================================================
+
+/*QUAKED item_armor_ya (1 .75 .3) (-16 -16 -16) (16 16 48) SUSPENDED
+Yellow Armor
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/armor/ya/ya.md3"*/
+
+//=============================================================================
+
+/*QUAKED item_armor_ra (.6 0 0) (-16 -16 -16) (16 16 48) SUSPENDED
+Red Armor
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/armor/ra/ra.md3"*/
+
+//=============================================================================
+
+/*QUAKED item_health_small (0 1 0) (-16 -16 -16) (16 16 48) SUSPENDED
+Small Health
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/health/small/small_health.md3"*/
+
+//=============================================================================
+
+/*QUAKED item_health_medium (.8 .8 0) (-16 -16 -16) (16 16 48) SUSPENDED
+Medium Health
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/health/medium/medium_health.md3"*/
+
+//=============================================================================
+
+/*QUAKED item_health_large (1 0 0) (-16 -16 -16) (16 16 48) SUSPENDED
+Large Health
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/health/large/large_health.md3"*/
+
+//=============================================================================
+
+/*QUAKED item_health_mega (0 0 1) (-16 -16 -16) (16 16 48) SUSPENDED
+Mega Health
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/health/mega/mega_health.md3"*/
+
+//=============================================================================
+
+/*QUAKED item_health_ultra (0 0 1) (-16 -16 -16) (16 16 48) SUSPENDED
+Ultra Health
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/items/health/ultra/ultra_health.md3"*/
+
+//=============================================================================
+
+/*QUAKED item_quad (.4 .6 1) (-16 -16 -16) (16 16 48) SUSPENDED
+Quad Damage power-up. (updated: 12/08/2005)
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/powerups/instant/quad.md3"*/
+
+//=============================================================================
+
+/*QUAKED item_warshell (.4 .6 1) (-16 -16 -16) (16 16 48) SUSPENDED
+Quad Damage power-up. (updated: 12/08/2005)
+-------- KEYS --------
+target : activating this entity will trigger any entity with this as targetname.
+targetname : name to use for targeting this entity.
+wait : time in seconds before item spawns for the first time in the map (todo)
+team : set this to team items. Teamed items will respawn randomly after team master is picked up (see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/powerups/instant/warshell_belt.md3"*/
+
+//=============================================================================
+
+FLAGS
+
+//=============================================================================
+
+/*QUAKED team_CTF_alphaflag (0 .2 1) (-16 -16 -16) (16 16 48)
+Alpha team flag for CTF games.
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/objects/flag/flag_base.md3"*/
+
+//=============================================================================
+
+/*QUAKED team_CTF_betaflag (0 .2 1) (-16 -16 -16) (16 16 48)
+Beta team flag for CTF games.
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/objects/flag/flag_base.md3"*/
+
+//=============================================================================
+
+SPAWNPOINTS
+
+//=============================================================================
+
+/*QUAKED info_player_start (1 0 0) (-16 -16 -24) (16 16 40) SUSPENDED
+Player spawn location. Maps must have one of this, even when it's not used in multiplayer games. (updated: 12/08/2005)
+-------- KEYS --------
+angle : direction in which player will look when spawning in the game.
+target : this can point at a target_give entity for respawn freebies.
+-------- SPAWNFLAGS --------
+SUSPENDED : the spawnpoint will be placed where it was in the map and won't drop automatically to the floor.*/
+
+//=============================================================================
+
+/*QUAKED info_player_deathmatch (1 0 1) (-16 -16 -24) (16 16 40) SUSPENDED
+Multiplayer spawning location. (updated: 12/08/2005)
+-------- KEYS --------
+angle : direction in which player will look when spawning in the game. Does not apply to bots.
+target : this can point at a target_give entity for respawn freebies.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SUSPENDED : the spawnpoint will be placed where it was in the map and won't drop automatically to the floor.
+*/
+
+//=============================================================================
+
+/*QUAKED info_player_intermission (1 0 1) (-16 -16 -16) (16 16 16)
+Camera for intermission screen between matches. Can be aimed by setting the "angles" key or targeting an pointing to an aiming entity. Use only one per level. (updated: 12/08/2005)
+-------- KEYS --------
+angles: sorted as pitch, yaw, roll.
+target : point this to an info_notnull or target_position entity to set the camera's pointing angles.
+-------- NOTES --------
+Use this entity as the cammera for the scoreboards view at end of matches. If this entity isn't in the map, a random info_player_deathmatch entity will be choosed in it's place, usually resulting in ugly views*/
+
+//=============================================================================
+
+/*QUAKED team_CTF_alphaplayer (1 .2 0) (-16 -16 -24) (16 16 40) SUSPENDED
+Initial Alpha team spawning position for CTF games. This is where players spawn when they join the Alpha team.
+-------- KEYS --------
+target : this can point at a target_give entity for respawn freebies.
+-------- SPAWNFLAGS --------
+SUSPENDED : the spawnpoint will be placed where it was in the map and won't drop automatically to the floor.*/
+
+//=============================================================================
+
+/*QUAKED team_CTF_alphaspawn (0 .2 1) (-16 -16 -24) (16 16 40) SUSPENDED
+Alpha team respawning position for CTF games. This is where Alpha team players respawn after they get fragged.
+-------- KEYS --------
+target : this can point at a target_give entity for respawn freebies.
+-------- SPAWNFLAGS --------
+SUSPENDED : the spawnpoint will be placed where it was in the map and won't drop automatically to the floor.*/
+
+//=============================================================================
+
+/*QUAKED team_CTF_betaplayer (1 .2 0) (-16 -16 -24) (16 16 40) SUSPENDED
+Initial Beta team spawning position for CTF games. This is where players spawn when they join the Beta team.
+-------- KEYS --------
+target : this can point at a target_give entity for respawn freebies.
+-------- SPAWNFLAGS --------
+SUSPENDED : the spawnpoint will be placed where it was in the map and won't drop automatically to the floor.*/
+
+//=============================================================================
+
+/*QUAKED team_CTF_betaspawn (0 .2 1) (-16 -16 -24) (16 16 40) SUSPENDED
+Beta team respawning position for CTF games. This is where Beta team players respawn after they get fragged.
+-------- KEYS --------
+target : this can point at a target_give entity for respawn freebies.
+-------- SPAWNFLAGS --------
+SUSPENDED : the spawnpoint will be placed where it was in the map and won't drop automatically to the floor.*/
+
+//=============================================================================
+
+FUNC_* ENTITIES
+
+//=============================================================================
+
+/*QUAKED func_group (0 .5 .8) ?
+This is not an entity as such, it never reachs the game. It is strictly an editor utility to group world brushes and patches together for convenience (selecting, moving, copying, etc). You cannot group entities with this. (updated: 12/08/2005)
+-------- KEYS --------
+alphamap : this is the path/name for the art file used to guide the mapping of textures on the terrain surface.
+layers : this integer value is the number unique root shaders that will be use on the terrain.
+shader : this is the path to the metashader used to assign textures to the terrain entity.
+terrain : this is an on/off flag. When set to 1, the entity becomes a terrain entity.
+-------- NOTES --------
+The TAB key can be used to flip through the component pieces of a selected func_group entity, isolating individual components. To make a func_group into a terrain entity, refer to the Terrain Construction documentation.*/
+
+//=============================================================================
+
+/*QUAKED func_bobbing (0 .5 .8) ? X_AXIS Y_AXIS
+Solid entity that oscillates back and forth in a linear motion. Entity bobs on the Z axis (up-down) by default. It can also emit sound if the "noise" key is set. Will crush the player when blocked. (updated: 12/08/2005)
+-------- KEYS --------
+speed : amount of time in seconds for one complete oscillation cycle (default 4).
+height : sets the amount of travel of the oscillation movement (default 32). 
+phase : sets the start offset of the oscillation cycle. Values must be 0 < phase < 1. Any integer phase value is the same as no offset (default 0).
+noise_start : start moving sound (default is silent)
+noise : path/name of .wav file to play (default is silent). Use looping sounds only (eg. sound/world/drone6.wav - See Notes).
+noise_stop : stop moving sound (default is silent)
+model2 : path/name of model to include.
+origin : alternate method of setting XYZ origin of sound and .md3 model included with entity (See Notes).
+light : constantLight radius of .md3 model included with entity. Has no effect on the entity's brushes (default 0).
+color : constantLight color of .md3 model included with entity. Has no effect on the entity's brushes (default 1 1 1).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+X_AXIS : &1 entity will bob along the X axis.
+Y_AXIS : &2 entity will bob along the Y axis.
+-------- NOTES --------
+In order for the sound to be emitted from the entity, it is recommended to include a brush with an origin shader at its center, otherwise the sound will not follow the entity as it moves. Setting the origin key is simply an alternate method to using an origin brush. When using the model2 key, the origin point of the model will correspond to the origin point defined by either the origin brush or the origin coordinate value.
+Start and stop sounds will only be played if the entity is set to be triggered*/
+
+//=============================================================================
+
+/*QUAKED func_button (0 .5 .8) ?
+When a button is touched by a player, it moves in the direction set by the "angle" key, triggers all its targets, stays pressed by an amount of time set by the "wait" key, then returns to it's original position where it can be operated again. (updated: 12/08/2005)
+-------- KEYS --------
+angle : determines the direction in which the button will move (up = -1, down = -2).
+target : all entities with a matching targetname will be triggered.
+speed : speed of button's displacement (default 40).
+wait : number of seconds button stays pressed (default 1, -1 = return immediately).
+lip : lip remaining at end of move (default 4 units).
+health : (default 0) if set to any non-zero value, the button must take damage (any amount) to activate.
+noise : custom noise to be played when activated
+light : constantLight radius of .md3 model included with entity. Has no effect on the entity's brushes (default 0).
+color : constantLight color of .md3 model included with entity. Has no effect on the entity's brushes (default 1 1 1).
+model2 : path/name of model to include (eg: models/mapobjects/pipe/pipe02.md3).
+origin : alternate method of setting XYZ origin of .md3 model included with entity (See Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- NOTES --------
+Setting the origin key is simply an alternate method to using an origin brush. When using the model2 key, the origin point of the model will correspond to the origin point defined by either the origin brush or the origin coordinate value.*/
+
+//=============================================================================
+
+/*QUAKED func_door (0 .5 .8) ? START_OPEN - CRUSHER NOMONSTER - TOGGLE -
+Normal sliding door entity. By default, the door will activate when player walks close to it or when damage is inflicted to it. (updated: 12/08/2005)
+-------- KEYS --------
+message : is printed when the door is touched if it is a trigger door and it hasn't been fired yet
+angle : determines the opening direction of door (up = -1, down = -2).
+speed : determines how fast the door moves (default 600).
+wait : number of seconds before door returns (2 default, -1 = never return)
+lip : lip remaining at end of move (default 8)
+targetname : if set, a func_button or trigger is required to activate the door.
+target : fire entities with this targetname when activated
+health : (default 0) if set to any non-zero value, the button must take damage (any amount) to activate.
+dmg : damage to inflict on player when he blocks operation of door (default 2). Door will reverse direction when blocked unless CRUSHER spawnflag is set.
+team: assign the same team name to multiple doors that should operate together (see Notes).
+gameteam : makes the door only openable by a player of a specific team (0 = everyone, 1 = FFA players, 2 = alpha,  3 = beta)
+noise_start : overrides default start moving sound
+noise : overrides default movement sound
+noise_stop : overrides default stop moving sound
+light : constantLight radius of .md3 model included with entity. Has no effect on the entity's brushes (default 0).
+color : constantLight color of .md3 model included with entity. Has no effect on the entity's brushes (default 1 1 1).
+model2 : path/name of model to include (eg: models/mapobjects/pipe/pipe02.md3).
+origin : alternate method of setting XYZ origin of .md3 model included with entity (See Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+START_OPEN : &1 the door will spawn in the open state and operate in reverse.
+CRUSHER : &4 door will not reverse direction when blocked and will keep damaging player until he dies or gets out of the way.
+NOMONSTER : &8 monsters will not trigger this door
+TOGGLE : &32 wait in both the start and end states for a trigger event
+-------- NOTES --------
+*/
+
+//=============================================================================
+
+/*QUAKED func_pendulum (0 .5 .8) ?
+You need to have an origin brush as part of this entity. Solid entity that describes a pendulum back and forth rotation movement. Rotates on the X axis by default. Pendulum frequency is a physical constant based on the length of the beam and gravity. Blocking the pendulum instantly kills a player. (updated: 12/08/2005)
+-------- KEYS --------
+angle : angle offset of axis of rotation from default X axis (default 0).
+speed : angle of swing arc in either direction from initial position (default 30).
+phase : sets the start offset of the swinging cycle. Values must be 0 < phase < 1. Any integer phase value is the same as no offset (default 0).
+noise_start :	start moving sound to be played only if triggered (default is silent)
+noise : path/name of .wav file to play. Use looping sounds only (default is silent).
+noise_stop : stop moving sound to be played only if triggered (default is silent)
+model2 : path/name of model to include (eg: models/mapobjects/jets/jets01.md3).
+origin : alternate method of setting XYZ origin of entity's rotation axis and .md3 model included with entity (default "0 0 0" - See Notes).
+light : constantLight radius of .md3 model included with entity. Has no effect on the entity's brushes (default 0).
+color : constantLight color of .md3 model included with entity. Has no effect on the entity's brushes (default 1 1 1).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- NOTES --------
+You need to have an origin brush as part of this entity. The center of that brush will be the point through which the rotation axis passes. Setting the origin key is simply an alternate method to using an origin brush. Pendulum will rotate along the X axis by default. Very crude operation: pendulum cannot rotate along Z axis, the speed of swing (frequency) is not adjustable. When using the model2 key, the origin point of the model will correspond to the origin point defined by either the origin brush or the origin coordinate value. Pendulums always swing north / south on unrotated models. Add an angles field to the model to allow rotation in other directions. Pendulum frequency is a physical constant based on the length of the beam and gravity.*/
+
+//=============================================================================
+
+/*QUAKED func_plat (0 .5 .8) ? LOW_TRIGGER
+Rising platform the player can ride to reach higher places. Plats must always be drawn in the raised position, so they will operate and be lighted correctly but they spawn in the lowered position. The plat will stay in the raised position until the player steps off. (updated: 12/08/2005)
+-------- KEYS --------
+speed : determines how fast the plat moves (default 300).
+accel : default 20
+deccel : default 20
+lip : lip remaining at end of move (default 8).
+height : if set, this will determine the total amount of vertical travel of the plat, instead of being implicitly assigned by the model's height.
+dmg : damage to inflict on player when he blocks operation of plat (default 2). Plat will reverse direction when blocked.
+targetname : if set, the trigger that points to this will raise the plat each time it fires.
+noise_start : overrides default start moving sound
+noise : overrides default movement sound
+noise_stop : overrides default stop moving sound
+light : constantLight radius of .md3 model included with entity. Has no effect on the entity's brushes (default 0).
+color : constantLight color of .md3 model included with entity. Has no effect on the entity's brushes (default 1 1 1).
+model2 : path/name of model to include (eg: models/mapobjects/pipe/pipe02.md3).
+origin : alternate method of setting XYZ origin of .md3 model included with entity (See Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+LOW_TRIGGER : &1 the plat is triggered from its lower side
+-------- NOTES --------
+By default, the total amount of vertical travel of a platform is implicitly determined by the overall vertical size of the brushes of which it's made minus the lip value. But if the "height" key is used, then the total amount of vertical travel of the plat will be exactly that value regardless of the shape and size of the plat and regardless of the value of the "lip" key. Using the "height" key is the best method for any kind of platforms and the only possible one for thin plats which need to travel vertical distances many times their own thickness. Setting the origin key is simply an alternate method to using an origin brush. When using the model2 key, the origin point of the model will correspond to the origin point defined by either the origin brush or the origin coordinate value.
+*/
+
+//=============================================================================
+
+/*QUAKED func_rotating (0 .5 .8) ? START_OFF REVERSE X_AXIS Y_AXIS TOUCH_PAIN STOP - -
+You need to have an origin brush as part of this entity.  The center of that brush will be
+the point around which it is rotated. It will rotate around the Z axis by default.  You can
+check either the X_AXIS or Y_AXIS box to change that. (updated: 12/08/2005)
+-------- KEYS --------
+targetname : name to be targeted
+target : names to target.
+speed : determines how fast entity rotates (default 100).
+noise_start : overrides default start moving sound
+noise : overrides default movement sound
+noise_stop : overrides default stop moving sound
+model2 : path/name of model to include (eg: models/mapobjects/bitch/fembotbig.md3).
+origin : alternate method of setting XYZ origin of entity's rotation axis and .md3 model included with entity (default "0 0 0" - See Notes).
+light : constantLight radius of .md3 model included with entity. Has no effect on the entity's brushes (default 0).
+color : constantLight color of .md3 model included with entity. Has no effect on the entity's brushes (default 1 1 1).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+START_OFF : &1 must be triggered to start moving.
+REVERSE : &2 will cause the it to rotate in the opposite direction.
+X_AXIS : &4 entity will rotate along the X axis.
+Y_AXIS : &8 entity will rotate along the Y axis.
+TOUCH_PAIN : &16 dunno what it does (jal)
+STOP : &32 it will stop moving instead when blocked, instead of pushing or crushing them.
+-------- NOTES --------
+You need to have an origin brush as part of this entity. The center of that brush will be the point through which the rotation axis passes. Setting the origin key is simply an alternate method to using an origin brush. It will rotate along the Z axis by default. You can check either the X_AXIS or Y_AXIS box to change that. When using the model2 key, the origin point of the model will correspond to the origin point defined by either the origin brush or the origin coordinate value.*/
+
+//=============================================================================
+
+/*QUAKED func_train (0 .5 .8) ? START_ON TOGGLE BLOCK_STOPS
+Trains are moving platforms that players can ride. The targets origin specifies the min point of the train at each corner. The train spawns at the first target it is pointing at. If the train is the target of a button or trigger, it will not begin moving until activated. (updated: 12/08/2005)
+-------- KEYS --------
+speed : speed of displacement of train (default 100).
+dmg : default 2
+target : point to first entity in the path
+targetname : train's targetname
+noise_start : start moving sound (default silent)
+noise : movement sound (default silent)
+noise_stop : stop moving sound (default silent)
+model2 : path/name of model to include (eg: models/mapobjects/pipe/pipe02.md3).
+origin : alternate method of setting XYZ origin of the train's brush(es) and .md3 model included with entity (See Notes).
+light : constantLight radius of .md3 model included with entity. Has no effect on the entity's brushes (default 0).
+color : constantLight color of .md3 model included with entity. Has no effect on the entity's brushes (default 1 1 1).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+START_ON : &1
+TOGGLE : &2
+BLOCK_STOPS : &4
+-------- NOTES --------
+Setting the origin key is simply an alternate method to using an origin brush. When using the model2 key, the origin point of the model will correspond to the origin point defined by either the origin brush or the origin coordinate value.*/
+
+
+//=============================================================================
+
+/*QUAKED func_door_rotating (0 .5 .8) ? START_OPEN REVERSE CRUSHER NOMONSTER - TOGGLE X_AXIS Y_AXIS
+Door which opens by rotating in one axis. You need to have an origin brush as part of this entity. (updated: 12/08/2005)
+-------- KEYS --------
+message : is printed when the door is touched if it is a trigger door and it hasn't been fired yet
+distance : is how many degrees the door will be rotated.
+angle : determines the opening direction of door (up = -1, down = -2).
+speed : determines how fast the door moves (default 100).
+wait : wait before returning (3 default, -1 = never return)
+targetname : if set, a func_button or trigger is required to activate the door.
+target : fire entities with this targetname when activated
+health : if set, door must be shot open (default 0).
+dmg : damage to inflict on player when he blocks operation of door (default 2). Door will reverse direction when blocked unless CRUSHER spawnflag is set.
+team: assign the same team name to multiple doors that should operate together.
+noise_start : overrides default start moving sound
+noise : overrides default movement sound
+noise_stop : overrides default stop moving sound
+light : constantLight radius of .md3 model included with entity. Has no effect on the entity's brushes (default 0).
+color : constantLight color of .md3 model included with entity. Has no effect on the entity's brushes (default 1 1 1).
+model2 : path/name of model to include (eg: models/mapobjects/pipe/pipe02.md3).
+origin : alternate method of setting XYZ origin of .md3 model included with entity (See Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+START_OPEN : &1 the door will spawn in the open state and operate in reverse.
+REVERSE : &2 will cause the door to rotate in the opposite direction.
+CRUSHER : &4 door will not reverse direction when blocked and will keep damaging player until he dies or gets out of the way.
+NOMONSTER : &8 monsters can't trigger this door.
+TOGGLE : &32 wait in both the start and end states for a trigger event
+X_AXIS : &64 rotate in the X axis
+Y_AXIS : &128 rotate in the Y axis
+-------- NOTES --------
+The center of the origin brush determines the point around which it is rotated. It will rotate around the Z axis by default. You can check either the X_AXIS or Y_AXIS box to change that.
+*/
+
+//=============================================================================
+
+/*QUAKED func_conveyor (0 .5 .8) ? START_ON TOGGLE
+Conveyors are stationary brushes that move what's on them. (updated: 12/08/2005)
+-------- KEYS --------
+speed : speed of displacement (default 100).
+target : targetname to activate when used
+targetname : to be targeted with
+noise_start : start moving sound (default silent)
+noise : movement sound (default silent)
+noise_stop : stop moving sound (default silent)
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+START_ON : &1 start activated
+TOGGLE : &2 must be triggered again to toogle it's state
+-------- NOTES --------
+The brush should be have a surface with at least one current content enabled.*/
+
+//=============================================================================
+
+/*QUAKED func_door_secret (0 .5 .8) ? ALWAYS_SHOOT 1ST_LEFT 1ST_DOWN 
+A secret door.  Slide back and then to the side. (updated: 12/08/2005)
+-------- KEYS --------
+message : is printed when the door is touched if it is a trigger door and it hasn't been fired yet
+angle : determines the opening direction of door (up = -1, down = -2).
+speed : determines how fast the door moves (default 50).
+wait : number of seconds before door returns (5 default, -1 = never return)
+targetname : if set, a func_button or trigger is required to activate the door.
+target : fire entities with this targetname when activated
+health : (default 0) if set to any non-zero value, the button must take damage (any amount) to activate.
+dmg : damage to inflict on player when he blocks operation of door (default 2). Door will reverse direction when blocked unless CRUSHER spawnflag is set.
+team: assign the same team name to multiple doors that should operate together (see Notes).
+noise_start : overrides default start moving sound
+noise : overrides default movement sound
+noise_stop : overrides default stop moving sound
+light : constantLight radius of .md3 model included with entity. Has no effect on the entity's brushes (default 0).
+color : constantLight color of .md3 model included with entity. Has no effect on the entity's brushes (default 1 1 1).
+model2 : path/name of model to include (eg: models/mapobjects/pipe/pipe02.md3).
+origin : alternate method of setting XYZ origin of .md3 model included with entity (See Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+ALWAYS_SHOOT : &1 door is shooteable even if targeted
+1ST_LEFT : &2 1st move is left of arrow
+1ST_DOWN : &4 1st move is down from arrow
+-------- NOTES --------
+Slide back and then to the side.
+*/
+
+//=============================================================================
+
+/*QUAKED func_wall (0 .5 .8) ? TRIGGER_SPAWN TOGGLE START_ON - -
+This is just a solid wall if not inhibited. Can be used for conditional walls. (updated: 12/08/2005)
+-------- KEYS --------
+target : activate entities with this targetname when used
+targetname : use this name to target me
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+TRIGGER_SPAWN : &1 the wall will not be present until triggered it will then blink in to existance; it will kill anything that was in its way
+TOGGLE : &2 only valid for TRIGGER_SPAWN walls this allows the wall to be turned on and off
+START_ON : &4 only valid for TRIGGER_SPAWN walls the wall will initially be present
+-------- NOTES --------
+Untested in Warsow*/
+
+//=============================================================================
+
+/*QUAKED func_static (0 .5 .8) ?
+Static non-solid bspmodel. Can be used for conditional walls and models. (updated: 12/08/2005)
+-------- KEYS --------
+model2 : path/name of model to include (eg: models/mapobjects/bitch/fembotbig.md3).
+origin : alternate method of setting XYZ origin of .md3 model included with entity (See Notes).
+light : constantLight radius of .md3 model included with entity. Has no effect on the entity's brushes (default 0).
+color : constantLight color of .md3 model included with entity. Has no effect on the entity's brushes (default 1 1 1).
+targetname : NOT SUPPORTED BY RENDERER - if set, a func_button or trigger can make entity disappear from the game (See Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- NOTES --------
+When using the model2 key, the origin point of the model will correspond to the origin point defined by either the origin brush or the origin coordinate value. If a model is included with a targeted func_static, the brush(es) of the entity will be removed from the game but the .md3 model won't: it will automatically be moved to the (0 0 0) world origin so you should NOT include an .md3 model to a targeted func_static.*/
+
+//=============================================================================
+
+/*QUAKED func_object (0 .5 .8) ? TRIGGER_SPAWN - -
+This is solid bmodel that will fall if its support it removed. (updated: 12/08/2005)
+-------- KEYS --------
+origin : alternate method of setting XYZ origin of .md3 model included with entity (See Notes).
+light : constantLight radius of .md3 model included with entity. Has no effect on the entity's brushes (default 0).
+color : constantLight color of .md3 model included with entity. Has no effect on the entity's brushes (default 1 1 1).
+target : fire targets with this name at being used.
+targetname : name to be targeted with.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+TRIGGER_SPAWN : &1 spawn this entity when target is fired
+-------- NOTES --------
+model2 is not supported in func_objects, only map brushes can be safely used as model*/
+
+//=============================================================================
+
+/*QUAKED func_explosive (0 .5 .8) ? TRIGGER_SPAWN - -
+Any brush that you want to explode or break apart.  If you want an
+ex0plosion, set dmg and it will do a radius explosion of that amount
+at the center of the bursh. If targeted it will not be shootable. (updated: 12/08/2005)
+-------- KEYS --------
+health : defaults to 100.
+mass : defaults to 75.  This determines how much debris is emitted when it explodes.  You get one large chunk per 100 of mass (up to 8) and one small chunk per 25 of mass (up to 16).  So 800 gives the most.
+model2 : a md3 model.
+origin : alternate method of setting XYZ origin of .md3 model included with entity (See Notes).
+light : constantLight radius of .md3 model included with entity. Has no effect on the entity's brushes (default 0).
+color : constantLight color of .md3 model included with entity. Has no effect on the entity's brushes (default 1 1 1).
+target : fire targets with this name at being used.
+targetname : name to be targeted with.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+TRIGGER_SPAWN : &1 spawn this entity when target is fired
+-------- NOTES --------
+Untested: model2 models might not collide perfectly if used with a brush origin*/
+
+//=============================================================================
+
+/*QUAKED func_clock (0 0 1) (-8 -8 -8) (8 8 8) TIMER_UP TIMER_DOWN START_OFF MULTI_USE
+Target a target_string with this, to print a clock. The default is to be a time of day clock (updated: 12/08/2005)
+-------- KEYS --------
+target : fire targets with this name at being used.
+targetname : name to be targeted with.
+pathtarget : countdown will fire this one
+count : a value.
+style : 0 "xx", 1 "xx:xx", 2 "xx:xx:xx"
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+TIMER_UP : &1 run for "count" seconds and then fire target.
+TIMER_DOWN : &2 run for "count" seconds and then fire target.
+START_OFF : &4 this entity must be used before it starts.
+MULTI_USE : &8 can be used more than once.
+-------- NOTES --------
+Untested*/
+
+/*QUAKED _decal (0 .5 .8) ?
+This is not an entity as such, it never reachs the game. It is strictly an editor utility to project decals surfaces over world brushes
+-------- KEYS --------
+target : To a point entity to set the direction to project.
+-------- NOTES --------
+The _decal entity must contain a patch mesh. Target the _decal entity to a point entity to project the decal.*/
+
+//=============================================================================
+
+//PATH_* ENTITIES
+
+//=============================================================================
+
+/*QUAKED path_corner (.5 .3 0) (-8 -8 -8) (8 8 8) TELEPORT
+Path corner entity that func_trains can be made to follow. (updated: 12/08/2005)
+-------- KEYS --------
+target : point to next path_corner in the path.
+targetname : the train following the path or the previous path_corner in the path points to this.
+pathtarget: gets used when an entity that has this path_corner targeted touches it
+speed : speed of func_train while moving to the next path corner. This will override the speed value of the train.
+wait : number of seconds func_train will pause on path corner before moving to next path corner (default 0 - see Notes).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+TELEPORT : &1 instant move to next target
+-------- NOTES --------
+Setting the wait key to -1 will not make the train stop on the path corner, it will simply default to 0.*/
+
+//=============================================================================
+
+INFO_* ENTITIES
+
+//=============================================================================
+
+/*QUAKED info_null (0 .5 0) (-8 -8 -8) (8 8 8)
+Used as a positional target for light entities to create a spotlight effect. removed during gameplay. (updated: 12/08/2005)
+-------- KEYS --------
+targetname : must match the target key of entity that uses this for pointing.
+-------- NOTES --------
+A target_position can be used instead of this but was kept in for legacy purposes.*/
+
+//=============================================================================
+
+/*QUAKED info_notnull (0 .5 0) (-8 -8 -8) (8 8 8)
+Used as a positional target for entities that can use directional pointing. Kept during gameplay. (updated: 12/08/2005)
+-------- KEYS --------
+targetname : must match the target key of entity that uses this for pointing.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- NOTES --------
+A target_position can be used instead of this but was kept in for legacy purposes.*/
+
+//=============================================================================
+
+/*QUAKED info_camp (0 .5 0) (-8 -8 -8) (8 8 8)
+Don't use. Can be used as pointing origin, but there are other entities for it. removed during gameplay. (updated: 12/08/2005)
+-------- KEYS --------
+targetname : must match the target key of entity that uses this for pointing.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- NOTES --------
+It was created to mark camp spots for monsters and bots, but it isn't used anymore and is only kept in for legacy purposes.*/
+
+//=============================================================================
+
+/*QUAKED info_teleport_destination (0.5 0.5 0.5) (-16 -16 -24) (16 16 32)
+You can point trigger_teleports at these. (updated: 12/08/2005)
+-------- KEYS --------
+targetname : must match the target key of entity that uses this for pointing.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- NOTES --------
+Does the same thing as misc_teleporter_dest*/
+
+//=============================================================================
+
+LIGHT ENTITY
+
+//=============================================================================
+
+/*QUAKED light (.65 .65 1) (-8 -8 -8) (8 8 8) LINEAR_ATTN NOANGLE_ATTN DARK_LIGHT - NO_GRID NO_COLOR_NORMALIZE FORCE_DEFAULT_ATTN
+Non-displayed point light source. (updated: 12/08/2005)
+-------- KEYS --------
+light: overrides the default 300 intensity.
+_color : weighted RGB value of light color (default white - 1.0 1.0 1.0).
+style : choose lightstyle. For warsow this may be one of 0=normal 1=FLICKER (first variety) 2=SLOW STRONG PULSE 3=CANDLE (first variety) 4=FAST STROBE 5=GENTLE PULSE 1 6=FLICKER (second variety) 7=CANDLE (second variety) 8=CANDLE (third variety) 9=SLOW STROBE (fourth variety) 10=FLUORESCENT FLICKER 11=SLOW PULSE NOT FADE TO BLACK
+Linear checkbox gives linear falloff instead of inverse square
+Lights pointed at a target will be spotlights.
+radius: overrides the default 64 unit radius of a spotlight at the target point.
+-------- VLIGHT KEYS --------
+atten_distscale:  falloff for light ents.  .25 will give you 4x the falloff distance, .5 will give twice the distance, etc.
+atten_anglescale: angle falloff
+-------- SPAWNFLAGS --------
+LINEAR_ATTN : Linear falloff (q2, ET style)
+NOANGLE_ATTN : No angle attenuation
+DARK_LIGHT : wolf dark light? 
+- 
+NO_GRID : Don't affect lightgrid 
+NO_COLOR_NORMALIZE : the light color is not normalized
+FORCE_DEFAULT_ATTN : force distance attenuation
+*/
+
+//=============================================================================
+
+TRIGGER_* ENTITIES
+
+//=============================================================================
+
+/*QUAKED trigger_always (.5 .5 .5) (-8 -8 -8) (8 8 8)
+Automatic trigger. It will fire the entities it targets as soon as it spawns in the game. (updated: 12/08/2005)
+-------- KEYS --------
+target : fire entities with this targetname.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+*/
+
+//=============================================================================
+
+/*QUAKED trigger_push (.5 .5 .5) ? PUSH_ONCE
+This is used to create jump pads and launch ramps. It MUST point to a target_position or info_notnull entity to work. (updated: 12/08/2005)
+-------- KEYS --------
+target : this points to the target_position to which the player will jump.
+noise : override default noise ("silent" doesn't make any noise)
+wait : time before it can be triggered again.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+PUSH_ONCE : &1 only push when touched the first time
+-------- NOTES --------
+To make a jump pad or launch ramp, place the target_position/info_notnull entity at the highest point of the jump and target it with this entity.
+*/
+
+//=============================================================================
+
+/*QUAKED trigger_multiple (.5 .5 .5) ? MONSTER NOT_PLAYER TRIGGERED
+Variable size repeatable trigger. It will fire the entities it targets when touched by player. Can be made to operate like a trigger_once entity by setting the "wait" key to -1. It can also be activated by another trigger that targets it. (updated: 12/08/2005)
+-------- KEYS --------
+target : this points to the entity to activate.
+targetname : activating trigger points to this.
+noise : play this noise when triggered
+message : centerprint this text string when triggered
+wait : time in seconds until trigger becomes re-triggerable after it's been touched (default 0.2, -1 = trigger once).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+MONSTER : &1 monsters won't activate this trigger unless this flag is set
+NOT_PLAYER : &2 players can't trigger this one (for those triggered by other triggers)
+TRIGGERED : &4 spawns as triggered and must wait for the "wait" key to pass to be re-triggered
+-------- NOTES --------
+message is untested*/
+
+//=============================================================================
+
+/*QUAKED trigger_once (.5 .5 .5) ? MONSTER NOT_PLAYER TRIGGERED
+Triggers once, then removes itself. You must set the key "target" to the name of another object in the level that has a matching "targetname". (updated: 12/08/2005)
+-------- KEYS --------
+target : this points to the entity to activate.
+targetname : activating trigger points to this.
+noise : play this noise when triggered
+message : centerprint this text string when triggered
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+MONSTER : &1 monsters won't activate this trigger unless this flag is set
+NOT_PLAYER : &2 players can't trigger this one (for those triggered by other triggers)
+TRIGGERED : &4 spawns as triggered and must wait for the "wait" key to pass to be re-triggered
+-------- NOTES --------
+Wait key will be ignored. message is untested*/
+
+//=============================================================================
+
+/*QUAKED trigger_relay (.5 .5 .5) ? (-8 -8 -8) (8 8 8)
+This fixed size trigger cannot be touched, it can only be fired by other events. (updated: 12/08/2005)
+-------- KEYS --------
+target : this points to the entity to activate.
+targetname : activating trigger points to this.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- NOTES --------
+Trigger_relay is a tool for use in entities meccanos. It's of no use by itself, and can only be used as an intermediary between events. Wait key will be ignored.*/
+
+//=============================================================================
+
+/*QUAKED trigger_counter (.5 .5 .5) ? NOMESSAGE NOSOUNDS
+Acts as an intermediary for an action that takes multiple inputs. Example: a sequence of several buttons to activate a event (updated: 12/08/2005)
+-------- KEYS --------
+target : this points to the entity to activate.
+targetname : activating trigger points to this.
+count : number of actions to count (default 2)
+noise_start : sound to play each time a event happens
+noise_stop : sound to play at the last event in the count
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+NOMESSAGE : &1 if not set, it will print "1 more.. " etc when triggered and "sequence complete" when finished.
+NOSOUNDS : &2 if not set, it will try to play the noise_start and noise_stop sounds
+-------- NOTES --------
+Sounds like this one should be a target and not a trigger, but well...*/
+
+//=============================================================================
+
+/*QUAKED trigger_hurt (.5 .5 .5) ? START_OFF TOGGLE SILENT NO_PROTECTION SLOW KILL FALL
+Any player that touches this will be hurt by "dmg" points of damage (updated: 23/10/2005)
+-------- KEYS --------
+dmg : number of points of damage inflicted to player per "wait" time lapse (default 5 - integer values only).
+wait : wait time before hurting again (in seconds. Default 0.1)
+noise : sound to be played when inflicting damage
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+START_OFF : needs to be triggered (toggle) for damage
+TOGGLE : toogle
+SILENT : supresses the sizzling sound while player is being hurt.
+NO_PROTECTION : player will be hurt regardless of protection (see Notes).
+SLOW : changes the damage rate to once per second.
+KILL : player will die instantly.
+FALL : player will die the next time he touches the ground.
+-------- NOTES --------
+*/
+
+
+//=============================================================================
+
+/*QUAKED trigger_capture_area (.5 .5 .5) ? -
+Target it to a misc_capture_area_indicator
+-------- KEYS --------
+target : this points to the entity to activate.
+targetname : activating trigger points to this.
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+-------- NOTES --------
+Target it to a misc_capture_area_indicator.*/
+
+//=============================================================================
+
+/*QUAKED trigger_teleport (.5 .5 .5) ? SPECTATOR
+Players touching this will be teleported. Target it to a misc_teleporter_dest. (updated: 12/08/2005)
+-------- KEYS --------
+target : this points to the entity to activate.
+targetname : activating trigger points to this.
+noise : play this noise when triggered
+wait : time in seconds until trigger becomes re-triggerable after it's been touched (default 0.2, -1 = trigger once).
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SPECTATOR : &1 only teleport players moving in spectator mode
+-------- NOTES --------
+Target it to a misc_teleporter_dest.*/
+
+//=============================================================================
+
+MISC_* ENTITIES
+
+//=============================================================================
+
+/*QUAKED misc_teleporter_dest (1 .5 .25) (-32 -32 -24) (32 32 -16)
+Teleport destination location point for trigger_teleporter entities. (updated: 12/08/2005)
+-------- KEYS --------
+angle : direction in which player will look when teleported.
+targetname : make the trigger_teleporter point to this.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- NOTES --------
+Does the same thing as info_teleport_destination*/
+
+//=============================================================================
+
+/*QUAKED misc_model (1 .5 .25) (-16 -16 -16) (16 16 16) NOSHADOWS SOLID FORCEMETA EXTRUDE_NORMALS EXTRUDE_TERRAIN COLOR_TO_ALPHA NOSMOOTH
+Generic placeholder for inserting models in the world. Requires compilation of map geometry to be added to level. (updated: 12/08/2005)
+-------- KEYS --------
+angle: direction in which model will be oriented.
+model: path/name of model to use (eg: models/mapobjects/teleporter/teleporter.ase).
+angle: view direction of the model
+angles: view direction of the model in PITCH YAW ROLL
+modelscale: scaling factor
+modelscale_vec: scaling vector for non-uniform scaling
+_frame: frame of model to include
+_remap: string of the form from;to specifying which texture name of the model to replace by which shader; * is allowed. Any key starting with this prefix will work, so if you need more remappings, create _remap2, etc.
+_castshadows: Allows per-entity control over shadow casting. Defaults to 0 on entities, 1 on world. 0 = no shadow casting. 1 = cast shadows on world. > 1 = cast shadows on entities with _rs (or _receiveshadows) with the corresponding value, AND world. Negative values imply same, but DO NOT cast shadows on world.
+_receiveshadows: Allows per-entity control over shadow reception. Defaults to 1 on everything (world shadows). 0 = receives NO shadows. > 1 = receive shadows only from corresponding keyed entities (see above) and world. < 1 = receive shadows ONLY from corresponding keyed entities.
+_lightmapscale: light map resolution factor
+-------- SPAWNFLAGS --------
+NOSHADOWS: Toggle casting shadows from the model.
+SOLID: Make the model solid.
+LIGHTMAPPED: (aka: forcemeta) Convert model triangles to bsp metasurfaces
+EXTRUDE_NORMALS: extrude along the model normals for clipping
+EXTRUDE_TERRAIN: always extrude downwards (for horizontal terrain only)
+COLOR_TO_ALPHA: use the color value as alpha (for terrain blending)
+NOSMOOTH: Don't smooth normals when importing (forces all faces planar).
+*/
+
+//=============================================================================
+
+/*QUAKED misc_portal_camera (1 .5 .25) (-8 -8 -8) (8 8 8) SLOWROTATE FASTROTATE NOROTATE
+Portal camera. This camera is used to project its view onto a portal surface in the level through the intermediary of a misc_portal_surface entity. Use the "angles" key or target a target_position or info_notnull entity to set the camera's pointing direction. (updated: 12/08/2005)
+-------- KEYS --------
+angles: this sets the pitch and yaw aiming angles of the portal camera (default 0 0). Use "roll" key to set roll angle.
+target : point this to a target_position entity to set the camera's pointing direction.
+targetname : a misc_portal_surface portal surface indicator must point to this.
+roll: roll angle of camera. A value of 0 is upside down and 180 is the same as the player's view.
+-------- SPAWNFLAGS --------
+SLOWROTATE : makes the portal camera rotate slowly along the roll axis.
+FASTROTATE : makes the portal camera rotate faster along the roll axis.
+NOROTATE : disables rotation
+-------- NOTES --------
+Both the setting "angles" key or "targeting a target_position" methods can be used to aim the camera. However, the target_position method is simpler. In both cases, the "roll" key must be used to set the roll angle. If either the SLOWROTATE or FASTROTATE spawnflag is set, then the "roll" value is irrelevant.*/
+
+//=============================================================================
+
+/*QUAKED misc_portal_surface (1 .5 .25) (-8 -8 -8) (8 8 8)
+The portal surface nearest this entity will show a view from the targeted misc_portal_camera, or a mirror view if untargeted. This must be within 64 world units of the surface! (updated: 12/08/2005)
+-------- KEYS --------
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- NOTES --------
+The entity must be no farther than 64 units away from the portal surface to lock onto it. To make a mirror, apply the common/mirror shader to the surface, place this entity near it but don't target a misc_portal_camera.*/
+
+//=============================================================================
+
+/*QUAKED misc_skyportal (1 .5 .25) (-8 -8 -8) (8 8 8)
+Camera of a portal view which will show up at the sky
+-------- KEYS --------
+noents : when set to 1 the entities in the sky room will be skept from drawing.
+fov : when set to any value it will override the player fov. Do not set for normal behavior.
+scale : scale the view to make it appear closer or further.
+-------- NOTES --------
+The entity must be placed in a room which is not connected to the rest of the map.*/
+
+//=============================================================================
+
+/*QUAKED misc_explobox (1 .5 .25) (-16 -16 0) (16 16 40)
+Model capable of exploding.  You can override its mass, health, and dmg. (updated: 12/08/2005)
+-------- KEYS --------
+target : fire entities with this targetname at exploding
+targetname : to explode by being triggered.
+health : default 80
+mass : influences the ammount of debris at exploding (default 100)
+dmg : damage radius of the explosion (default 150)
+angle: direction in which model will be oriented.
+model : path/name of model to use (eg: models/mapobjects/barrel/barrel.md3).*/
+
+//=============================================================================
+
+/*QUAKED misc_capture_area_indicator (1 .5 .25) (-16 -16 0) (16 16 96) SUSPENDED
+Indicator of the capture area for domination alike gametypes
+-------- KEYS --------
+-------- SPAWNFLAGS --------
+SUSPENDED : item will spawn where it was placed in map and won't drop to the floor.
+-------- NOTES --------
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/objects/capture_area/indicator.md3"*/
+
+//=============================================================================
+
+/*QUAKED misc_particles (.6 .7 .7) (-8 -8 -8) (8 8 8) SPHERICAL SOLID GRAVITY LIGHT EXPAND_EFFECT SHRINK_EFFECT START_OFF
+Generates particles
+-------- KEYS --------
+angles : direction in which the particles will be thrown (unused when spherical).
+radius : radius of the spread of the particles direction (unused when spherical).
+shaderName : the particle shader to use.
+size : the radius of a particle.
+delay : time before the particle dissapears.
+gameteam : use teamcolors on the sprites. 2 ALPHA, 3 BETA.
+speed : Speed at which the particles will be thrown
+count : Number of particles per second
+color : color of the light emitted by the particle.
+noise : the entity (not each particle) produces this looping sound.
+-------- SPAWNFLAGS --------
+SPHERICAL : Particles will be generated in all directions around a point
+SOLID : Particles will bounce on walls
+GRAVITY : Particles will be affected by gravity
+LIGHT : enable light on the particles
+EXPAND_EFFECT : The particle expands during its lifetime
+SHRINK_EFFECT : The particle shrinks during its lifetime
+
+//=============================================================================
+
+TARGET_* ENTITIES
+
+//=============================================================================
+
+/*QUAKED target_give (0 .5 0) (-8 -8 -8) (8 8 8)
+This is used to give ammo, weapons, health or items to the player who activates it.
+-------- KEYS --------
+target : this points to the item(s) to give when activated.
+targetname : activating trigger or spawn entity points to this.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- NOTES --------
+There are 2 ways to use this entity.
+a) automatically give items to players when they spawn in the game: make a spawn location entity like info_player_deathmatch or CTF respawn points target this entity, then make it target the item(s) to give to the player upon respawn.
+b) give items to players during the game: make a trigger_multiple target this entity, then make it target the item(s) to give to the player when the trigger is touched.*/
+
+//=============================================================================
+
+/*QUAKED target_startTimer (1 0 0) (-8 -8 -8) (8 8 8)
+Timer Start
+*/
+
+//=============================================================================
+
+/*QUAKED target_stopTimer (1 0 0) (-8 -8 -8) (8 8 8)
+Timer Stop
+-------- KEYS --------
+target: stopTimer triggers its targets when a best time occurs.
+*/
+
+//=============================================================================
+
+/*QUAKED target_checkpoint (1 0 0) (-8 -8 -8) (8 8 8)
+Checkpoint
+*/
+
+//=============================================================================
+
+/*QUAKED target_location (0 .5 0) (-8 -8 -8) (8 8 8)
+Location marker used by bots and players for team orders and team chat in the course of Teamplay games. The closest target_location in sight is used for the location. If none is in sight, the closest in distance is used. (updated: 12/08/2005)
+-------- KEYS --------
+message :  name of the location (text string). Displayed in parentheses in front of all team chat and order messages.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+*/
+
+//=============================================================================
+
+/*QUAKED target_position (0 .5 0) (-8 -8 -8) (8 8 8)
+Aiming target for entities like light, misc_portal_camera and trigger_push (jump pads) in particular. (updated: 12/08/2005)
+-------- KEYS --------
+targetname : the entity that requires an aiming direction points to this.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- NOTES --------
+To make a jump pad, place this entity at the highest point of the jump and target it with a trigger_push entity.*/
+
+//=============================================================================
+
+/*QUAKED target_print (0 .5 0) (-8 -8 -8) (8 8 8) SAMETEAM OTHERTEAM PRIVATE
+This will print a message on the center of the screen when triggered. By default, all the clients will see the message. (updated: 12/08/2005)
+-------- KEYS --------
+message : text string to print on screen.
+targetname : the activating trigger points to this.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+SAMETEAM : &1 only players in activator's team will see the message.
+OTHERTEAM : &2 only players in other than activator's team will see the message.
+PRIVATE : &4 only the player that activates the target will see the message.*/
+
+//=============================================================================
+
+/*QUAKED target_speaker (0 .7 .7) (-8 -8 -8) (8 8 8) LOOPED_ON LOOPED_OFF RELIABLE GLOBAL ACTIVATOR
+Normal sounds play each time the target is used.  The reliable flag can be set for crucial voiceovers. Looped sounds are always atten 3 / vol 1, and the use function toggles it on/off. Multiple identical looping sounds will just increase volume without any speed cost. (updated: 12/08/2005)
+-------- KEYS --------
+noise : path/name of .wav file to play (eg. sound/world/growl1.wav - see Notes).
+volume : 0.0 to 1.0
+attenuation : -1 = none, send to whole level, 1 = normal fighting sounds, 2 = idle sound level, 3 = ambient sound level
+wait : delay in seconds between each time the sound is played ("random" key must be set - see Notes).
+random : random time variance in seconds added or subtracted from "wait" delay ("wait" key must be set - see Notes).
+targetname : the activating button or trigger points to this.
+notfree : when set to 1, entity will not spawn in "Free for all" and "Tournament" modes.
+notduel : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes.
+notteam : when set to 1, entity will not spawn in "Teamplay" and "CTF" modes. 
+gametype : list of gametype names in which this entity will be spawned.
+-------- SPAWNFLAGS --------
+LOOPED_ON : &1 sound will loop and initially start on in level (will toggle on/off when triggered).
+LOOPED_OFF : &2 sound will loop and initially start off in level (will toggle on/off when triggered).
+RELIABLE : &4
+GLOBAL : &8 Overrides attenuation setting. Sound will play full volume throughout the level as if it had attenuation -1
+ACTIVATOR : &16 sound will play only for the player that activated the target.
+-------- NOTES --------
+The path portion value of the "noise" key can be replaced by the implicit folder character "*" for triggered sounds that belong to a particular player model. For example, if you want to create a "bottomless pit" in which the player screams and dies when he falls into, you would place a trigger_multiple over the floor of the pit and target a target_speaker with it. Then, you would set the "noise" key to "*falling1.wav". The * character means the current player model's sound folder. So if your current player model is Visor, * = sound/player/visor, if your current player model is Sarge, * = sound/player/sarge, etc. This cool feature provides an excellent way to create "player-specific" triggered sounds in your levels.*/
+
+//=============================================================================
+
+/*QUAKED props_skyportal (.6 .7 .7) (-8 -8 0) (8 8 16)
+-------- KEYS --------
+fov: for the skybox default is whatever client's fov is set to
+scale: is world/skyarea ratio if you want to keep a certain perspective when player moves around the world
+noents: makes the skyportal ignore entities within the sky area, making them invisible for the player*/
+
+//=============================================================================
