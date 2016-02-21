@@ -1,0 +1,24 @@
+# Blender MTL File: 'gun_shotgun_sawnoff.blend'
+# Material Count: 2
+
+newmtl Material
+Ns 21.568627
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd gun_tacticalsupershotgun.png
+
+newmtl Material.001
+Ns 96.078431
+Ka 0.073684 0.073684 0.073684
+Kd 0.171228 0.171228 0.208151
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 3
+map_Kd gun_tacticalsupershotgun.png
