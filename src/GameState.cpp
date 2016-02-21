@@ -42,8 +42,8 @@ void GameState :: preload()
         vec3(0.2f, 0.6f, 0.2f)
     ));
     m_pPlayerMesh->disable_physics();
-    //m_pPlayerMesh->set_physics(Node::Physics::DYNAMIC);
-    //m_pPlayerMesh->set_physics_shape(Node::CAPSULE);
+    m_pPlayerMesh->set_physics(Node::Physics::DYNAMIC);
+    m_pPlayerMesh->set_physics_shape(Node::CAPSULE);
     m_pPlayerMesh->friction(1.0f);
     m_pPlayerMesh->mass(80.0f);
     m_pPlayerMesh->inertia(true);
@@ -52,6 +52,10 @@ void GameState :: preload()
     m_pPlayerMesh->add(m_pCamera);
     m_pCamera->position(vec3(0.0f, 0.6f, 0.0f));
     m_pRoot->add(m_pPlayerMesh);
+    
+    auto mus = m_pQor->make<Sound>("cave.ogg");
+    m_pRoot->add(mus);
+    mus->ambient(true);
 
     //m_pRoot->add(m_pCamera);
     
@@ -86,7 +90,7 @@ void GameState :: preload()
     l->specular(Color(0.1f, 0.1f, 0.1f, 1.0f));
     //l->diffuse(Color(1.0f, 1.0f, 1.0f));
     //l->specular(Color(1.0f, 1.0f, 1.0f));
-    l->atten(glm::vec3(0.0f, 0.0f, 0.5f));
+    //l->atten(glm::vec3(0.0f, 0.0f, 0.5f));
     m_pRoot->add(l);
 
     //l = make_shared<Light>();
@@ -115,7 +119,7 @@ void GameState :: preload()
     //);
     
     //m_pRoot->add(m_pQor->make<Mesh>("apartment_scene.obj"));
-    auto scene = m_pQor->make<Scene>("thehall.json");
+    auto scene = m_pQor->make<Scene>("test.json");
     m_pRoot->add(scene->root());
     m_pController = m_pQor->session()->profile(0)->controller();
     
@@ -133,7 +137,6 @@ void GameState :: preload()
     //gun->mass(1.0f);
     //gun->inertia(true);
     //gun->position(glm::vec3(-2.0f, 1.0f, 0.0f));
-    
     
     //m_pViewModel->node()->rotate(0.5f, Axis::Z);
     //m_pViewModel->node()->position(glm::vec3(
@@ -158,19 +161,22 @@ void GameState :: preload()
     //m_pScript->execute_file("mods/"+ m_Filename +"/__init__.py");
     //m_pScript->execute_string("preload()");
     
-    m_pPlayerMesh->position(vec3(-4.0f, 2.0f, 0.0f));
+    m_pPlayerMesh->position(vec3(0.0f, 1.0f, 0.0f));
     m_pPhysics = make_shared<Physics>(m_pRoot.get(), this);
     m_pPhysics->generate(m_pRoot.get(), (unsigned)Physics::GenerateFlag::RECURSIVE);
 
-    //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
-    //pmesh_body->setActivationState(DISABLE_DEACTIVATION);
-    //pmesh_body->setAngularFactor(btVector3(0,0,0));
-    //pmesh_body->setCcdMotionThreshold(1.0f);
-    ////pmesh_body->setCcdSweptSphereRadius(0.25f);
-    //pmesh_body->setRestitution(0.0f);
-    ////pmesh_body->setDamping(0.0f, 0.0f);
-    //////pmesh_body->setRestitution(0.0f);
-    //m_pPhysics->world()->setGravity(btVector3(0.0, -40.0, 0.0));
+    btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
+    pmesh_body->setActivationState(DISABLE_DEACTIVATION);
+    pmesh_body->setAngularFactor(btVector3(0,0,0));
+    pmesh_body->setCcdMotionThreshold(1.0f);
+    //pmesh_body->setCcdSweptSphereRadius(0.25f);
+    pmesh_body->setRestitution(0.0f);
+    //pmesh_body->setDamping(0.0f, 0.0f);
+    ////pmesh_body->setRestitution(0.0f);
+    m_pPhysics->world()->setGravity(btVector3(0.0, -40.0, 0.0));
+
+    m_pConsole = make_shared<Console>(m_pQor->interpreter(), win, m_pInput, m_pQor->resources());
+    m_pOrthoRoot->add(m_pConsole);
 }
 
 GameState :: ~GameState()
@@ -180,25 +186,36 @@ GameState :: ~GameState()
 
 void GameState :: enter()
 {
+    m_pRoot->each([](Node* node){
+        auto s = dynamic_cast<Sound*>(node);
+        if(s) {
+            s->play();
+        }
+    }, Node::Each::RECURSIVE);
+    
     m_pPlayer = kit::init_shared<PlayerInterface3D>(
         m_pController,
         m_pCamera,
         m_pPlayerMesh,
-        m_pQor->session()->profile(0)->config()
+        m_pQor->session()->profile(0)->config(),
+        [&]{ return m_pConsole->input(); }
     );
     m_pPlayer->speed(12.0f);
-    m_pPlayer->fly();
-    //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
-    //m_pPlayer->on_jump([pmesh_body]{
-    //    pmesh_body->applyImpulse(
-    //        btVector3(0.0f, 1000.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)
-    //    );
-    //});
+    //m_pPlayer->fly();
+    btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
+    m_pPlayer->on_jump([pmesh_body]{
+        pmesh_body->applyImpulse(
+            btVector3(0.0f, 1000.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)
+        );
+    });
+    Audio::reference_distance(2.0f);
+    Audio::max_distance(20.0f);
     
     m_pPipeline->shader(1)->use();
     m_pPipeline->override_shader(PassType::NORMAL, m_Shader);
      
     m_pCamera->perspective();
+    m_pCamera->listen();
     m_pInput->relative_mouse(true);
 
     on_tick.connect(std::move(screen_fader(
@@ -212,7 +229,7 @@ void GameState :: enter()
                 );
         },
         [this](Freq::Time){
-            if(m_pInput->key(SDLK_ESCAPE))
+            if(not m_pConsole->input() && m_pInput->escape())
                 return true;
             return false;
         },
@@ -235,61 +252,43 @@ void GameState :: logic(Freq::Time t)
     //LOGf("object: %s", Matrix::to_string(*m_pCamera->matrix()));
     //LOGf("world: %s", Matrix::to_string(*m_pCamera->matrix(Space::WORLD)));
     
-    if(m_pInput->key(SDLK_ESCAPE))
-        m_pQor->quit();
+    if(not m_pConsole->input()){
+        //if(m_pInput->key(SDLK_ESCAPE).consume_now())
+        //    m_pQor->quit();
 
-    if(m_pController->button("zoom").pressed_now())
-        m_pViewModel->zoom(not m_pViewModel->zoomed());
-    
-    if(m_pController->button("fire") &&
-       m_pViewModel->idle()
-    ){
-        //Sound::play(m_pCamera.get(), "shotgun.wav", m_pQor->resources());
-        auto s = m_pQor->make<Sound>("shotgun3.wav");
-        m_pCamera->add(s);
-        s->play();
-        s->detach_on_done();
-
-        //auto l = make_shared<Light>();
-        //l->position(m_pViewModel->position(Space::WORLD));
-        //l->move(m_pViewModel->orient_to_world(vec3(0.0f, 0.0f, 1.0f)));
-        //l->diffuse(Color(1.0f,1.0f,1.0f));
-        //l->specular(Color(1.0f,1.0f,1.0f));
-        //l->atten(glm::vec3(0.0f, 0.5f, 0.01f));
-        //auto light_timeline = make_shared<Freq::Timeline>();
-        //Light* lp = l.get();
-        //l->on_tick.connect([lp, light_timeline](Freq::Time t){
-        //    light_timeline->logic(t);
-        //    if(light_timeline->elapsed(Freq::Time(50)))
-        //        lp->detach();
-        //});
-        //m_pRoot->add(l);
+        if(m_pController->button("zoom").pressed_now())
+            m_pViewModel->zoom(not m_pViewModel->zoomed());
         
-        m_pViewModel->recoil(Freq::Time(50), Freq::Time(700));
+        if(m_pController->button("fire") &&
+           m_pViewModel->idle()
+        ){
+            Sound::play(m_pCamera.get(), "shotgun.wav", m_pQor->resources());
+            m_pViewModel->recoil(Freq::Time(50), Freq::Time(700));
 
-        for(int i=0; i<8; ++i)
-        {
-            auto mag_var = (rand() % 1000) * 0.001f * 0.1f;
-            auto ang_var = (rand() % 1000) * 0.001f;
-            vec3 dir = glm::vec3(
-                cos(K_TAU * ang_var) * mag_var,
-                sin(K_TAU * ang_var) * mag_var,
-                -1.0f
-            );
-            dir = glm::normalize(dir);
-            
-            auto hit = m_pPhysics->first_hit(
-                m_pCamera->position(Space::WORLD),
-                m_pCamera->position(Space::WORLD) +
-                    m_pCamera->orient_to_world(dir) * 100.0f
-            );
-            if(std::get<0>(hit))
+            for(int i=0; i<8; ++i)
             {
-                decal(
-                    std::get<1>(hit),
-                    std::get<2>(hit),
-                    Matrix::up(*m_pCamera->matrix(Space::WORLD))
+                auto mag_var = (rand() % 1000) * 0.001f * 0.1f;
+                auto ang_var = (rand() % 1000) * 0.001f;
+                vec3 dir = glm::vec3(
+                    cos(K_TAU * ang_var) * mag_var,
+                    sin(K_TAU * ang_var) * mag_var,
+                    -1.0f
                 );
+                dir = glm::normalize(dir);
+                
+                auto hit = m_pPhysics->first_hit(
+                    m_pCamera->position(Space::WORLD),
+                    m_pCamera->position(Space::WORLD) +
+                        m_pCamera->orient_to_world(dir) * 100.0f
+                );
+                if(std::get<0>(hit))
+                {
+                    decal(
+                        std::get<1>(hit),
+                        std::get<2>(hit),
+                        Matrix::up(*m_pCamera->matrix(Space::WORLD))
+                    );
+                }
             }
         }
     }

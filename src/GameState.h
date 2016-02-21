@@ -13,7 +13,7 @@
 //#include "Qor/BasicPhysics.h"
 #include "Qor/Sprite.h"
 #include "Qor/ViewModel.h"
-
+#include "Qor/Console.h"
 class PlayerInterface3D;
 
 class Qor;
@@ -67,6 +67,7 @@ class GameState:
         Input* m_pInput = nullptr;
         Pipeline* m_pPipeline = nullptr;
 
+        std::shared_ptr<Console> m_pConsole;
         std::shared_ptr<Node> m_pRoot;
         std::shared_ptr<Node> m_pOrthoRoot;
         //Interpreter* m_pInterpreter;
