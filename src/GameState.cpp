@@ -91,13 +91,13 @@ void GameState :: preload()
         "decal_bullethole1.png"
     );
     
-    auto l = make_shared<Light>();
-    l->diffuse(Color(1.0f, 1.0f, 1.0f, 1.0f));
-    l->specular(Color(0.1f, 0.1f, 0.1f, 1.0f));
-    //l->diffuse(Color(1.0f, 1.0f, 1.0f));
-    //l->specular(Color(1.0f, 1.0f, 1.0f));
-    //l->atten(glm::vec3(0.0f, 0.0f, 0.5f));
-    m_pRoot->add(l);
+    //auto l = make_shared<Light>();
+    //l->diffuse(Color(1.0f, 1.0f, 1.0f, 1.0f));
+    //l->specular(Color(0.1f, 0.1f, 0.1f, 1.0f));
+    ////l->diffuse(Color(1.0f, 1.0f, 1.0f));
+    ////l->specular(Color(1.0f, 1.0f, 1.0f));
+    ////l->atten(glm::vec3(0.0f, 0.0f, 0.5f));
+    //m_pRoot->add(l);
 
     //l = make_shared<Light>();
     //l->position(glm::vec3(10.0f, 0.0f, 0.0f));
