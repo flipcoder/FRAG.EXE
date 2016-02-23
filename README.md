@@ -13,3 +13,15 @@ Engine here: http://github.com/flipcoder/qor
 
 [![Video 2](http://img.youtube.com/vi/nMWK1l5uOjQ/0.jpg)](https://youtu.be/nMWK1l5uOjQ)
 
+## Credits
+
+### Programming
+[Grady O'Connell](http://github.com/flipcoder)
+
+### Graphics
+[Mark "Alfred" McDaniel](http://github.com/alfredanonymous)
+
+### Maps
+[Mark "Alfred" McDaniel](http://github.com/alfredanonymous)
+[Nick Adams](http://github.com/nadams)
+
