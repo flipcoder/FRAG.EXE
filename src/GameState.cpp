@@ -125,7 +125,7 @@ void GameState :: preload()
     //);
     
     //m_pRoot->add(m_pQor->make<Mesh>("theDunes.obj"));
-    auto scene = m_pQor->make<Scene>("thehall.json");
+    auto scene = m_pQor->make<Scene>("test.json");
     m_pRoot->add(scene->root());
     
     m_pController = m_pQor->session()->profile(0)->controller();
