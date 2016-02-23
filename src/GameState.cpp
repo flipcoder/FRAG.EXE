@@ -27,6 +27,7 @@ GameState :: GameState(
     m_pInput(engine->input()),
     m_pRoot(make_shared<Node>()),
     m_pOrthoRoot(make_shared<Node>()),
+    m_pSkyboxRoot(make_shared<Node>()),
     //m_pInterpreter(engine->interpreter()),
     //m_pScript(make_shared<Interpreter::Context>(engine->interpreter())),
     m_pPipeline(engine->pipeline())
@@ -44,24 +45,29 @@ void GameState :: preload()
     m_pPlayerMesh->disable_physics();
     m_pPlayerMesh->set_physics(Node::Physics::DYNAMIC);
     m_pPlayerMesh->set_physics_shape(Node::CAPSULE);
-    m_pPlayerMesh->friction(1.0f);
+    m_pPlayerMesh->friction(0.0f);
     m_pPlayerMesh->mass(80.0f);
-    m_pPlayerMesh->inertia(true);
+    m_pPlayerMesh->inertia(false);
     m_pCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     //m_pRoot->add(m_pCamera);
     m_pPlayerMesh->add(m_pCamera);
     m_pCamera->position(vec3(0.0f, 0.6f, 0.0f));
     m_pRoot->add(m_pPlayerMesh);
     
-    auto mus = m_pQor->make<Sound>("cave.ogg");
-    m_pRoot->add(mus);
-    mus->ambient(true);
+    //auto mus = m_pQor->make<Sound>("cave.ogg");
+    //m_pRoot->add(mus);
+    //mus->ambient(true);
 
-    //m_pRoot->add(m_pCamera);
-    
     m_pOrthoCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pOrthoCamera->ortho();
     m_pOrthoRoot->add(m_pOrthoCamera);
+    
+    m_pSkyboxCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
+    m_pSkyboxCamera->perspective();
+    m_pSkyboxRoot->add(m_pQor->make<Mesh>("skybox1.obj"));
+    m_pSkyboxRoot->add(m_pSkyboxCamera);
+    m_pSkyboxCamera->track(m_pCamera);
+    m_pSkyboxCamera->mode(Tracker::ORIENT);
     
     auto win = m_pQor->window();
 
@@ -118,14 +124,16 @@ void GameState :: preload()
     //    m_pCamera
     //);
     
-    //m_pRoot->add(m_pQor->make<Mesh>("apartment_scene.obj"));
-    auto scene = m_pQor->make<Scene>("test.json");
+    //m_pRoot->add(m_pQor->make<Mesh>("theDunes.obj"));
+    auto scene = m_pQor->make<Scene>("thehall.json");
     m_pRoot->add(scene->root());
+    
     m_pController = m_pQor->session()->profile(0)->controller();
     
     const bool ads = false;
-    auto gun = m_pQor->make<Mesh>("gun_tacticalsupershotgun.obj");
+    //auto gun = m_pQor->make<Mesh>("gun_tacticalsupershotgun.obj");
     //auto gun = m_pQor->make<Mesh>("gun_bullpup.obj");
+    auto gun = m_pQor->make<Mesh>("ump45.obj");
     //auto gun = m_pQor->make<Mesh>("glock.obj");
     m_pViewModel = make_shared<ViewModel>(m_pCamera, gun);
     gun->disable_physics();
@@ -147,13 +155,13 @@ void GameState :: preload()
     
     m_pViewModel->model_pos(glm::vec3(
         //0.111f, -0.168f, -0.223f //glock
-        0.0f, -0.228f, -0.385f //shotgun
-        //0.0f, -0.12f, -0.18f //bullpup
+        //0.0f, -0.228f, -0.385f //shotgun
+        0.093, -0.288f, -0.32f //ump45
     ));
     m_pViewModel->zoomed_model_pos(glm::vec3(
         //0.0f, -0.039f, -0.282f // glock
-        0.0f, -0.15f, -0.472f // shotgun
-        //0.0f, -0.12f, -0.18f // bullpup
+        //0.0f, -0.15f, -0.472f // shotgun
+        0.0f, -0.211f, -0.407 //ump45
     ));
     m_pViewModel->reset_zoom();
     
@@ -170,7 +178,7 @@ void GameState :: preload()
     pmesh_body->setAngularFactor(btVector3(0,0,0));
     pmesh_body->setCcdMotionThreshold(1.0f);
     //pmesh_body->setCcdSweptSphereRadius(0.25f);
-    pmesh_body->setRestitution(0.0f);
+    //pmesh_body->setRestitution(0.0f);
     //pmesh_body->setDamping(0.0f, 0.0f);
     ////pmesh_body->setRestitution(0.0f);
     m_pPhysics->world()->setGravity(btVector3(0.0, -40.0, 0.0));
@@ -203,11 +211,16 @@ void GameState :: enter()
     m_pPlayer->speed(12.0f);
     //m_pPlayer->fly();
     btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
-    m_pPlayer->on_jump([pmesh_body]{
-        pmesh_body->applyImpulse(
-            btVector3(0.0f, 1000.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)
-        );
-    });
+    {
+        auto resources = m_pQor->resources();
+        auto camera = m_pCamera.get();
+        m_pPlayer->on_jump([pmesh_body, resources, camera]{
+            pmesh_body->applyImpulse(
+                btVector3(0.0f, 1000.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)
+            );
+            Sound::play(camera, "jump.wav", resources);
+        });
+    }
     Audio::reference_distance(2.0f);
     Audio::max_distance(20.0f);
     
@@ -259,16 +272,51 @@ void GameState :: logic(Freq::Time t)
         if(m_pController->button("zoom").pressed_now())
             m_pViewModel->zoom(not m_pViewModel->zoomed());
         
-        if(m_pController->button("fire") &&
-           m_pViewModel->idle()
-        ){
-            Sound::play(m_pCamera.get(), "shotgun.wav", m_pQor->resources());
-            m_pViewModel->recoil(Freq::Time(50), Freq::Time(700));
+        //if(m_pController->button("next").pressed_now() ||
+        //   m_pController->button("previous").pressed_now())
+        if(m_pController->button("reload").pressed_now())
+        {
+            //auto cache = m_pQor->resources();
+            //auto camera = m_pCamera.get();
+            auto vm = m_pViewModel.get();
+            m_pViewModel->equip_time(Freq::Time(250));
+            Sound::play(m_pCamera.get(), "pump.wav", m_pQor->resources());
+            m_pViewModel->equip(false, [vm]{
+                //Sound::play(camera, "pump.wav", cache);
+                vm->equip(true);
+            });
+        }
 
-            for(int i=0; i<8; ++i)
+        if(m_pController->button("fire") &&
+           m_pViewModel->idle() &&
+           m_pViewModel->equipped()
+        ){
+            //Sound::play(m_pCamera.get(), "shotgun.wav", m_pQor->resources());
+            Sound::play(m_pCamera.get(), "shot.wav", m_pQor->resources());
+            
+            //Sound::play(m_pCamera.get(), "pump.wav", m_pQor->resources());
+            //auto snd = m_pQor->make<Sound>("pump.wav");
+            //auto time = make_shared<Freq::Time>();
+            //auto sndptr = snd.get();
+            //snd->on_tick.connect([sndptr,time](Freq::Time t){
+            //    if(*time >= Freq::Time(250)) {
+            //        if(not sndptr->played()){
+            //            sndptr->detach_on_done();
+            //            sndptr->play();
+            //        }
+            //    }else{
+            //        *time += t;
+            //    }
+            //});
+            //m_pCamera->add(snd);
+            //m_pViewModel->recoil(Freq::Time(50), Freq::Time(700)); // shotgun
+            m_pViewModel->recoil(Freq::Time(25), Freq::Time(50), 0.05f); // ump45
+
+            //for(int i=0; i<8; ++i)
+            int i = 0;
             {
-                auto mag_var = (rand() % 1000) * 0.001f * 0.1f;
-                auto ang_var = (rand() % 1000) * 0.001f;
+                auto mag_var = (rand() % 1000) * 0.001f * 0.1f         * 0.0f; // ump has 0
+                auto ang_var = (rand() % 1000) * 0.001f                * 0.0f;
                 vec3 dir = glm::vec3(
                     cos(K_TAU * ang_var) * mag_var,
                     sin(K_TAU * ang_var) * mag_var,
@@ -286,7 +334,8 @@ void GameState :: logic(Freq::Time t)
                     decal(
                         std::get<1>(hit),
                         std::get<2>(hit),
-                        Matrix::up(*m_pCamera->matrix(Space::WORLD))
+                        Matrix::up(*m_pCamera->matrix(Space::WORLD)),
+                        i * 0.0001
                     );
                 }
             }
@@ -302,6 +351,7 @@ void GameState :: logic(Freq::Time t)
         m_pPlayer->move() != glm::vec3(0.0f) && m_pPlayer->sprint()
     );
     
+    m_pSkyboxRoot->logic(t);
     m_pOrthoRoot->logic(t);
     m_pRoot->logic(t);
     
@@ -320,11 +370,11 @@ void GameState :: logic(Freq::Time t)
     //else if(m_pInput->key(SDLK_r))
     //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, -t.s()));
 
-    //LOGf("model pos %s", Vector::to_string(m_pViewModel->model_pos()));
+    //LOGf("model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
     //LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
 }
 
-void GameState :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up)
+void GameState :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset)
 {
     const float decal_scale = 0.1f;
     auto m = make_shared<Mesh>(make_shared<MeshGeometry>(Prefab::quad(
@@ -342,7 +392,7 @@ void GameState :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up)
     )));
     //LOGf("matrix: %s", Matrix::to_string(*m->matrix()));
     m->position(contact);
-    m->move(normal * 0.01f);
+    m->move(normal * (0.001f + offset));
     m->pend();
     m_Decals.push_back(m);
     while(m_Decals.size() > MAX_DECALS) {
@@ -355,6 +405,15 @@ void GameState :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up)
 
 void GameState :: render() const
 {
+    m_pPipeline->override_shader(PassType::NORMAL, (unsigned)PassType::NONE);
+    m_pPipeline->winding(false);
+    m_pPipeline->blend(false);
+    m_pPipeline->render(
+        m_pSkyboxRoot.get(),
+        m_pSkyboxCamera.get(),
+        nullptr,
+        Pipeline::NO_DEPTH
+    );
     m_pPipeline->override_shader(PassType::NORMAL, m_Shader);
     m_pPipeline->winding(false);
     m_pPipeline->blend(false);
@@ -362,7 +421,7 @@ void GameState :: render() const
         m_pRoot.get(),
         m_pCamera.get(),
         nullptr,
-        Pipeline::LIGHTS
+        Pipeline::LIGHTS | Pipeline::NO_CLEAR
     );
     m_pPipeline->override_shader(PassType::NORMAL, (unsigned)PassType::NONE);
     m_pPipeline->winding(true);
