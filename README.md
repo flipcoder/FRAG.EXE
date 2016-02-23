@@ -23,5 +23,6 @@ Engine here: http://github.com/flipcoder/qor
 
 ### Maps
 [Mark "Alfred" McDaniel](http://github.com/alfredanonymous)
+
 [Nick Adams](http://github.com/nadams)
 
