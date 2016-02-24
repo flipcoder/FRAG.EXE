@@ -78,7 +78,8 @@ Player :: Player(
     auto pmesh = m_pPlayerMesh.get();
     auto camera = m_pCamera.get();
     auto interface = m_pInterface.get();
-    m_pPhysics->on_generate([pmesh,interface,cache,camera]{
+    auto _this = this;
+    m_pPhysics->on_generate([_this, physics, pmesh,interface,cache,camera]{
         auto pmesh_body = (btRigidBody*)pmesh->body()->body();
         pmesh_body->setActivationState(DISABLE_DEACTIVATION);
         pmesh_body->setAngularFactor(btVector3(0,0,0));
@@ -87,7 +88,9 @@ Player :: Player(
         //pmesh_body->setRestitution(0.0f);
         //pmesh_body->setDamping(0.0f, 0.0f);
         ////pmesh_body->setRestitution(0.0f);
-        interface->on_jump([pmesh_body, cache, camera]{
+        interface->on_jump([_this, physics, pmesh_body, cache, camera]{
+            if(not _this->can_jump())
+                return;
             pmesh_body->applyImpulse(
                 btVector3(0.0f, 1000.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)
             );
@@ -232,5 +235,16 @@ void Player :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float of
         m_Decals.pop_front();
     }
     m_pRoot->add(m);
+}
+
+bool Player :: can_jump() const
+{
+    auto pos = m_pPlayerMesh->position(Space::WORLD);
+    auto jump_hit = m_pPhysics->first_hit(
+        pos,
+        pos - 0.6f - glm::vec3(0.0f, 0.1f, 0.0f)
+    );
+    Node* jump_hit_node = std::get<0>(jump_hit);
+    return jump_hit_node;
 }
 

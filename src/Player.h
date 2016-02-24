@@ -26,6 +26,8 @@ class Player:
         void logic(Freq::Time t);
 
         Camera* camera() { return m_pCamera.get(); }
+
+        bool can_jump() const;
         
     private:
         
