@@ -3,7 +3,6 @@
 
 #include "Qor/State.h"
 #include "Qor/Input.h"
-#include "Qor/TileMap.h"
 #include "Qor/Camera.h"
 #include "Qor/Pipeline.h"
 #include "Qor/Mesh.h"
@@ -14,7 +13,7 @@
 #include "Qor/Sprite.h"
 #include "Qor/ViewModel.h"
 #include "Qor/Console.h"
-class PlayerInterface3D;
+#include "Player.h"
 
 class Qor;
 
@@ -61,7 +60,7 @@ class GameState:
         
     private:
 
-        void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
+        //void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
         
         Qor* m_pQor = nullptr;
         Input* m_pInput = nullptr;
@@ -72,11 +71,7 @@ class GameState:
         std::shared_ptr<Node> m_pOrthoRoot;
         std::shared_ptr<Node> m_pSkyboxRoot;
         //Interpreter* m_pInterpreter;
-        //std::shared_ptr<Node> m_pTemp;
-        //std::shared_ptr<Sprite> m_pSprite;
-        std::shared_ptr<PlayerInterface3D> m_pPlayer;
-        std::shared_ptr<Mesh> m_pPlayerMesh;
-        //std::shared_ptr<TileMap> m_pMap;
+        std::unique_ptr<Player> m_pPlayer;
         std::shared_ptr<Camera> m_pCamera;
         std::shared_ptr<Camera> m_pOrthoCamera;
         std::shared_ptr<Camera> m_pSkyboxCamera;
@@ -84,15 +79,11 @@ class GameState:
         std::shared_ptr<ViewModel> m_pViewModel;
         std::shared_ptr<Controller> m_pController;
         std::shared_ptr<Scene> m_pScene;
-        std::shared_ptr<ITexture> m_pDecal;
-        std::deque<std::shared_ptr<Mesh>> m_Decals;
 
         std::string m_Filename;
 
         unsigned m_Shader = ~0u;
         unsigned m_ColorShader = ~0u;
-        
-        static const unsigned MAX_DECALS;
 };
 
 #endif
