@@ -49,10 +49,6 @@ Player :: Player(
 
     m_WeaponStash.give_all();
     m_WeaponStash.next();
-    
-    const bool ads = false;
-    //auto gun = m_pQor->make<Mesh>("gun_tacticalsupershotgun.obj");
-    //auto gun = m_pQor->make<Mesh>("gun_bullpup.obj");
     refresh_weapon();
     
     m_pInterface = kit::init_shared<PlayerInterface3D>(
@@ -157,12 +153,11 @@ void Player :: logic(Freq::Time t)
         //    }
         //});
         //m_pCamera->add(snd);
-        //m_pViewModel->recoil(Freq::Time(50), Freq::Time(700)); // shotgun
-        m_pViewModel->recoil(Freq::Time(25), Freq::Time(50), 0.05f); // ump45
+        m_pViewModel->recoil(Freq::Time(50), m_WeaponStash.active()->spec()->delay(), 0.05f);
 
         for(int i=0; i<m_WeaponStash.active()->spec()->burst(); ++i)
         {
-            auto mag_var = (rand() % 1000) * 0.001f * 0.1f         * 0.0f; // ump has 0
+            auto mag_var = (rand() % 1000) * 0.001f * m_WeaponStash.active()->spec()->spread();
             auto ang_var = (rand() % 1000) * 0.001f;
             vec3 dir = glm::vec3(
                 cos(K_TAU * ang_var) * mag_var,

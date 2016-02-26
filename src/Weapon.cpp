@@ -13,7 +13,9 @@ WeaponSpecEntry :: WeaponSpecEntry(
     m_Sound(m_pConfig->at<string>("sound", string())),
     m_Slot(m_pConfig->at<int>("slot")),
     m_Bias(m_pConfig->at<int>("bias",0)),
-    m_Burst(m_pConfig->at<int>("burst",1))
+    m_Burst(m_pConfig->at<int>("burst",1)),
+    m_Spread(m_pConfig->at<double>("spread",0.0f)),
+    m_Delay(Freq::Time::seconds(m_pConfig->at<double>("delay",1.0f)))
 {
     auto m = m_pConfig->at<shared_ptr<Meta>>("pos", make_shared<Meta>(MetaFormat::JSON, "[0.0,0.0,0.0]"));
     m_ViewModelPos = glm::vec3(

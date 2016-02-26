@@ -2,6 +2,8 @@
 #define _WEAPON_H
 
 #include "Qor/kit/meta/meta.h"
+#include "Qor/Common.h"
+#include "Qor/kit/freq/freq.h"
 #include <glm/glm.hpp>
 
 class WeaponSpec;
@@ -24,6 +26,8 @@ class WeaponSpecEntry
         glm::vec3 viewmodel_pos() const { return m_ViewModelPos;}
         glm::vec3 viewmodel_zoomed_pos() const { return m_ViewModelZoomedPos;}
         int burst() const { return m_Burst; }
+        float spread() const { return m_Spread; }
+        Freq::Time delay() const { return m_Delay; }
         
     private:
         std::string m_Name;
@@ -34,6 +38,8 @@ class WeaponSpecEntry
         int m_Slot = 0;
         int m_Bias = 0;
         int m_Burst = 0;
+        float m_Spread = 0.0f;
+        Freq::Time m_Delay;
         glm::vec3 m_ViewModelPos;
         glm::vec3 m_ViewModelZoomedPos;
 };
