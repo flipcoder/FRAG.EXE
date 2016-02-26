@@ -243,7 +243,7 @@ bool Player :: can_jump() const
     auto pos = m_pPlayerMesh->position(Space::WORLD);
     auto jump_hit = m_pPhysics->first_hit(
         pos,
-        pos - 0.6f - glm::vec3(0.0f, 0.1f, 0.0f)
+        pos - glm::vec3(0.0f, 0.6f + 0.2f, 0.0f)
     );
     Node* jump_hit_node = std::get<0>(jump_hit);
     return jump_hit_node;

@@ -88,7 +88,6 @@ void GameState :: preload()
     //    m_pCamera
     //);
     
-    //m_pRoot->add(m_pQor->make<Mesh>("theDunes.obj"));
     auto scene = m_pQor->make<Scene>("test.json");
     m_pRoot->add(scene->root());
      

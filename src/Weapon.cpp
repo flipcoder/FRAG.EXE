@@ -79,7 +79,7 @@ bool WeaponStash :: next(int delta)
         delta = delta - kit::sign(delta); // this counts as one switch
     }
     
-    unsigned active_slot = m_pActive->spec()->slot();
+    int active_slot = m_pActive->spec()->slot();
     bool r = false;
     // flip through weapons in direction of delta
     while(delta)
@@ -90,7 +90,9 @@ bool WeaponStash :: next(int delta)
         {
             int i = 0;
             do{
-                active_slot = kit::clamp<int>(active_slot + dir, 0, 9);
+                active_slot = (active_slot + dir) % 10;
+                if(active_slot == -1)
+                    active_slot = 9;
                 ++i;
                 if(i>10) {
                     m_pActive = nullptr; // no weapons?
