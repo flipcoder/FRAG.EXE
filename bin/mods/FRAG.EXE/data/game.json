@@ -1,0 +1,33 @@
+{
+    "weapons": {
+        "glock": {
+            "slot": 2,
+            "model": "glock.obj",
+            "pos": [0.111, -0.168, -0.223],
+            "zoomed_pos": [0.0, -0.039, -0.282],
+            "sound": "shot.wav"
+        },
+        "shotgun": {
+            "slot": 3,
+            "model": "gun_tacticalsupershotgun.obj",
+            "pos": [0.0, -0.228, -0.385],
+            "zoomed_pos": [0.0, -0.15, -0.472],
+            "sound": "shotgun.wav",
+            "burst": 8
+        },
+        "ump45": {
+            "slot": 4,
+            "model": "ump45.obj",
+            "pos": [0.093, -0.288, -0.32],
+            "zoomed_pos": [0.0, -0.211, -0.407],
+            "sound": "shot.wav"
+        },
+        "sniper": {
+            "slot": 6,
+            "model": "gun_sniper1.obj",
+            "pos": [0.0355, -0.06, -0.188],
+            "zoomed_pos": [0.0, -0.0295, -0.1525],
+            "sound": "snipershot.wav"
+        }
+    }
+}

@@ -14,6 +14,7 @@
 #include "Qor/ViewModel.h"
 #include "Qor/Console.h"
 #include "Player.h"
+#include "GameSpec.h"
 
 class Qor;
 
@@ -80,6 +81,8 @@ class GameState:
         std::shared_ptr<Controller> m_pController;
         std::shared_ptr<Scene> m_pScene;
 
+        GameSpec m_GameSpec;
+        
         std::string m_Filename;
 
         unsigned m_Shader = ~0u;

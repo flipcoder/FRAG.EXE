@@ -28,7 +28,8 @@ GameState :: GameState(
     m_pSkyboxRoot(make_shared<Node>()),
     //m_pInterpreter(engine->interpreter()),
     //m_pScript(make_shared<Interpreter::Context>(engine->interpreter())),
-    m_pPipeline(engine->pipeline())
+    m_pPipeline(engine->pipeline()),
+    m_GameSpec("game.json", engine->resources())
 {
     m_Shader = m_pPipeline->load_shaders({"lit"});
 }
@@ -45,6 +46,7 @@ void GameState :: preload()
         m_pPhysics.get(),
         win,
         m_pQor,
+        &m_GameSpec,
         [&]{ return m_pConsole->input();}
     );
     

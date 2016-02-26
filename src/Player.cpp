@@ -14,6 +14,7 @@ Player :: Player(
     Physics* physics,
     Window* window,
     Qor* engine,
+    GameSpec* spec,
     std::function<bool()> lock_if
 ):
     m_pRoot(root),
@@ -21,7 +22,9 @@ Player :: Player(
     m_pCache(cache),
     m_pPhysics(physics),
     m_pWindow(window),
-    m_pQor(engine)
+    m_pQor(engine),
+    m_pGameSpec(spec),
+    m_WeaponStash(spec->weapons())
 {
     m_pPlayerMesh = make_shared<Mesh>();
     m_pPlayerMesh->set_box(Box(
@@ -43,27 +46,14 @@ Player :: Player(
         "decal_bullethole1.png"
     );
     m_pController = m_pQor->session()->profile(0)->controller();
+
+    m_WeaponStash.give_all();
+    m_WeaponStash.next();
     
     const bool ads = false;
     //auto gun = m_pQor->make<Mesh>("gun_tacticalsupershotgun.obj");
     //auto gun = m_pQor->make<Mesh>("gun_bullpup.obj");
-    auto gun = m_pQor->make<Mesh>("ump45.obj");
-    //auto gun = m_pQor->make<Mesh>("glock.obj");
-    m_pViewModel = make_shared<ViewModel>(m_pCamera, gun);
-    gun->disable_physics();
-    m_pRoot->add(m_pViewModel);
-    
-    m_pViewModel->model_pos(glm::vec3(
-        //0.111f, -0.168f, -0.223f //glock
-        //0.0f, -0.228f, -0.385f //shotgun
-        0.093, -0.288f, -0.32f //ump45
-    ));
-    m_pViewModel->zoomed_model_pos(glm::vec3(
-        //0.0f, -0.039f, -0.282f // glock
-        //0.0f, -0.15f, -0.472f // shotgun
-        0.0f, -0.211f, -0.407 //ump45
-    ));
-    m_pViewModel->reset_zoom();
+    refresh_weapon();
     
     m_pInterface = kit::init_shared<PlayerInterface3D>(
         m_pController,
@@ -115,8 +105,24 @@ void Player :: logic(Freq::Time t)
     if(m_pController->button("zoom").pressed_now())
         m_pViewModel->zoom(not m_pViewModel->zoomed());
     
-    //if(m_pController->button("next").pressed_now() ||
-    //   m_pController->button("previous").pressed_now())
+    if(m_pController->button("next").pressed_now()){
+        m_WeaponStash.next();
+        auto vm = m_pViewModel.get();
+        auto _this = this;
+        m_pViewModel->equip(false,[_this]{
+            _this->refresh_weapon();
+        });
+    }
+    
+    if(m_pController->button("previous").pressed_now()){
+        m_WeaponStash.next(-1);
+        auto vm = m_pViewModel.get();
+        auto _this = this;
+        m_pViewModel->equip(false,[_this]{
+            _this->refresh_weapon();
+        });
+    }
+    
     if(m_pController->button("reload").pressed_now())
     {
         //auto cache = m_pQor->resources();
@@ -134,7 +140,7 @@ void Player :: logic(Freq::Time t)
        m_pViewModel->equipped()
     ){
         //Sound::play(m_pCamera.get(), "shotgun.wav", m_pQor->resources());
-        Sound::play(m_pCamera.get(), "shot.wav", m_pQor->resources());
+        Sound::play(m_pCamera.get(), m_WeaponStash.active()->spec()->sound(), m_pQor->resources());
         
         //Sound::play(m_pCamera.get(), "pump.wav", m_pQor->resources());
         //auto snd = m_pQor->make<Sound>("pump.wav");
@@ -154,11 +160,10 @@ void Player :: logic(Freq::Time t)
         //m_pViewModel->recoil(Freq::Time(50), Freq::Time(700)); // shotgun
         m_pViewModel->recoil(Freq::Time(25), Freq::Time(50), 0.05f); // ump45
 
-        //for(int i=0; i<8; ++i)
-        int i = 0;
+        for(int i=0; i<m_WeaponStash.active()->spec()->burst(); ++i)
         {
             auto mag_var = (rand() % 1000) * 0.001f * 0.1f         * 0.0f; // ump has 0
-            auto ang_var = (rand() % 1000) * 0.001f                * 0.0f;
+            auto ang_var = (rand() % 1000) * 0.001f;
             vec3 dir = glm::vec3(
                 cos(K_TAU * ang_var) * mag_var,
                 sin(K_TAU * ang_var) * mag_var,
@@ -194,20 +199,21 @@ void Player :: logic(Freq::Time t)
     
     //m_pViewModel->position(m_pCamera->position(Space::WORLD));
 
-    //if(m_pInput->key(SDLK_DOWN))
-    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, -t.s(), 0.0f));
-    //else if(m_pInput->key(SDLK_UP))
-    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, t.s(), 0.0f));
-    //else if(m_pInput->key(SDLK_LEFT))
-    //    m_pViewModel->zoomed_model_move(glm::vec3(-t.s(), 0.0f, 0.0f));
-    //else if(m_pInput->key(SDLK_RIGHT))
-    //    m_pViewModel->zoomed_model_move(glm::vec3(t.s(), 0.0f, 0.0f));
-    //else if(m_pInput->key(SDLK_w))
-    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, t.s()));
-    //else if(m_pInput->key(SDLK_r))
-    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, -t.s()));
+    //auto input = m_pController->input();
+    //if(input->key(SDLK_DOWN))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, -t.s() * 0.5f, 0.0f));
+    //else if(input->key(SDLK_UP))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, t.s() * 0.5f, 0.0f));
+    //else if(input->key(SDLK_LEFT))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(-t.s() * 0.5f, 0.0f, 0.0f));
+    //else if(input->key(SDLK_RIGHT))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(t.s() * 0.5f, 0.0f, 0.0f));
+    //else if(input->key(SDLK_w))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, t.s() * 0.5f));
+    //else if(input->key(SDLK_r))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, -t.s() * 0.5f));
 
-    //LOGf("model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
+    //LOGf("model pos %s", Vector::to_string(m_pViewModel->model_pos()));
     //LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
 }
 
@@ -246,5 +252,26 @@ bool Player :: can_jump() const
     );
     Node* jump_hit_node = std::get<0>(jump_hit);
     return jump_hit_node;
+}
+
+void Player :: refresh_weapon()
+{
+    if(m_pViewModel)
+        m_pViewModel->detach();
+    
+    if(m_WeaponStash.active())
+    {
+        auto wpn = m_WeaponStash.active()->spec();
+        LOG(wpn->model());
+        auto gun = m_pQor->make<Mesh>(wpn->model());
+        m_pViewModel = make_shared<ViewModel>(m_pCamera, gun);
+        gun->disable_physics();
+        m_pRoot->add(m_pViewModel);
+        m_pViewModel->model_pos(wpn->viewmodel_pos());
+        m_pViewModel->zoomed_model_pos(wpn->viewmodel_zoomed_pos());
+        m_pViewModel->reset_zoom();
+        m_pViewModel->fast_equip(false);
+        m_pViewModel->equip(true);
+    }
 }
 

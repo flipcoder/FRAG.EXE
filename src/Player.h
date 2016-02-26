@@ -7,6 +7,8 @@
 #include "Qor/Mesh.h"
 #include "Qor/Input.h"
 #include "Qor/Window.h"
+#include "Weapon.h"
+#include "GameSpec.h"
 
 class Qor;
 
@@ -21,6 +23,7 @@ class Player:
             Physics* physics,
             Window* window,
             Qor* engine,
+            GameSpec* gamespec,
             std::function<bool()> lock_if = std::function<bool()>()
         );
         void logic(Freq::Time t);
@@ -32,6 +35,7 @@ class Player:
     private:
         
         void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
+        void refresh_weapon();
         
         Node* m_pRoot;
         std::shared_ptr<Mesh> m_pPlayerMesh;
@@ -44,6 +48,9 @@ class Player:
         Window* m_pWindow;
         Qor* m_pQor;
         std::function<bool()> m_LockIf;
+
+        GameSpec* m_pGameSpec;
+        WeaponStash m_WeaponStash;
 
         std::shared_ptr<ITexture> m_pDecal;
         std::deque<std::shared_ptr<Mesh>> m_Decals;
