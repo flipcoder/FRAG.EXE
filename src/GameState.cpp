@@ -5,6 +5,7 @@
 #include "Qor/ScreenFader.h"
 #include "Qor/Sound.h"
 #include "Qor/Sprite.h"
+#include "Qor/Particle.h"
 #include <glm/glm.hpp>
 #include <cstdlib>
 #include <chrono>
@@ -49,6 +50,14 @@ void GameState :: preload()
         &m_GameSpec,
         [&]{ return m_pConsole->input();}
     );
+
+    //auto l = make_shared<Light>();
+    //l->dist(5.0f);
+    //l->position(glm::vec3(0.0f, 2.0f, 0.0f));
+    //m_pRoot->add(l);
+
+    //auto particle = m_pQor->make<Particle>("particle.png");
+    //m_pRoot->add(particle);
     
     auto mus = m_pQor->make<Sound>("cave.ogg");
     m_pRoot->add(mus);
@@ -88,7 +97,8 @@ void GameState :: preload()
     //    m_pCamera
     //);
     
-    auto scene = m_pQor->make<Scene>("test.json");
+    //m_pRoot->add(m_pQor->make<Mesh>("apartment_scene.obj"));
+    auto scene = m_pQor->make<Scene>("thehall.json");
     m_pRoot->add(scene->root());
      
     // TODO: ensure filename contains only valid filename chars
@@ -182,6 +192,8 @@ void GameState :: logic(Freq::Time t)
     m_pSkyboxRoot->logic(t);
     m_pOrthoRoot->logic(t);
     m_pRoot->logic(t);
+
+    //LOG(Matrix::to_string(*m_pSkyboxCamera->matrix(Space::WORLD)));
 }
 
 void GameState :: render() const
