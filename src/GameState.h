@@ -82,8 +82,6 @@ class GameState:
         std::shared_ptr<Scene> m_pScene;
 
         GameSpec m_GameSpec;
-        
-        std::string m_Filename;
 
         unsigned m_Shader = ~0u;
         unsigned m_ColorShader = ~0u;

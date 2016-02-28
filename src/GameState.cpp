@@ -50,6 +50,7 @@ void GameState :: preload()
         &m_GameSpec,
         [&]{ return m_pConsole->input();}
     );
+    m_pCamera = m_pPlayer->camera();
 
     //auto l = make_shared<Light>();
     //l->dist(5.0f);
@@ -70,9 +71,9 @@ void GameState :: preload()
     m_pSkyboxCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pSkyboxCamera->perspective();
     m_pSkyboxRoot->add(m_pQor->make<Mesh>("skybox1.obj"));
-    m_pSkyboxRoot->add(m_pSkyboxCamera);
     m_pSkyboxCamera->track(m_pCamera);
     m_pSkyboxCamera->mode(Tracker::ORIENT);
+    m_pSkyboxRoot->add(m_pSkyboxCamera);
     
     auto tex = m_pQor->resources()->cache_cast<Texture>("crosshair2.png");
     auto crosshair = make_shared<Mesh>(
@@ -98,7 +99,7 @@ void GameState :: preload()
     //);
     
     //m_pRoot->add(m_pQor->make<Mesh>("apartment_scene.obj"));
-    auto scene = m_pQor->make<Scene>("thehall.json");
+    auto scene = m_pQor->make<Scene>("room.json");
     m_pRoot->add(scene->root());
      
     // TODO: ensure filename contains only valid filename chars
@@ -192,8 +193,6 @@ void GameState :: logic(Freq::Time t)
     m_pSkyboxRoot->logic(t);
     m_pOrthoRoot->logic(t);
     m_pRoot->logic(t);
-
-    //LOG(Matrix::to_string(*m_pSkyboxCamera->matrix(Space::WORLD)));
 }
 
 void GameState :: render() const
@@ -212,7 +211,7 @@ void GameState :: render() const
     m_pPipeline->blend(false);
     m_pPipeline->render(
         m_pRoot.get(),
-        m_pPlayer->camera(),
+        m_pCamera.get(),
         nullptr,
         Pipeline::LIGHTS | Pipeline::NO_CLEAR
     );

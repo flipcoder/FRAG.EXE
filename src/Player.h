@@ -28,7 +28,7 @@ class Player:
         );
         void logic(Freq::Time t);
 
-        Camera* camera() { return m_pCamera.get(); }
+        std::shared_ptr<Camera> camera() { return m_pCamera; }
 
         bool can_jump() const;
         
