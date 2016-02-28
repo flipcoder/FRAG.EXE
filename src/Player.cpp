@@ -100,35 +100,59 @@ void Player :: logic(Freq::Time t)
     
     if(m_pController->button("zoom").pressed_now())
         m_pViewModel->zoom(not m_pViewModel->zoomed());
+
+    for(int i=0; i<9; ++i)
+    {
+        if(not m_pViewModel->equipping()){
+            if(m_pController->button(string("slot")+to_string(i))){
+                if(m_WeaponStash.slot(i)){
+                    auto vm = m_pViewModel.get();
+                    auto _this = this;
+                    m_pViewModel->equip(false,[_this]{
+                        _this->refresh_weapon();
+                    });
+                    break;
+                }
+            }
+        }
+    }
     
     if(m_pController->button("next").pressed_now()){
-        m_WeaponStash.next();
-        auto vm = m_pViewModel.get();
-        auto _this = this;
-        m_pViewModel->equip(false,[_this]{
-            _this->refresh_weapon();
-        });
+        if(not m_pViewModel->equipping()){
+            if(m_WeaponStash.next()){
+                auto vm = m_pViewModel.get();
+                auto _this = this;
+                m_pViewModel->equip(false,[_this]{
+                    _this->refresh_weapon();
+                });
+            }
+        }
     }
     
     if(m_pController->button("previous").pressed_now()){
-        m_WeaponStash.next(-1);
-        auto vm = m_pViewModel.get();
-        auto _this = this;
-        m_pViewModel->equip(false,[_this]{
-            _this->refresh_weapon();
-        });
+        if(not m_pViewModel->equipping()){
+            if(m_WeaponStash.next(-1)){
+                auto vm = m_pViewModel.get();
+                auto _this = this;
+                m_pViewModel->equip(false,[_this]{
+                    _this->refresh_weapon();
+                });
+            }
+        }
     }
     
     if(m_pController->button("reload").pressed_now())
     {
-        //auto cache = m_pQor->resources();
-        //auto camera = m_pCamera.get();
-        auto vm = m_pViewModel.get();
-        m_pViewModel->equip_time(Freq::Time(250));
-        Sound::play(m_pCamera.get(), "reload.wav", m_pQor->resources());
-        m_pViewModel->equip(false, [vm]{
-            vm->equip(true);
-        });
+        if(not m_pViewModel->equipping()){
+            //auto cache = m_pQor->resources();
+            //auto camera = m_pCamera.get();
+            auto vm = m_pViewModel.get();
+            m_pViewModel->equip_time(Freq::Time(250));
+            Sound::play(m_pCamera.get(), "reload.wav", m_pQor->resources());
+            m_pViewModel->equip(false, [vm]{
+                vm->equip(true);
+            });
+        }
     }
 
     if(m_pController->button("fire") &&

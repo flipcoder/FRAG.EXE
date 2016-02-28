@@ -105,6 +105,7 @@ bool WeaponStash :: next(int delta)
                 m_pActive = &m_Slots[active_slot][0];
             else
                 m_pActive = &m_Slots[active_slot][m_Slots[active_slot].size()-1];
+            r = true;
         }
         delta = delta - dir; // delta itr goes towards 0
     }
@@ -126,5 +127,16 @@ Weapon* WeaponStash :: next_in_slot(Weapon* active, int dir)
     //}catch(const std::out_of_range&){}
     // no more weapons in slot, return nullptr
     return nullptr;
+}
+
+bool WeaponStash :: slot(int num)
+{
+    if(num == m_pActive->spec()->slot())
+        return false; // TODO: next_in_slot w/ wrapping
+    try{
+        m_pActive = &m_Slots[num].at(0);
+        return true;
+    }catch(const out_of_range&){}
+    return false;
 }
 

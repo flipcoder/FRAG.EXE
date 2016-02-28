@@ -30,7 +30,17 @@
                 "jump",
                 "select"
             ],
-            "a": "crouch"
+            "a": "crouch",
+            "1": "slot1",
+            "2": "slot2",
+            "3": "slot3",
+            "4": "slot4",
+            "5": "slot5",
+            "6": "slot6",
+            "7": "slot7",
+            "8": "slot8",
+            "9": "slot9",
+            "0": "slot0"
         }
     }
 }

@@ -85,6 +85,7 @@ class WeaponStash
         bool give(WeaponSpecEntry* spec);
 
         bool next(int delta=1);
+        bool slot(int num);
         Weapon* next_in_slot(Weapon* active, int dir);
 
         Weapon* active() { return m_pActive; }
