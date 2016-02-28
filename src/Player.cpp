@@ -281,7 +281,6 @@ void Player :: refresh_weapon()
     if(m_WeaponStash.active())
     {
         auto wpn = m_WeaponStash.active()->spec();
-        LOG(wpn->model());
         auto gun = m_pQor->make<Mesh>(wpn->model());
         m_pViewModel = make_shared<ViewModel>(m_pCamera, gun);
         gun->disable_physics();

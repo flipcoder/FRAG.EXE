@@ -99,8 +99,13 @@ void GameState :: preload()
     //);
     
     //m_pRoot->add(m_pQor->make<Mesh>("apartment_scene.obj"));
-    auto scene = m_pQor->make<Scene>("room.json");
-    m_pRoot->add(scene->root());
+    string map = m_pQor->args().value_or("map","test.json");
+    if(Filesystem::getExtension(map) == "json"){
+        auto scene = m_pQor->make<Scene>(map);
+        m_pRoot->add(scene->root());
+    }else{
+        m_pRoot->add(m_pQor->make<Mesh>(map));
+    }
      
     // TODO: ensure filename contains only valid filename chars
     //m_pScript->execute_file("mods/"+ m_Filename +"/__init__.py");
@@ -126,7 +131,7 @@ void GameState :: enter()
             s->play();
         }
     }, Node::Each::RECURSIVE);
-    
+
     //m_pPlayer = kit::init_shared<PlayerInterface3D>(
     //    m_pController,
     //    m_pCamera,
