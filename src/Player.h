@@ -53,6 +53,7 @@ class Player:
         WeaponStash m_WeaponStash;
 
         std::shared_ptr<ITexture> m_pDecal;
+        std::shared_ptr<ITexture> m_pSpark;
         std::deque<std::shared_ptr<Mesh>> m_Decals;
         static const unsigned MAX_DECALS;
 

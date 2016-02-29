@@ -42,9 +42,8 @@ Player :: Player(
     m_pPlayerMesh->add(m_pCamera);
     m_pCamera->position(vec3(0.0f, 0.6f, 0.0f));
     m_pRoot->add(m_pPlayerMesh);
-    m_pDecal = cache->cache_cast<ITexture>(
-        "decal_bullethole1.png"
-    );
+    m_pDecal = cache->cache_cast<ITexture>("decal_bullethole1.png");
+    m_pSpark = cache->cache_cast<ITexture>("spark.png");
     m_pController = m_pQor->session()->profile(0)->controller();
 
     m_WeaponStash.give_all();
@@ -106,6 +105,7 @@ void Player :: logic(Freq::Time t)
         if(not m_pViewModel->equipping()){
             if(m_pController->button(string("slot")+to_string(i))){
                 if(m_WeaponStash.slot(i)){
+                    m_pViewModel->fast_zoom(false);
                     auto vm = m_pViewModel.get();
                     auto _this = this;
                     m_pViewModel->equip(false,[_this]{
@@ -118,8 +118,9 @@ void Player :: logic(Freq::Time t)
     }
     
     if(m_pController->button("next").pressed_now()){
-        if(not m_pViewModel->equipping()){
+        if(m_pViewModel->idle()){
             if(m_WeaponStash.next()){
+                m_pViewModel->fast_zoom(false);
                 auto vm = m_pViewModel.get();
                 auto _this = this;
                 m_pViewModel->equip(false,[_this]{
@@ -130,8 +131,9 @@ void Player :: logic(Freq::Time t)
     }
     
     if(m_pController->button("previous").pressed_now()){
-        if(not m_pViewModel->equipping()){
+        if(m_pViewModel->idle()){
             if(m_WeaponStash.next(-1)){
+                m_pViewModel->fast_zoom(false);
                 auto vm = m_pViewModel.get();
                 auto _this = this;
                 m_pViewModel->equip(false,[_this]{
@@ -143,9 +145,10 @@ void Player :: logic(Freq::Time t)
     
     if(m_pController->button("reload").pressed_now())
     {
-        if(not m_pViewModel->equipping()){
+        if(m_pViewModel->idle() && m_pViewModel->equipped()){
             //auto cache = m_pQor->resources();
             //auto camera = m_pCamera.get();
+            m_pViewModel->fast_zoom(false);
             auto vm = m_pViewModel.get();
             m_pViewModel->equip_time(Freq::Time(250));
             Sound::play(m_pCamera.get(), "reload.wav", m_pQor->resources());
@@ -218,22 +221,22 @@ void Player :: logic(Freq::Time t)
     
     //m_pViewModel->position(m_pCamera->position(Space::WORLD));
 
-    //auto input = m_pController->input();
-    //if(input->key(SDLK_DOWN))
-    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, -t.s() * 0.5f, 0.0f));
-    //else if(input->key(SDLK_UP))
-    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, t.s() * 0.5f, 0.0f));
-    //else if(input->key(SDLK_LEFT))
-    //    m_pViewModel->zoomed_model_move(glm::vec3(-t.s() * 0.5f, 0.0f, 0.0f));
-    //else if(input->key(SDLK_RIGHT))
-    //    m_pViewModel->zoomed_model_move(glm::vec3(t.s() * 0.5f, 0.0f, 0.0f));
-    //else if(input->key(SDLK_w))
-    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, t.s() * 0.5f));
-    //else if(input->key(SDLK_r))
-    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, -t.s() * 0.5f));
+    auto input = m_pController->input();
+    if(input->key(SDLK_DOWN))
+        m_pViewModel->model_move(glm::vec3(0.0f, -t.s() * 0.1f, 0.0f));
+    else if(input->key(SDLK_UP))
+        m_pViewModel->model_move(glm::vec3(0.0f, t.s() * 0.1f, 0.0f));
+    else if(input->key(SDLK_LEFT))
+        m_pViewModel->model_move(glm::vec3(-t.s() * 0.1f, 0.0f, 0.0f));
+    else if(input->key(SDLK_RIGHT))
+        m_pViewModel->model_move(glm::vec3(t.s() * 0.1f, 0.0f, 0.0f));
+    else if(input->key(SDLK_w))
+        m_pViewModel->model_move(glm::vec3(0.0f, 0.0f, t.s() * 0.1f));
+    else if(input->key(SDLK_r))
+        m_pViewModel->model_move(glm::vec3(0.0f, 0.0f, -t.s() * 0.1f));
 
-    //LOGf("model pos %s", Vector::to_string(m_pViewModel->model_pos()));
-    //LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
+    LOGf("model pos %s", Vector::to_string(m_pViewModel->model_pos()));
+    LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
 }
 
 void Player :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset)
@@ -260,6 +263,26 @@ void Player :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float of
         m_Decals.pop_front();
     }
     m_pRoot->add(m);
+    
+    // spark
+    auto m2 = make_shared<Mesh>(make_shared<MeshGeometry>(Prefab::quad(
+        glm::vec2(decal_scale/2.0f, decal_scale/2.0f),
+        glm::vec2(-decal_scale/2.0f, -decal_scale/2.0f)
+    )));
+    m2->add_modifier(make_shared<Wrap>(Prefab::quad_wrap()));
+    m2->material(make_shared<MeshMaterial>(m_pSpark));
+    *m2->matrix() = *m->matrix();
+    m2->move(normal * (0.01f + offset));
+    m2->pend();
+    m_pRoot->add(m2);
+    
+    auto timer = make_shared<Freq::Timeline>();
+    auto m2p = m2.get();
+    m2->on_tick.connect([m2p, timer](Freq::Time t){
+        timer->logic(t);
+        if(timer->elapsed(Freq::Time::ms(50)))
+            m2p->detach();
+    });
 }
 
 bool Player :: can_jump() const
