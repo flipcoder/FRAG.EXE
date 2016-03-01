@@ -6,7 +6,7 @@
             "model": "glock.obj",
             "pos": [0.111, -0.168, -0.223],
             "zoomed_pos": [0.0, -0.039, -0.282],
-            "sound": "shot.wav",
+            "sound": "shot2.wav",
             "delay": 0.2
         },
         "shotgun": {
@@ -26,7 +26,7 @@
             "model": "gun_ump45s.obj",
             "pos": [0.101, -0.2215, -0.295],
             "zoomed_pos": [0.0, -0.1557, -0.2559],
-            "sound": "shot2.wav",
+            "sound": "shot.wav",
             "delay": 0.025
         },
         "grenadelauncher": {
@@ -35,7 +35,7 @@
             "projectile": "grenade.obj",
             "model": "gun_grenadelauncher.obj",
             "pos": [0.0355, -0.06, -0.188],
-            "zoomed_pos": [0.0, -0.0295, -0.1525],
+            "zoomed_pos": [0.0, -0.0474, -0.1525],
             "sound": "grenadelauncher.wav",
             "delay": 0.7
         },

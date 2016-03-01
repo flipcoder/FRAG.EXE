@@ -10,6 +10,7 @@ WeaponSpecEntry :: WeaponSpecEntry(
     m_pConfig(cfg),
     m_pSpec(spec),
     m_Model(m_pConfig->at<string>("model", string())),
+    m_Projectile(m_pConfig->at<string>("projectile", string())),
     m_Sound(m_pConfig->at<string>("sound", string())),
     m_Slot(m_pConfig->at<int>("slot")),
     m_Bias(m_pConfig->at<int>("bias",0)),

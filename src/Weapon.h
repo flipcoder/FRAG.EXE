@@ -22,6 +22,7 @@ class WeaponSpecEntry
         int slot() const { return m_Slot; }
         WeaponSpec* spec() const { return m_pSpec; }
         std::string model() const { return m_Model; }
+        std::string projectile() const { return m_Projectile; }
         std::string sound() const { return m_Sound; }
         glm::vec3 viewmodel_pos() const { return m_ViewModelPos;}
         glm::vec3 viewmodel_zoomed_pos() const { return m_ViewModelZoomedPos;}
@@ -34,6 +35,7 @@ class WeaponSpecEntry
         std::shared_ptr<Meta> m_pConfig;
         WeaponSpec* m_pSpec;
         std::string m_Model;
+        std::string m_Projectile;
         std::string m_Sound;
         int m_Slot = 0;
         int m_Bias = 0;

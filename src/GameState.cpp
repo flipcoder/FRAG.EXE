@@ -59,6 +59,11 @@ void GameState :: preload()
 
     //auto particle = m_pQor->make<Particle>("particle.png");
     //m_pRoot->add(particle);
+
+    auto player = m_pQor->make<Mesh>("player.obj");
+    player->add_tag("player");
+    player->position(vec3(0.0f, 1.0f, 0.0f));
+    m_pRoot->add(player);
     
     auto mus = m_pQor->make<Sound>("cave.ogg");
     m_pRoot->add(mus);

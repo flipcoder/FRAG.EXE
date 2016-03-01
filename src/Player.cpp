@@ -182,32 +182,49 @@ void Player :: logic(Freq::Time t)
         //m_pCamera->add(snd);
         m_pViewModel->recoil(Freq::Time(50), m_WeaponStash.active()->spec()->delay(), 0.05f);
 
-        for(int i=0; i<m_WeaponStash.active()->spec()->burst(); ++i)
+        bool player_hit = false;
+        if(m_WeaponStash.active()->spec()->projectile().empty())
         {
-            auto mag_var = (rand() % 1000) * 0.001f * m_WeaponStash.active()->spec()->spread();
-            auto ang_var = (rand() % 1000) * 0.001f;
-            vec3 dir = glm::vec3(
-                cos(K_TAU * ang_var) * mag_var,
-                sin(K_TAU * ang_var) * mag_var,
-                -1.0f
-            );
-            dir = glm::normalize(dir);
-            
-            auto hit = m_pPhysics->first_hit(
-                m_pCamera->position(Space::WORLD),
-                m_pCamera->position(Space::WORLD) +
-                    m_pCamera->orient_to_world(dir) * 100.0f
-            );
-            if(std::get<0>(hit))
+            for(int i=0; i<m_WeaponStash.active()->spec()->burst(); ++i)
             {
-                decal(
-                    std::get<1>(hit),
-                    std::get<2>(hit),
-                    Matrix::up(*m_pCamera->matrix(Space::WORLD)),
-                    i * 0.0001
+                auto mag_var = (rand() % 1000) * 0.001f * m_WeaponStash.active()->spec()->spread();
+                auto ang_var = (rand() % 1000) * 0.001f;
+                vec3 dir = glm::vec3(
+                    cos(K_TAU * ang_var) * mag_var,
+                    sin(K_TAU * ang_var) * mag_var,
+                    -1.0f
                 );
+                dir = glm::normalize(dir);
+                
+                auto hit = m_pPhysics->first_hit(
+                    m_pCamera->position(Space::WORLD),
+                    m_pCamera->position(Space::WORLD) +
+                        m_pCamera->orient_to_world(dir) * 100.0f
+                );
+                Node* n = std::get<0>(hit);
+                if(n)
+                {
+                    //if(not n->hook("#player",Node::Hook::REVERSE).empty())
+                    if(n->parent()->has_tag("player"))
+                        player_hit = true;
+                    
+                    decal(
+                        std::get<1>(hit),
+                        std::get<2>(hit),
+                        Matrix::up(*m_pCamera->matrix(Space::WORLD)),
+                        i * 0.0001
+                    );
+                }
             }
+            if(player_hit)
+                Sound::play(m_pCamera.get(), "hit.wav", m_pQor->resources());
         }
+        else
+        {
+            // projectile
+            
+        }
+        
     }
 
     //LOGf("pos: %s, %s", t.s() % m_pPlayerMesh->position().y);
@@ -223,17 +240,17 @@ void Player :: logic(Freq::Time t)
 
     auto input = m_pController->input();
     if(input->key(SDLK_DOWN))
-        m_pViewModel->model_move(glm::vec3(0.0f, -t.s() * 0.1f, 0.0f));
+        m_pViewModel->zoomed_model_move(glm::vec3(0.0f, -t.s() * 0.1f, 0.0f));
     else if(input->key(SDLK_UP))
-        m_pViewModel->model_move(glm::vec3(0.0f, t.s() * 0.1f, 0.0f));
+        m_pViewModel->zoomed_model_move(glm::vec3(0.0f, t.s() * 0.1f, 0.0f));
     else if(input->key(SDLK_LEFT))
-        m_pViewModel->model_move(glm::vec3(-t.s() * 0.1f, 0.0f, 0.0f));
+        m_pViewModel->zoomed_model_move(glm::vec3(-t.s() * 0.1f, 0.0f, 0.0f));
     else if(input->key(SDLK_RIGHT))
-        m_pViewModel->model_move(glm::vec3(t.s() * 0.1f, 0.0f, 0.0f));
+        m_pViewModel->zoomed_model_move(glm::vec3(t.s() * 0.1f, 0.0f, 0.0f));
     else if(input->key(SDLK_w))
-        m_pViewModel->model_move(glm::vec3(0.0f, 0.0f, t.s() * 0.1f));
+        m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, t.s() * 0.1f));
     else if(input->key(SDLK_r))
-        m_pViewModel->model_move(glm::vec3(0.0f, 0.0f, -t.s() * 0.1f));
+        m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, -t.s() * 0.1f));
 
     LOGf("model pos %s", Vector::to_string(m_pViewModel->model_pos()));
     LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
