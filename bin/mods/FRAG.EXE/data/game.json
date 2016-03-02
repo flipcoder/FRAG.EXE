@@ -7,7 +7,8 @@
             "pos": [0.111, -0.168, -0.223],
             "zoomed_pos": [0.0, -0.039, -0.282],
             "sound": "shot2.wav",
-            "delay": 0.2
+            "delay": 0.2,
+            "ammo_type": "pistolbullets"
         },
         "shotgun": {
             "name": "Tactical Shotgun",
@@ -18,7 +19,8 @@
             "sound": "shotgun.wav",
             "burst": 8,
             "spread": 0.1,
-            "delay": 0.7
+            "delay": 0.7,
+            "ammo_type": "shotgunshells"
         },
         "ump45": {
             "name": "Silenced UMP-45",
@@ -27,7 +29,8 @@
             "pos": [0.101, -0.2215, -0.295],
             "zoomed_pos": [0.0, -0.1557, -0.2559],
             "sound": "shot.wav",
-            "delay": 0.025
+            "delay": 0.025,
+            "ammo_type": "ump45bullets"
         },
         "grenadelauncher": {
             "name": "Grenade Launcher",
@@ -37,7 +40,8 @@
             "pos": [0.0355, -0.06, -0.188],
             "zoomed_pos": [0.0, -0.0474, -0.1525],
             "sound": "grenadelauncher.wav",
-            "delay": 0.7
+            "delay": 0.7,
+            "ammo_type": "grenades"
         },
         "sniper": {
             "name": "Sniper Rifle",
@@ -46,7 +50,18 @@
             "pos": [0.0355, -0.06, -0.188],
             "zoomed_pos": [0.0, -0.0295, -0.1525],
             "sound": "snipershot.wav",
-            "delay": 0.7
+            "delay": 0.7,
+            "ammo_type": "sniperbullets"
         }
+    },
+    "pickups": {
+        "pistolbullets": [
+            "ammo_type": "pistolbullets",
+            "quantity": "100%"
+        ],
+        "medkit": [
+            "type": "health",
+            "quantity": "100%"
+        ]
     }
 }

@@ -222,7 +222,13 @@ void Player :: logic(Freq::Time t)
         else
         {
             // projectile
-            
+            auto m = m_pQor->make<Mesh>("projectile_grenade.obj");
+            //m->set_physics(Node::DYNAMIC);
+            //m->set_physics_shape(Node::HULL);
+            //m->mass(1.0f);
+            //m_pPhysics->generate(m.get());
+            m_pViewModel->add(m);
+            m->collapse();
         }
         
     }
