@@ -10,7 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd H:\Work\qorAssets\textures\wood_pressed_smooth.png
+map_Kd H:\Work\qorAssets\textures\gun_metal_turbulent.png
 
 newmtl Material_chrome_gradient_onesided.png
 Ns 96.078431
@@ -34,7 +34,7 @@ d 1.000000
 illum 2
 map_Kd H:\Work\qorAssets\textures\gun_metal_dark.png
 
-newmtl Material_gun_metal_turbulent.png
+newmtl Material_wood_pressed_smooth.png
 Ns 96.078431
 Ka 1.000000 1.000000 1.000000
 Kd 0.640000 0.640000 0.640000
@@ -43,4 +43,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd H:\Work\qorAssets\textures\gun_metal_turbulent.png
+map_Kd H:\Work\qorAssets\textures\wood_pressed_smooth.png
