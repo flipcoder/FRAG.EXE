@@ -53,25 +53,46 @@ if the mode is CTF.
 The following events can be used in scripting to change map state when things occur:
 
 - use - When a player presses the use key on a surface.
-- start - When the map/round starts.
-- enter - When a player is touching a surface.
-- leave - When a player stops touching a surface.
+- enter - When the map/round starts.
+- touch - When a player is touching a surface.
+- untouch - When a player stops touching a surface.
 - damage - When a player does damage to a surface.
 - tick - Every tick
 
 ## Scripting
 
+The map script first executes during the loading screen.  You set up events here
+and associate them with functions.  The first event you'll want to associate is
+enter().  This occurs *after* the loading screen during the first tick.
+
+```
+def enter(info):
+    # this stuff happens after loading screen
+    # ...
+    
+# this stuff happens during loading screen
+qor.on_enter(enter)
+```
+
 Node names, properties, and events are all accessible through scripting.
 
-If you want something to happen when you press a switch, you need to
+If you want something to happen when you press a switch, you need to set up
+those events with every switch.  You can find all the switches on a map by
+*hooking*.
 
 ```
 def activate(player, switch):
     # ...
 
-def enter():
-    switches = qor.hook("#switch") # get all nodes tagged as switches
-    for s in switches:
-        s.on_event("use", lambda player: activate(player, s))
+switches = qor.hook("#switch") # get all nodes tagged as switches
+for s in switches:
+    s.on_event("use", lambda player: activate(player, s))
 ```
+
+The concept of a switch, as far as FRAG is concerned, is specific to your map.
+
+You may consider reading through
+[QorBook](https://github.com/flipcoder/qor/blob/master/QorBook.md)
+to learn more about scripting.  Specifically the sections about different node
+types since these are what you will be dealing with.
 
