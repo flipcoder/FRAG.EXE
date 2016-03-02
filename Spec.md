@@ -59,19 +59,19 @@ The following events can be used in scripting to change map state when things oc
 - damage - When a player does damage to a surface.
 - tick - Every tick
 
-## Scripting and Events
+## Scripting
 
 Node names, properties, and events are all accessible through scripting.
 
 If you want something to happen when you press a switch, you need to
 
 ```
-def activate(switch):
+def activate(player, switch):
     # ...
 
 def enter():
     switches = qor.hook("#switch") # get all nodes tagged as switches
     for s in switches:
-        s.on_event("use", lambda _: activate(s))
+        s.on_event("use", lambda player: activate(player, s))
 ```
 
