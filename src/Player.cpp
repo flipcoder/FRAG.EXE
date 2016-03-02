@@ -2,6 +2,7 @@
 #include "Qor/Sound.h"
 #include "Qor/Qor.h"
 #include "Qor/Physics.h"
+#include "Qor/Particle.h"
 using namespace std;
 using namespace glm;
 
@@ -31,7 +32,7 @@ Player :: Player(
         vec3(-0.2f, -0.6f, -0.2f),
         vec3(0.2f, 0.6f, 0.2f)
     ));
-    m_pPlayerMesh->disable_physics();
+    //m_pPlayerMesh->disable_physics();
     m_pPlayerMesh->set_physics(Node::Physics::DYNAMIC);
     m_pPlayerMesh->set_physics_shape(Node::CAPSULE);
     m_pPlayerMesh->friction(0.0f);
@@ -185,6 +186,11 @@ void Player :: logic(Freq::Time t)
         bool player_hit = false;
         if(m_WeaponStash.active()->spec()->projectile().empty())
         {
+            //auto p = m_pQor->make<Particle>("muzzleflash1.png");
+            //m_pViewModel->add(p);
+            //p->move(vec3(0.0f, 0.0f, -1.0f));
+            //p->collapse();
+            
             for(int i=0; i<m_WeaponStash.active()->spec()->burst(); ++i)
             {
                 auto mag_var = (rand() % 1000) * 0.001f * m_WeaponStash.active()->spec()->spread();
@@ -244,22 +250,22 @@ void Player :: logic(Freq::Time t)
     
     //m_pViewModel->position(m_pCamera->position(Space::WORLD));
 
-    auto input = m_pController->input();
-    if(input->key(SDLK_DOWN))
-        m_pViewModel->zoomed_model_move(glm::vec3(0.0f, -t.s() * 0.1f, 0.0f));
-    else if(input->key(SDLK_UP))
-        m_pViewModel->zoomed_model_move(glm::vec3(0.0f, t.s() * 0.1f, 0.0f));
-    else if(input->key(SDLK_LEFT))
-        m_pViewModel->zoomed_model_move(glm::vec3(-t.s() * 0.1f, 0.0f, 0.0f));
-    else if(input->key(SDLK_RIGHT))
-        m_pViewModel->zoomed_model_move(glm::vec3(t.s() * 0.1f, 0.0f, 0.0f));
-    else if(input->key(SDLK_w))
-        m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, t.s() * 0.1f));
-    else if(input->key(SDLK_r))
-        m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, -t.s() * 0.1f));
+    //auto input = m_pController->input();
+    //if(input->key(SDLK_DOWN))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, -t.s() * 0.1f, 0.0f));
+    //else if(input->key(SDLK_UP))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, t.s() * 0.1f, 0.0f));
+    //else if(input->key(SDLK_LEFT))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(-t.s() * 0.1f, 0.0f, 0.0f));
+    //else if(input->key(SDLK_RIGHT))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(t.s() * 0.1f, 0.0f, 0.0f));
+    //else if(input->key(SDLK_w))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, t.s() * 0.1f));
+    //else if(input->key(SDLK_r))
+    //    m_pViewModel->zoomed_model_move(glm::vec3(0.0f, 0.0f, -t.s() * 0.1f));
 
-    LOGf("model pos %s", Vector::to_string(m_pViewModel->model_pos()));
-    LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
+    //LOGf("model pos %s", Vector::to_string(m_pViewModel->model_pos()));
+    //LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
 }
 
 void Player :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset)

@@ -55,13 +55,14 @@
         }
     },
     "pickups": {
-        "pistolbullets": [
+        "pistolbullets": {
+            "type": "ammo",
             "ammo_type": "pistolbullets",
             "quantity": "100%"
-        ],
-        "medkit": [
+        },
+        "medkit": {
             "type": "health",
             "quantity": "100%"
-        ]
+        }
     }
 }
