@@ -70,6 +70,7 @@ Player :: Player(
         pmesh_body->setActivationState(DISABLE_DEACTIVATION);
         pmesh_body->setAngularFactor(btVector3(0,0,0));
         pmesh_body->setCcdMotionThreshold(1.0f);
+        //pmesh_body->setGravity();
         //pmesh_body->setCcdSweptSphereRadius(0.25f);
         //pmesh_body->setRestitution(0.0f);
         //pmesh_body->setDamping(0.0f, 0.0f);
@@ -95,6 +96,12 @@ Player :: Player(
 
 void Player :: logic(Freq::Time t)
 {
+    auto pmesh = m_pPlayerMesh.get();
+    auto pmesh_body = (btRigidBody*)pmesh->body()->body();
+    pmesh_body->applyCentralForce(
+        Physics::toBulletVector(glm::vec3(0.0f, -31.0f * pmesh->mass(), 0.0f))
+    );
+    
     if(m_LockIf && m_LockIf())
         return;
     
@@ -229,12 +236,12 @@ void Player :: logic(Freq::Time t)
         {
             // projectile
             auto m = m_pQor->make<Mesh>("projectile_grenade.obj");
-            //m->set_physics(Node::DYNAMIC);
-            //m->set_physics_shape(Node::HULL);
-            //m->mass(1.0f);
-            //m_pPhysics->generate(m.get());
+            m->set_physics(Node::DYNAMIC);
+            m->set_physics_shape(Node::HULL);
+            m->mass(1.0f);
             m_pViewModel->add(m);
             m->collapse();
+            m_pPhysics->generate(m.get());
         }
         
     }

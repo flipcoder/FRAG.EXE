@@ -71,7 +71,8 @@ class GameState:
         std::shared_ptr<Node> m_pRoot;
         std::shared_ptr<Node> m_pOrthoRoot;
         std::shared_ptr<Node> m_pSkyboxRoot;
-        //Interpreter* m_pInterpreter;
+        Interpreter* m_pInterpreter;
+        std::shared_ptr<Interpreter::Context> m_pScript;
         std::unique_ptr<Player> m_pPlayer;
         std::shared_ptr<Camera> m_pCamera;
         std::shared_ptr<Camera> m_pOrthoCamera;

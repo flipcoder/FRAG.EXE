@@ -27,8 +27,8 @@ GameState :: GameState(
     m_pRoot(make_shared<Node>()),
     m_pOrthoRoot(make_shared<Node>()),
     m_pSkyboxRoot(make_shared<Node>()),
-    //m_pInterpreter(engine->interpreter()),
-    //m_pScript(make_shared<Interpreter::Context>(engine->interpreter())),
+    m_pInterpreter(engine->interpreter()),
+    m_pScript(make_shared<Interpreter::Context>(engine->interpreter())),
     m_pPipeline(engine->pipeline()),
     m_GameSpec("game.json", engine->resources())
 {
@@ -57,13 +57,19 @@ void GameState :: preload()
     //l->position(glm::vec3(0.0f, 2.0f, 0.0f));
     //m_pRoot->add(l);
 
-    //auto particle = m_pQor->make<Particle>("particle.png");
-    //m_pRoot->add(particle);
+    //auto p = m_pQor->make<Particle>("particle.png");
+    //p->position(vec3(-1.0f, 1.0f, 0.0f));
+    //m_pRoot->add(p);
+    
+    //p = m_pQor->make<Particle>("particle.png");
+    //p->position(vec3(1.0f, 1.0f, 0.0f));
+    //p->scale(0.5f);
+    //m_pRoot->add(p);
 
-    auto player = m_pQor->make<Mesh>("player.obj");
-    player->add_tag("player");
-    player->position(vec3(0.0f, 1.0f, 0.0f));
-    m_pRoot->add(player);
+    //auto player = m_pQor->make<Mesh>("player.obj");
+    //player->add_tag("player");
+    //player->position(vec3(0.0f, 1.0f, 0.0f));
+    //m_pRoot->add(player);
     
     auto mus = m_pQor->make<Sound>("cave.ogg");
     m_pRoot->add(mus);
@@ -104,7 +110,9 @@ void GameState :: preload()
     //);
     
     //m_pRoot->add(m_pQor->make<Mesh>("apartment_scene.obj"));
-    string map = m_pQor->args().value_or("map","test.json");
+    string map = m_pQor->args().at(-1, "test.json");
+    if(boost::starts_with(map, "-"))
+        map = "test.json";
     if(Filesystem::getExtension(map) == "json"){
         auto scene = m_pQor->make<Scene>(map);
         m_pRoot->add(scene->root());
@@ -112,20 +120,20 @@ void GameState :: preload()
         m_pRoot->add(m_pQor->make<Mesh>(map));
     }
      
-    // TODO: ensure filename contains only valid filename chars
-    //m_pScript->execute_file("mods/"+ m_Filename +"/__init__.py");
-    //m_pScript->execute_string("preload()");
-    
     m_pPhysics->generate(m_pRoot.get(), (unsigned)Physics::GenerateFlag::RECURSIVE);
-    m_pPhysics->world()->setGravity(btVector3(0.0, -40.0, 0.0));
+    m_pPhysics->world()->setGravity(btVector3(0.0, -9.8, 0.0));
 
     m_pConsole = make_shared<Console>(m_pQor->interpreter(), win, m_pInput, m_pQor->resources());
     m_pOrthoRoot->add(m_pConsole);
+    
+    map = Filesystem::cutExtension(map);
+    // TODO: ensure filename contains only valid filename chars
+    if(not map.empty())
+        m_pScript->execute_file("mods/FRAG.EXE/maps/"+ map +".py");
 }
 
 GameState :: ~GameState()
 {
-    //m_pPipeline->partitioner()->clear();
 }
 
 void GameState :: enter()

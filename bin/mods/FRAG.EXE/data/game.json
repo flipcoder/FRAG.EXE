@@ -3,9 +3,9 @@
         "glock": {
             "name": "Glock",
             "slot": 2,
-            "model": "glock.obj",
-            "pos": [0.111, -0.168, -0.223],
-            "zoomed_pos": [0.0, -0.039, -0.282],
+            "model": "gun_glock.obj",
+            "pos": [0.0414, -0.0899, -0.1483],
+            "zoomed_pos": [0.0, -0.039, -0.1612],
             "sound": "shot2.wav",
             "delay": 0.2,
             "ammo_type": "pistolbullets"
