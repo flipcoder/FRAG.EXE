@@ -31,6 +31,10 @@ class Player:
         std::shared_ptr<Camera> camera() { return m_pCamera; }
 
         bool can_jump() const;
+
+        std::shared_ptr<Mesh> mesh() { return m_pPlayerMesh; }
+        
+        //void stand(glm::vec3 pos);
         
     private:
         

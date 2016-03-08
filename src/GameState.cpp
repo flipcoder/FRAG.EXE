@@ -14,6 +14,7 @@
 #include "Qor/Light.h"
 #include "Qor/Material.h"
 #include "Qor/kit/log/log.h"
+#include <glm/gtx/orthonormalize.hpp>
 //#include <OALWrapper/OAL_Funcs.h>
 using namespace std;
 using namespace glm;
@@ -53,8 +54,8 @@ void GameState :: preload()
     m_pCamera = m_pPlayer->camera();
 
     //auto l = make_shared<Light>();
-    //l->dist(5.0f);
-    //l->position(glm::vec3(0.0f, 2.0f, 0.0f));
+    //l->dist(20.0f);
+    //l->position(glm::vec3(0.0f, 1.0f, 0.0f));
     //m_pRoot->add(l);
 
     //auto p = m_pQor->make<Particle>("particle.png");
@@ -65,10 +66,22 @@ void GameState :: preload()
     //p->position(vec3(1.0f, 1.0f, 0.0f));
     //p->scale(0.5f);
     //m_pRoot->add(p);
-
+    
     //auto player = m_pQor->make<Mesh>("player.obj");
-    //player->add_tag("player");
     //player->position(vec3(0.0f, 1.0f, 0.0f));
+    //auto playerptr = player.get();
+    //player->config()->set<int>("hp", 10);
+    //player->event("hit", [playerptr](const shared_ptr<Meta>& meta){
+    //    LOG("hit!");
+    //    int dmg = meta->at<int>("damage");
+    //    int hp = playerptr->config()->at<int>("hp");
+    //    if(dmg && hp){
+    //        hp = std::max<int>(0, hp - dmg);
+    //        playerptr->config()->set<int>("hp",hp);
+    //        if(hp <= 0)
+    //            playerptr->detach();
+    //    }
+    //});
     //m_pRoot->add(player);
     
     auto mus = m_pQor->make<Sound>("cave.ogg");
@@ -110,16 +123,14 @@ void GameState :: preload()
     //);
     
     //m_pRoot->add(m_pQor->make<Mesh>("apartment_scene.obj"));
-    string map = m_pQor->args().at(-1, "test.json");
-    if(boost::starts_with(map, "-"))
-        map = "test.json";
+    string map = m_pQor->args().filenames(-1, "test.json");
     if(Filesystem::getExtension(map) == "json"){
         auto scene = m_pQor->make<Scene>(map);
         m_pRoot->add(scene->root());
     }else{
         m_pRoot->add(m_pQor->make<Mesh>(map));
     }
-     
+    
     m_pPhysics->generate(m_pRoot.get(), (unsigned)Physics::GenerateFlag::RECURSIVE);
     m_pPhysics->world()->setGravity(btVector3(0.0, -9.8, 0.0));
 
@@ -130,6 +141,10 @@ void GameState :: preload()
     // TODO: ensure filename contains only valid filename chars
     if(not map.empty())
         m_pScript->execute_file("mods/FRAG.EXE/maps/"+ map +".py");
+
+    //auto lights = m_pRoot->hook_type<Light>();
+    //for(auto&& l: lights)
+    //    l->detach();
 }
 
 GameState :: ~GameState()
@@ -144,6 +159,13 @@ void GameState :: enter()
             s->play();
         }
     }, Node::Each::RECURSIVE);
+
+    auto spawns = m_pRoot->hook(R"(Spawn\.*)", Node::Hook::REGEX);
+    if(not spawns.empty())
+    {
+        auto spawn = spawns[rand() % spawns.size()];
+        m_pPlayer->mesh()->teleport(spawn->position(Space::WORLD));
+    }
 
     //m_pPlayer = kit::init_shared<PlayerInterface3D>(
     //    m_pController,
@@ -207,7 +229,14 @@ void GameState :: logic(Freq::Time t)
     m_pPhysics->logic(t);
     
     m_pPlayer->logic(t);
-        
+    //LOG(Vector::to_string(m_pPlayer->mesh()->position(Space::WORLD)));
+
+    //auto box = m_pQor->make<Mesh>("box.obj");
+    //box->set_physics_shape(Node::HULL);
+    //auto shape = m_pPhysics->generate_shape(box.get());
+    //auto body = kit::make_unique<btRigidBody>(info);
+    //m_pPhysics->contact((btRigidBody*)body.get());
+    
     m_pSkyboxRoot->logic(t);
     m_pOrthoRoot->logic(t);
     m_pRoot->logic(t);

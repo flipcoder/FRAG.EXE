@@ -35,6 +35,7 @@ solution("FRAG")
             "boost_filesystem",
             "boost_python",
             "boost_coroutine",
+            "boost_regex",
             "jsoncpp",
             "BulletSoftBody",
             "BulletDynamics",

@@ -196,7 +196,7 @@ void Player :: logic(Freq::Time t)
             //auto p = m_pQor->make<Particle>("muzzleflash1.png");
             //m_pViewModel->add(p);
             //p->move(vec3(0.0f, 0.0f, -1.0f));
-            //p->collapse();
+            //p->collapse(Space::WORLD);
             
             for(int i=0; i<m_WeaponStash.active()->spec()->burst(); ++i)
             {
@@ -218,8 +218,12 @@ void Player :: logic(Freq::Time t)
                 if(n)
                 {
                     //if(not n->hook("#player",Node::Hook::REVERSE).empty())
-                    if(n->parent()->has_tag("player"))
+                    if(n->parent()->has_event("hit")){
+                        auto hitinfo = make_shared<Meta>();
+                        hitinfo->set<int>("damage", 1);
                         player_hit = true;
+                        n->parent()->event("hit", hitinfo);
+                    }
                     
                     decal(
                         std::get<1>(hit),
@@ -239,9 +243,13 @@ void Player :: logic(Freq::Time t)
             m->set_physics(Node::DYNAMIC);
             m->set_physics_shape(Node::HULL);
             m->mass(1.0f);
-            m_pViewModel->add(m);
-            m->collapse();
+            m_pViewModel->node()->add(m);
+            m->collapse(Space::WORLD);
+            auto dir = Matrix::heading(*m->matrix(Space::WORLD));
             m_pPhysics->generate(m.get());
+            ((btRigidBody*)m->body()->body())->applyCentralImpulse(
+                Physics::toBulletVector(dir * 10.0f)
+            );
         }
         
     }
@@ -351,4 +359,9 @@ void Player :: refresh_weapon()
         m_pViewModel->equip(true);
     }
 }
+
+//void Player :: stand(vec3 pos)
+//{
+//    m_pPlayerMesh->position(pos);
+//}
 

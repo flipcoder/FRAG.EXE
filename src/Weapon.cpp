@@ -32,7 +32,6 @@ WeaponSpec :: WeaponSpec(const shared_ptr<Meta>& cfg):
     m_pConfig(cfg)
 {
     for(auto&& e: *cfg){
-        LOG(e.key);
         m_Entries.emplace(e.key, e.as<shared_ptr<Meta>>(), this);
     }
 }
