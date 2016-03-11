@@ -51,7 +51,8 @@
             "zoomed_pos": [0.0, -0.0295, -0.1525],
             "sound": "snipershot.wav",
             "delay": 0.7,
-            "ammo_type": "sniperbullets"
+            "ammo_type": "sniperbullets",
+            "scope": true
         }
     },
     "pickups": {

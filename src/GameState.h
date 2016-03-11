@@ -70,6 +70,7 @@ class GameState:
         std::shared_ptr<Console> m_pConsole;
         std::shared_ptr<Node> m_pRoot;
         std::shared_ptr<Node> m_pOrthoRoot;
+        std::shared_ptr<Node> m_pConsoleRoot;
         std::shared_ptr<Node> m_pSkyboxRoot;
         Interpreter* m_pInterpreter;
         std::shared_ptr<Interpreter::Context> m_pScript;
@@ -77,6 +78,7 @@ class GameState:
         std::shared_ptr<Camera> m_pCamera;
         std::shared_ptr<Camera> m_pOrthoCamera;
         std::shared_ptr<Camera> m_pSkyboxCamera;
+        std::shared_ptr<Camera> m_pConsoleCamera;
         std::shared_ptr<Physics> m_pPhysics;
         std::shared_ptr<ViewModel> m_pViewModel;
         std::shared_ptr<Controller> m_pController;

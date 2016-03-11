@@ -13,6 +13,7 @@
                 "down",
                 "back"
             ],
+            "w": "use",
             "f": "right",
             "mouse left": "fire",
             "mouse scrollup": "previous",

@@ -3,6 +3,7 @@
 #include "Qor/Qor.h"
 #include "Qor/Physics.h"
 #include "Qor/Particle.h"
+#include "Qor/Material.h"
 using namespace std;
 using namespace glm;
 
@@ -19,6 +20,7 @@ Player :: Player(
     std::function<bool()> lock_if
 ):
     m_pRoot(root),
+    m_pOrthoRoot(make_shared<Node>()),
     m_pController(controller),
     m_pCache(cache),
     m_pPhysics(physics),
@@ -27,6 +29,10 @@ Player :: Player(
     m_pGameSpec(spec),
     m_WeaponStash(spec->weapons())
 {
+    m_pOrthoCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
+    m_pOrthoCamera->ortho();
+    m_pOrthoRoot->add(m_pOrthoCamera);
+    
     m_pPlayerMesh = make_shared<Mesh>();
     m_pPlayerMesh->set_box(Box(
         vec3(-0.2f, -0.6f, -0.2f),
@@ -39,6 +45,7 @@ Player :: Player(
     m_pPlayerMesh->mass(80.0f);
     m_pPlayerMesh->inertia(false);
     m_pCamera = make_shared<Camera>(cache, window);
+    m_fFOV = m_pCamera->fov();
     //m_pRoot->add(m_pCamera);
     m_pPlayerMesh->add(m_pCamera);
     m_pCamera->position(vec3(0.0f, 0.6f, 0.0f));
@@ -91,7 +98,63 @@ Player :: Player(
     
     //m_pInterface->fly();
     //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
+
+    m_bScope = true;
+    scope(false);
+}
+
+void Player :: scope(bool b)
+{
+    if(m_bScope == b)
+        return;
     
+    if(b)
+    {
+        auto tex = m_pQor->resources()->cache_cast<Texture>("scope_overlay.png");
+        if(m_pCrosshair) m_pCrosshair->detach();
+        m_pCrosshair = make_shared<Mesh>(
+            make_shared<MeshGeometry>(
+                Prefab::quad(
+                    vec2(0.0f, 0.0f),
+                    vec2((float)m_pWindow->size().x, (float)m_pWindow->size().y)
+                )
+            )
+        );
+        m_pCrosshair->add_modifier(make_shared<Wrap>(Prefab::quad_wrap(
+            vec2(1.0f, -1.0f)
+        )));
+        m_pCrosshair->material(make_shared<MeshMaterial>(tex));
+        m_pOrthoRoot->add(m_pCrosshair);
+
+        m_pViewModel->each([](Node* n){
+            n->self_visible(false);
+        });
+    }
+    else
+    {
+        auto tex = m_pQor->resources()->cache_as<Material>("crosshair2.png");
+        tex->diffuse(Color(1.0f, 1.0f, 1.0f, 0.5f));
+        if(m_pCrosshair) m_pCrosshair->detach();
+        m_pCrosshair = make_shared<Mesh>(
+            make_shared<MeshGeometry>(
+                Prefab::quad(
+                    -vec2((float)tex->center().x, (float)tex->center().y) / 2.0f,
+                    vec2((float)tex->center().x, (float)tex->center().y) / 2.0f
+                )
+            )
+        );
+        m_pCrosshair->add_modifier(make_shared<Wrap>(Prefab::quad_wrap(
+            vec2(1.0f, -1.0f)
+        )));
+        m_pCrosshair->material(make_shared<MeshMaterial>(tex));
+        m_pCrosshair->position(glm::vec3(m_pWindow->center().x, m_pWindow->center().y, 0.0f));
+        m_pOrthoRoot->add(m_pCrosshair);
+        
+        m_pViewModel->each([](Node* n){
+            n->self_visible(true);
+        });
+    }
+    m_bScope = b;
 }
 
 void Player :: logic(Freq::Time t)
@@ -105,14 +168,50 @@ void Player :: logic(Freq::Time t)
     if(m_LockIf && m_LockIf())
         return;
     
-    if(m_pController->button("zoom").pressed_now())
-        m_pViewModel->zoom(not m_pViewModel->zoomed());
+    if(m_pController->button("zoom").pressed_now()){
+        bool zoomed = not m_pViewModel->zoomed(); // opposite of what it is now
+        auto wpn = m_WeaponStash.active()->spec();
+        if(!zoomed || not wpn->scope()){
+            scope(false);
+        }
+        auto vm = m_pViewModel.get();
+        auto _this = this;
+        m_pViewModel->zoom(zoomed, [zoomed,vm,_this]{
+            if(zoomed) {
+                auto wpn = _this->m_WeaponStash.active()->spec();
+                _this->scope(wpn->scope());
+                //if(wpn->scope()){
+                //    vm->each([](Node* n){
+                //        n->self_visible(false);
+                //    });
+                //}
+            }
+        });
+    }
+
+    if(m_pController->button("use").pressed_now())
+    {
+        auto hit = m_pPhysics->first_hit(
+            m_pCamera->position(Space::WORLD),
+            m_pCamera->to_world(vec3(0.0f, 0.0f, -3.0f))
+        );
+        Node* n = std::get<0>(hit);
+        if(n)
+        {
+            if(n->has_event("use")){
+                Sound::play(m_pCamera.get(), "switch.wav", m_pQor->resources());
+                n->event("use", make_shared<Meta>());
+            }
+        }
+    }
+
 
     for(int i=0; i<9; ++i)
     {
         if(not m_pViewModel->equipping()){
             if(m_pController->button(string("slot")+to_string(i))){
                 if(m_WeaponStash.slot(i)){
+                    scope(false);
                     m_pViewModel->fast_zoom(false);
                     auto vm = m_pViewModel.get();
                     auto _this = this;
@@ -128,6 +227,7 @@ void Player :: logic(Freq::Time t)
     if(m_pController->button("next").pressed_now()){
         if(m_pViewModel->idle()){
             if(m_WeaponStash.next()){
+                scope(false);
                 m_pViewModel->fast_zoom(false);
                 auto vm = m_pViewModel.get();
                 auto _this = this;
@@ -141,6 +241,7 @@ void Player :: logic(Freq::Time t)
     if(m_pController->button("previous").pressed_now()){
         if(m_pViewModel->idle()){
             if(m_WeaponStash.next(-1)){
+                scope(false);
                 m_pViewModel->fast_zoom(false);
                 auto vm = m_pViewModel.get();
                 auto _this = this;
@@ -156,6 +257,7 @@ void Player :: logic(Freq::Time t)
         if(m_pViewModel->idle() && m_pViewModel->equipped()){
             //auto cache = m_pQor->resources();
             //auto camera = m_pCamera.get();
+            scope(false);
             m_pViewModel->fast_zoom(false);
             auto vm = m_pViewModel.get();
             m_pViewModel->equip_time(Freq::Time(250));
@@ -172,6 +274,11 @@ void Player :: logic(Freq::Time t)
     ){
         //Sound::play(m_pCamera.get(), "shotgun.wav", m_pQor->resources());
         Sound::play(m_pCamera.get(), m_WeaponStash.active()->spec()->sound(), m_pQor->resources());
+
+        if(m_WeaponStash.active()->spec()->scope()){
+            scope(false);
+            m_pViewModel->zoom(false);
+        }
         
         //Sound::play(m_pCamera.get(), "pump.wav", m_pQor->resources());
         //auto snd = m_pQor->make<Sound>("pump.wav");
@@ -352,6 +459,7 @@ void Player :: refresh_weapon()
         m_pViewModel = make_shared<ViewModel>(m_pCamera, gun);
         gun->disable_physics();
         m_pRoot->add(m_pViewModel);
+        m_pViewModel->fov(m_fFOV);
         m_pViewModel->model_pos(wpn->viewmodel_pos());
         m_pViewModel->zoomed_model_pos(wpn->viewmodel_zoomed_pos());
         m_pViewModel->reset_zoom();

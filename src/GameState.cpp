@@ -15,7 +15,6 @@
 #include "Qor/Material.h"
 #include "Qor/kit/log/log.h"
 #include <glm/gtx/orthonormalize.hpp>
-//#include <OALWrapper/OAL_Funcs.h>
 using namespace std;
 using namespace glm;
 
@@ -26,7 +25,6 @@ GameState :: GameState(
     m_pQor(engine),
     m_pInput(engine->input()),
     m_pRoot(make_shared<Node>()),
-    m_pOrthoRoot(make_shared<Node>()),
     m_pSkyboxRoot(make_shared<Node>()),
     m_pInterpreter(engine->interpreter()),
     m_pScript(make_shared<Interpreter::Context>(engine->interpreter())),
@@ -51,21 +49,30 @@ void GameState :: preload()
         &m_GameSpec,
         [&]{ return m_pConsole->input();}
     );
+    
+    // just render this player for now
     m_pCamera = m_pPlayer->camera();
+    m_pOrthoCamera = m_pPlayer->ortho_camera();
+    m_pOrthoRoot = m_pPlayer->ortho_root();
+    
+    m_pConsoleCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
+    m_pConsoleRoot = make_shared<Node>();
 
     //auto l = make_shared<Light>();
     //l->dist(20.0f);
     //l->position(glm::vec3(0.0f, 1.0f, 0.0f));
     //m_pRoot->add(l);
 
-    //auto p = m_pQor->make<Particle>("particle.png");
-    //p->position(vec3(-1.0f, 1.0f, 0.0f));
-    //m_pRoot->add(p);
+    auto p = m_pQor->make<Particle>("particle.png");
+    p->position(vec3(-1.0f, 1.0f, 0.0f));
+    p->flags(Particle::UPRIGHT);
+    m_pRoot->add(p);
     
-    //p = m_pQor->make<Particle>("particle.png");
-    //p->position(vec3(1.0f, 1.0f, 0.0f));
-    //p->scale(0.5f);
-    //m_pRoot->add(p);
+    p = m_pQor->make<Particle>("particle.png");
+    p->position(vec3(1.0f, 1.0f, 0.0f));
+    p->scale(0.5f);
+    p->flags(Particle::UPRIGHT);
+    m_pRoot->add(p);
     
     //auto player = m_pQor->make<Mesh>("player.obj");
     //player->position(vec3(0.0f, 1.0f, 0.0f));
@@ -87,10 +94,6 @@ void GameState :: preload()
     auto mus = m_pQor->make<Sound>("cave.ogg");
     m_pRoot->add(mus);
     mus->ambient(true);
-
-    m_pOrthoCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
-    m_pOrthoCamera->ortho();
-    m_pOrthoRoot->add(m_pOrthoCamera);
     
     m_pSkyboxCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pSkyboxCamera->perspective();
@@ -98,22 +101,6 @@ void GameState :: preload()
     m_pSkyboxCamera->track(m_pCamera);
     m_pSkyboxCamera->mode(Tracker::ORIENT);
     m_pSkyboxRoot->add(m_pSkyboxCamera);
-    
-    auto tex = m_pQor->resources()->cache_cast<Texture>("crosshair2.png");
-    auto crosshair = make_shared<Mesh>(
-        make_shared<MeshGeometry>(
-            Prefab::quad(
-                -vec2((float)tex->center().x, (float)tex->center().y) / 2.0f,
-                vec2((float)tex->center().x, (float)tex->center().y) / 2.0f
-            )
-        )
-    );
-    crosshair->add_modifier(make_shared<Wrap>(Prefab::quad_wrap(
-        vec2(1.0f, -1.0f)
-    )));
-    crosshair->material(make_shared<MeshMaterial>(tex));
-    crosshair->position(glm::vec3(win->center().x, win->center().y, 0.0f));
-    m_pOrthoRoot->add(crosshair);
     
     //m_pPipeline = make_shared<Pipeline>(
     //    m_pQor->window(),
@@ -135,7 +122,7 @@ void GameState :: preload()
     m_pPhysics->world()->setGravity(btVector3(0.0, -9.8, 0.0));
 
     m_pConsole = make_shared<Console>(m_pQor->interpreter(), win, m_pInput, m_pQor->resources());
-    m_pOrthoRoot->add(m_pConsole);
+    m_pConsoleRoot->add(m_pConsole);
     
     map = Filesystem::cutExtension(map);
     // TODO: ensure filename contains only valid filename chars
@@ -244,6 +231,7 @@ void GameState :: logic(Freq::Time t)
 
 void GameState :: render() const
 {
+    // render player view & skybox
     m_pPipeline->override_shader(PassType::NORMAL, (unsigned)PassType::NONE);
     m_pPipeline->winding(false);
     m_pPipeline->blend(false);
@@ -262,12 +250,21 @@ void GameState :: render() const
         nullptr,
         Pipeline::LIGHTS | Pipeline::NO_CLEAR
     );
+
+    // render ortho overlays
     m_pPipeline->override_shader(PassType::NORMAL, (unsigned)PassType::NONE);
     m_pPipeline->winding(true);
-    m_pPipeline->blend(true);
     m_pPipeline->render(
         m_pOrthoRoot.get(),
         m_pOrthoCamera.get(),
+        nullptr,
+        Pipeline::NO_CLEAR | Pipeline::NO_DEPTH
+    );
+
+    // render console
+    m_pPipeline->render(
+        m_pConsoleRoot.get(),
+        m_pConsoleCamera.get(),
         nullptr,
         Pipeline::NO_CLEAR | Pipeline::NO_DEPTH
     );

@@ -29,6 +29,8 @@ class Player:
         void logic(Freq::Time t);
 
         std::shared_ptr<Camera> camera() { return m_pCamera; }
+        std::shared_ptr<Node> ortho_root() { return m_pOrthoRoot; }
+        std::shared_ptr<Camera> ortho_camera() { return m_pOrthoCamera; }
 
         bool can_jump() const;
 
@@ -38,15 +40,19 @@ class Player:
         
     private:
         
+        void scope(bool b);
         void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
         void refresh_weapon();
         
         Node* m_pRoot;
+        std::shared_ptr<Node> m_pOrthoRoot;
+        std::shared_ptr<Camera> m_pOrthoCamera;
         std::shared_ptr<Mesh> m_pPlayerMesh;
         std::shared_ptr<Camera> m_pCamera;
         std::shared_ptr<ViewModel> m_pViewModel;
         std::shared_ptr<Controller> m_pController;
         std::shared_ptr<PlayerInterface3D> m_pInterface;
+        std::shared_ptr<Mesh> m_pCrosshair;
         Cache<Resource, std::string>* m_pCache;
         Physics* m_pPhysics;
         Window* m_pWindow;
@@ -61,6 +67,8 @@ class Player:
         std::deque<std::shared_ptr<Mesh>> m_Decals;
         static const unsigned MAX_DECALS;
 
+        bool m_bScope = false;
+        float m_fFOV;
 };
 
 #endif

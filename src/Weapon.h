@@ -29,6 +29,7 @@ class WeaponSpecEntry
         int burst() const { return m_Burst; }
         float spread() const { return m_Spread; }
         Freq::Time delay() const { return m_Delay; }
+        bool scope() const { return m_bScope; }
         
     private:
         std::string m_Name;
@@ -44,6 +45,7 @@ class WeaponSpecEntry
         Freq::Time m_Delay;
         glm::vec3 m_ViewModelPos;
         glm::vec3 m_ViewModelZoomedPos;
+        bool m_bScope = false;
 };
 
 class WeaponSpec
