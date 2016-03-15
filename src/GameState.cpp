@@ -63,16 +63,16 @@ void GameState :: preload()
     //l->position(glm::vec3(0.0f, 1.0f, 0.0f));
     //m_pRoot->add(l);
 
-    auto p = m_pQor->make<Particle>("particle.png");
-    p->position(vec3(-1.0f, 1.0f, 0.0f));
-    p->flags(Particle::UPRIGHT);
-    m_pRoot->add(p);
+    //auto p = m_pQor->make<Particle>("particle.png");
+    //p->position(vec3(-1.0f, 1.0f, 0.0f));
+    //p->flags(Particle::UPRIGHT);
+    //m_pRoot->add(p);
     
-    p = m_pQor->make<Particle>("particle.png");
-    p->position(vec3(1.0f, 1.0f, 0.0f));
-    p->scale(0.5f);
-    p->flags(Particle::UPRIGHT);
-    m_pRoot->add(p);
+    //p = m_pQor->make<Particle>("particle.png");
+    //p->position(vec3(1.0f, 1.0f, 0.0f));
+    //p->scale(0.5f);
+    //p->flags(Particle::UPRIGHT);
+    //m_pRoot->add(p);
     
     //auto player = m_pQor->make<Mesh>("player.obj");
     //player->position(vec3(0.0f, 1.0f, 0.0f));
@@ -127,7 +127,7 @@ void GameState :: preload()
     map = Filesystem::cutExtension(map);
     // TODO: ensure filename contains only valid filename chars
     if(not map.empty())
-        m_pScript->execute_file("mods/FRAG.EXE/maps/"+ map +".py");
+        m_pScript->execute_file("mods/FRAG.EXE/data/maps/"+ map +".py");
 
     //auto lights = m_pRoot->hook_type<Light>();
     //for(auto&& l: lights)
