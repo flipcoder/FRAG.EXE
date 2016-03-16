@@ -55,10 +55,18 @@ class GameState:
             return m_pCamera;
         }
 
-        virtual void camera(const std::shared_ptr<Node>& camera)override{
+        virtual void camera(const std::shared_ptr<Node>& camera) override {
             m_pCamera = std::dynamic_pointer_cast<Camera>(camera);
         }
         
+        virtual Physics* physics() override {
+            return m_pPhysics.get();
+        }
+        virtual Physics* physics() const override {
+            return m_pPhysics.get();
+        }
+
+
     private:
 
         //void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
