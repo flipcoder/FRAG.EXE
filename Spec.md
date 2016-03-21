@@ -72,7 +72,7 @@ along with the data passed in when the event occurs.
 
 To associate engine events, use:
 ```
-on_EVENTNAME(callback)
+qor.on_EVENTNAME(callback)
 ```
 Where EVENTNAME is any of the following:
 
@@ -106,11 +106,11 @@ Where EVENTNAME is any of the following:
 
 ## Metadata
 
-Use qor.meta() to access metadata.
+Information about the game state can be obtained through Qor's metadata.
 
-- Game (qor.meta()["game"])
+- Game (qor.state_meta()["game"])
     - ...
-- Spec (qor.meta()["spec"])
+- Spec (qor.state_meta()["spec"])
     - ...
 
 ## Scripting
