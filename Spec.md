@@ -38,7 +38,7 @@ See "game.json" for the current list of all default weapons, items with their st
     - dynamic
     - actor
     - ghost
-- penetration (float [0,1] def 0) - fraction of resultant bullet damage after penetrating (0-1)
+- penetration (float [0,1] def 0) - fraction of resultant bullet damage after penetrating
 - visible (bool)
 - hurt (float) - amount of damage to inflict on player per second when touching, negative values heal
 - tags:
