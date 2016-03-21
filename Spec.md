@@ -26,6 +26,14 @@ The following prefixes are recognized:
 
 ## Node properties/tags
 
+- physics (string)
+    - (empty) - disables physics
+    - static
+    - dynamic
+    - actor
+    - ghost
+- visible (bool)
+
 Properties are keys with values that store  information for each node set in blender.
 The specs may or may not make use of these.
 For example, there may be a flag called "penetration" with a value of
@@ -41,12 +49,9 @@ Here is an example of a mesh using properties and tags correctly:
 ```
 Node name: Barrel.001
 Properties:
-    penetration: 0.2
+    physics: dynamic
     tags: explosive,ctf
 ```
-
-The above example includes a second flag, which may mean to only include this
-if the mode is CTF.
 
 ## Events
 
