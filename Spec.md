@@ -21,8 +21,14 @@ The following prefixes are recognized:
 - bluespawn
 - redflag
 - blueflag
-- All weapon names are weapon spawns (example. ump45)
-- All pickup names are pickup spawns (example. medkit)
+- glock
+- shotgun
+- ump45
+- grenadelauncher
+- sniper
+- medkit
+
+See "game.json" for the current list of all default weapons, items with their stats.
 
 ## Node properties/tags
 
@@ -32,9 +38,13 @@ The following prefixes are recognized:
     - dynamic
     - actor
     - ghost
+- penetration (float [0,1] def 0) - fraction of resultant bullet damage after penetrating (0-1)
 - visible (bool)
+- hurt (float) - amount of damage to inflict on player per second when touching, negative values heal
+- tags:
+    - fluid
 
-Properties are keys with values that store  information for each node set in blender.
+Properties are keys with values that store information for each node set in blender.
 The specs may or may not make use of these.
 For example, there may be a flag called "penetration" with a value of
 0.2 for items that bullets are able to penetrate while reducing the damage by 20%.
@@ -55,14 +65,21 @@ Properties:
 
 ## Events
 
-The following events can be used in scripting to change map state when things occur:
+The following events can be used in scripting to change map state when things occur,
+along with the data passed in when the event occurs
 
 - use - When a player presses the use key on a surface.
 - enter - When the map/round starts.
-- touch - When a player is touching a surface.
-- untouch - When a player stops touching a surface.
-- damage - When a player does damage to a surface.
+- touch - When a player starts touching an object.
+- untouch - When a player stops touching an object.
+- damage - When a player does damage to a object.
+    - player
+    - object
+    - damage - amount of damage
+    - projectile (bool)
 - tick - Every tick
+- see - when an object starts being visible to a player
+- unsee - when an object stops being visible to a player
 
 ## Scripting
 
@@ -71,7 +88,7 @@ and associate them with functions.  The first event you'll want to associate is
 enter().  This occurs *after* the loading screen during the first tick.
 
 ```
-def enter(info):
+def enter():
     # this stuff happens after loading screen
     # ...
     
@@ -91,7 +108,7 @@ def activate(player, switch):
 
 switches = qor.hook("#switch") # get all nodes tagged as switches
 for s in switches:
-    s.on_event("use", lambda player: activate(player, s))
+    s.on_event("use", lambda data: activate(data["player"], s))
 ```
 
 The concept of a switch, as far as FRAG is concerned, is specific to your map.
