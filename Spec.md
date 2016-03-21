@@ -47,7 +47,7 @@ See "game.json" for the current list of all default weapons, items with their st
 Properties are keys with values that store information for each node set in blender.
 The specs may or may not make use of these.
 For example, there may be a flag called "penetration" with a value of
-0.2 for items that bullets are able to penetrate while reducing the damage by 20%.
+0.2 for items that bullets are able to penetrate while reducing the damage to 20% of what it was.
 This is something that Gamespec would make use of, since it is specific to the game.
 However, the serverspec may override this by disabling bullet penetration.
 
@@ -66,20 +66,52 @@ Properties:
 ## Events
 
 The following events can be used in scripting to change map state when things occur,
-along with the data passed in when the event occurs
+along with the data passed in when the event occurs.
 
-- use - When a player presses the use key on a surface.
-- enter - When the map/round starts.
+### Engine events
+
+To associate engine events, use:
+```
+on_EVENTNAME(callback)
+```
+Where EVENTNAME is any of the following:
+
+- enter - When the map starts (after loading)
+- tick
+    - Time passed since last frame
+
+### Game events
+
+To associate game events, use:
+```
+qor.on_event("EVENTNAME", callback)
+```
+Where EVENTNAME is any of the following:
+
+- use - When a player presses the use key on an object
+    - player
+    - object
+- start - When the round starts
+- stop - When the round ends
 - touch - When a player starts touching an object.
 - untouch - When a player stops touching an object.
 - damage - When a player does damage to a object.
     - player
     - object
     - damage - amount of damage
-    - projectile (bool)
-- tick - Every tick
-- see - when an object starts being visible to a player
-- unsee - when an object stops being visible to a player
+    - weapon - the weapon that did the damage
+    - projectile - projectile object, if projectile
+- see - When an object starts being visible to a player
+- unsee - When an object stops being visible to a player
+
+## Metadata
+
+Use qor.meta() to access metadata.
+
+- Game (qor.meta()["game"])
+    - ...
+- Spec (qor.meta()["spec"])
+    - ...
 
 ## Scripting
 
