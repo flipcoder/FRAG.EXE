@@ -141,3 +141,8 @@ bool WeaponStash :: slot(int num)
     return false;
 }
 
+Weapon :: Weapon(WeaponSpecEntry* spec):
+    m_pSpec(spec)
+    //m_Clip(spec->clip())
+{}
+

@@ -32,6 +32,16 @@
             "delay": 0.025,
             "ammo_type": "ump45bullets"
         },
+        "rocketrifle": {
+            "name": "Rocket Rifle",
+            "slot": 5,
+            "projectile": "rocket.obj",
+            "model": "gun_rocketrifle.obj",
+            "pos": [0.0355, -0.06, -0.188],
+            "zoomed_pos": [0.0, -0.0474, -0.1525],
+            "delay": 0.7,
+            "ammo_type": "rockets"
+        },
         "grenadelauncher": {
             "name": "Grenade Launcher",
             "slot": 5,

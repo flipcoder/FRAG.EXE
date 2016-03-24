@@ -72,12 +72,11 @@ class WeaponSpec
 class Weapon
 {
     public:
-        Weapon(WeaponSpecEntry* spec):
-            m_pSpec(spec)
-        {}
+        Weapon(WeaponSpecEntry* spec);
         WeaponSpecEntry* spec() { return m_pSpec; }
     private:
         WeaponSpecEntry* m_pSpec;
+        //int m_Clip;
 };
 
 class WeaponStash
