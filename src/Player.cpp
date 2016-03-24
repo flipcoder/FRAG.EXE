@@ -375,22 +375,22 @@ void Player :: logic(Freq::Time t)
     
     //m_pViewModel->position(m_pCamera->position(Space::WORLD));
 
-    auto input = m_pController->input();
-    if(input->key(SDLK_DOWN))
-        m_pViewModel->model_move(glm::vec3(0.0f, -t.s() * 0.1f, 0.0f));
-    else if(input->key(SDLK_UP))
-        m_pViewModel->model_move(glm::vec3(0.0f, t.s() * 0.1f, 0.0f));
-    else if(input->key(SDLK_LEFT))
-        m_pViewModel->model_move(glm::vec3(-t.s() * 0.1f, 0.0f, 0.0f));
-    else if(input->key(SDLK_RIGHT))
-        m_pViewModel->model_move(glm::vec3(t.s() * 0.1f, 0.0f, 0.0f));
-    else if(input->key(SDLK_w))
-        m_pViewModel->model_move(glm::vec3(0.0f, 0.0f, t.s() * 0.1f));
-    else if(input->key(SDLK_r))
-        m_pViewModel->model_move(glm::vec3(0.0f, 0.0f, -t.s() * 0.1f));
+    //auto input = m_pController->input();
+    //if(input->key(SDLK_DOWN))
+    //    m_pViewModel->model_move(glm::vec3(0.0f, -t.s() * 0.1f, 0.0f));
+    //else if(input->key(SDLK_UP))
+    //    m_pViewModel->model_move(glm::vec3(0.0f, t.s() * 0.1f, 0.0f));
+    //else if(input->key(SDLK_LEFT))
+    //    m_pViewModel->model_move(glm::vec3(-t.s() * 0.1f, 0.0f, 0.0f));
+    //else if(input->key(SDLK_RIGHT))
+    //    m_pViewModel->model_move(glm::vec3(t.s() * 0.1f, 0.0f, 0.0f));
+    //else if(input->key(SDLK_w))
+    //    m_pViewModel->model_move(glm::vec3(0.0f, 0.0f, t.s() * 0.1f));
+    //else if(input->key(SDLK_r))
+    //    m_pViewModel->model_move(glm::vec3(0.0f, 0.0f, -t.s() * 0.1f));
 
-    LOGf("model pos %s", Vector::to_string(m_pViewModel->model_pos()));
-    LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
+    //LOGf("model pos %s", Vector::to_string(m_pViewModel->model_pos()));
+    //LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
 }
 
 void Player :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset)
