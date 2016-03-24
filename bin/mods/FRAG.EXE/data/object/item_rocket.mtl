@@ -1,5 +1,5 @@
 # Blender MTL File: 'gun_rocketrifle.blend'
-# Material Count: 7
+# Material Count: 1
 
 newmtl Material
 Ns 96.078431
@@ -11,69 +11,3 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd H:\Work\qorAssets\textures\chrome_gradient_onesided.png
-
-newmtl Material_chrome_gradient_dark.png
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd H:\Work\qorAssets\textures\chrome_gradient_dark.png
-
-newmtl Material_gun_metal.png
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd H:\Work\qorAssets\textures\gun_metal.png
-
-newmtl Material_gun_metal_dark.png
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd H:\Work\qorAssets\textures\gun_metal_dark.png
-
-newmtl Material_gun_metal_turbulent.png
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd H:\Work\qorAssets\textures\gun_metal_turbulent.png
-
-newmtl Material_rust.png
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd H:\Work\qorAssets\textures\rust.png
-
-newmtl Material_rust_brown.png
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd H:\Work\qorAssets\textures\rust_brown.png
