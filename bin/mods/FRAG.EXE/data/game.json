@@ -37,8 +37,8 @@
             "slot": 5,
             "projectile": "rocket.obj",
             "model": "gun_rocketrifle.obj",
-            "pos": [0.0355, -0.06, -0.188],
-            "zoomed_pos": [0.0, -0.0474, -0.1525],
+            "pos": [0.06, -0.1153, -0.188],
+            "zoomed_pos": [0.0, -0.07, -0.28],
             "delay": 0.7,
             "ammo_type": "rockets"
         },
