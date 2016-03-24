@@ -1,9 +1,9 @@
 # FRAG.EXE
 
-Basic first person shooter demonstration.
+First person shooter demonstration.
 Written in C++11 using my own engine (Qor).
     
-Work in progress, not all files are uploaded yet.
+Work in progress.
 
 Engine here: http://github.com/flipcoder/qor
 

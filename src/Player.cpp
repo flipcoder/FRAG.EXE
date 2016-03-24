@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "HUD.h"
 #include "Qor/Sound.h"
 #include "Qor/Qor.h"
 #include "Qor/Physics.h"
@@ -32,13 +33,14 @@ Player :: Player(
     m_pOrthoCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pOrthoCamera->ortho();
     m_pOrthoRoot->add(m_pOrthoCamera);
-    
+    m_pOrthoRoot->add(make_shared<HUD>(
+        this, window, controller->input(), cache
+    ));
     m_pPlayerMesh = make_shared<Mesh>();
     m_pPlayerMesh->set_box(Box(
         vec3(-0.2f, -0.6f, -0.2f),
         vec3(0.2f, 0.6f, 0.2f)
     ));
-    //m_pPlayerMesh->disable_physics();
     m_pPlayerMesh->set_physics(Node::Physics::DYNAMIC);
     m_pPlayerMesh->set_physics_shape(Node::CAPSULE);
     m_pPlayerMesh->friction(0.0f);
@@ -198,7 +200,8 @@ void Player :: logic(Freq::Time t)
         Node* n = std::get<0>(hit);
         if(n)
         {
-            if(n->subroot()->has_event("use")){
+            n = n->subroot();
+            if(n->has_event("use")){
                 Sound::play(m_pCamera.get(), "switch.wav", m_pQor->resources());
                 n->event("use", make_shared<Meta>());
             }

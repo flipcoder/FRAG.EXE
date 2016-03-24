@@ -111,17 +111,25 @@ void GameState :: preload()
     
     //m_pRoot->add(m_pQor->make<Mesh>("apartment_scene.obj"));
     string map = m_pQor->args().filenames(-1, "test.json");
+    std::shared_ptr<Node> scene_root;
     if(Filesystem::getExtension(map) == "json"){
         auto scene = m_pQor->make<Scene>(map);
+        scene_root = scene->root();
         m_pRoot->add(scene->root());
     }else{
-        m_pRoot->add(m_pQor->make<Mesh>(map));
+        scene_root = m_pQor->make<Mesh>(map);
+        m_pRoot->add(scene_root);
     }
+    auto meshes = scene_root->hook_type<Mesh>();
+    for(auto&& mesh: meshes)
+        mesh->set_physics(Node::STATIC);
     
     m_pPhysics->generate(m_pRoot.get(), Physics::GEN_RECURSIVE);
     m_pPhysics->world()->setGravity(btVector3(0.0, -9.8, 0.0));
 
-    m_pConsole = make_shared<Console>(m_pQor->interpreter(), win, m_pInput, m_pQor->resources());
+    m_pConsole = make_shared<Console>(
+        m_pQor->interpreter(), win, m_pInput, m_pQor->resources()
+    );
     m_pConsoleRoot->add(m_pConsole);
     
     map = Filesystem::cutExtension(map);
