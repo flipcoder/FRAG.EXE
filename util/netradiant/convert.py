@@ -3,13 +3,14 @@ import sys
 import os
 import shutil
 
-SCALE = 0.01
+SCALE = 0.1
 
 m = os.path.splitext(sys.argv[1])[0]
 old_obj_fn = m+".obj"
 old_mtl_fn = m+".mtl"
 obj_fn = "new_"+m+".obj"
 mtl_fn = "new_"+m+".mtl"
+old_map_fn = m+".map"
 
 if not os.path.exists(old_obj_fn) or not os.path.exists(old_mtl_fn):
     print "must exist"
@@ -33,8 +34,12 @@ for l in obj:
         tokens = tokens[1:]
         for i in range(0,len(tokens)):
             tokens[i] = str(float(tokens[i]) * SCALE)
-        l = "v " + " ".join(tokens)
-        mtl_r.write(l)
+        l = "v " + " ".join(tokens) + "\n"
+        obj_r.write(l)
     else:
-        mtl_r.write(l)
+        obj_r.write(l)
+
+# qmap = open(old_map_fn,'r')
+# for l in qmap:
+#     print l
 
