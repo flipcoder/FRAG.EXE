@@ -214,6 +214,7 @@ void Player :: logic(Freq::Time t)
         if(not m_pViewModel->equipping()){
             if(m_pController->button(string("slot")+to_string(i))){
                 if(m_WeaponStash.slot(i)){
+                    Sound::play(m_pCamera.get(), "swap.wav", m_pQor->resources());
                     scope(false);
                     m_pViewModel->fast_zoom(false);
                     auto vm = m_pViewModel.get();
@@ -230,6 +231,7 @@ void Player :: logic(Freq::Time t)
     if(m_pController->button("next").pressed_now()){
         if(m_pViewModel->idle()){
             if(m_WeaponStash.next()){
+                Sound::play(m_pCamera.get(), "swap.wav", m_pQor->resources());
                 scope(false);
                 m_pViewModel->fast_zoom(false);
                 auto vm = m_pViewModel.get();
@@ -244,6 +246,7 @@ void Player :: logic(Freq::Time t)
     if(m_pController->button("previous").pressed_now()){
         if(m_pViewModel->idle()){
             if(m_WeaponStash.next(-1)){
+                Sound::play(m_pCamera.get(), "swap.wav", m_pQor->resources());
                 scope(false);
                 m_pViewModel->fast_zoom(false);
                 auto vm = m_pViewModel.get();

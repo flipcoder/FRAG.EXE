@@ -131,21 +131,20 @@ Weapon* WeaponStash :: next_in_slot(Weapon* active, int dir, bool wrap)
             return &slot.at((idx + dir) % slot.size());
         else
             return &slot.at(idx + dir);
-    }catch(const std::out_of_range&){
-        LOG("no more weapons in slot")
-    }
+    }catch(const std::out_of_range&){}
     // no more weapons in slot, return nullptr
     return nullptr;
 }
 
 bool WeaponStash :: slot(int num)
 {
+    auto last_active = m_pActive;
     if(num == m_pActive->spec()->slot())
     {
         auto active = next_in_slot(m_pActive, 1, true);
         if(active)
             m_pActive = active;
-        return active; // TODO: next_in_slot w/ wrapping
+        return active && active != last_active;
     }
     try{
         m_pActive = &m_Slots[num].at(0);
