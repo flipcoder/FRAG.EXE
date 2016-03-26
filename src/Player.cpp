@@ -87,8 +87,8 @@ Player :: Player(
         interface->on_jump([_this, physics, pmesh_body, cache, camera]{
             if(not _this->can_jump())
                 return;
-            pmesh_body->applyImpulse(
-                btVector3(0.0f, 1000.0f, 0.0f), btVector3(0.0f, 0.0f, 0.0f)
+            pmesh_body->applyCentralImpulse(
+                btVector3(0.0f, 1000.0f, 0.0f)
             );
             Sound::play(camera, "jump.wav", cache);
         });
@@ -352,7 +352,7 @@ void Player :: logic(Freq::Time t)
         else
         {
             // projectile
-            auto m = m_pQor->make<Mesh>("projectile_grenade.obj");
+            auto m = m_pQor->make<Mesh>(m_WeaponStash.active()->spec()->projectile());
             m->set_physics(Node::DYNAMIC);
             m->set_physics_shape(Node::HULL);
             m->mass(1.0f);

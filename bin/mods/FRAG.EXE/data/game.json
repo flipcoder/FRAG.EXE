@@ -35,7 +35,7 @@
         "rocketrifle": {
             "name": "Rocket Rifle",
             "slot": 5,
-            "projectile": "rocket.obj",
+            "projectile": "item_rocket.obj",
             "model": "gun_rocketrifle.obj",
             "pos": [0.06, -0.1153, -0.188],
             "zoomed_pos": [0.0, -0.07, -0.28],

@@ -113,21 +113,23 @@ void GameState :: preload()
     string map = m_pQor->args().filenames(-1, "test");
     std::shared_ptr<Node> scene_root;
     
-    map = Filesystem::cutExtension(map);
     //if(Filesystem::getExtension(map) == "json"){
     if(m_pQor->exists(map +  ".json")){
         auto scene = m_pQor->make<Scene>(map + ".json");
-        scene_root = scene->root();
+        auto scene_root = scene->root();
         m_pRoot->add(scene->root());
+        auto meshes = scene_root->hook_type<Mesh>();
+        for(auto&& mesh: meshes)
+            mesh->set_physics(Node::STATIC);
     }
     
     if(m_pQor->exists(map +  ".obj")){
-        scene_root = m_pQor->make<Mesh>(map + ".obj");
+        auto scene_root = m_pQor->make<Mesh>(map + ".obj");
         m_pRoot->add(scene_root);
+        auto meshes = scene_root->hook_type<Mesh>();
+        for(auto&& mesh: meshes)
+            mesh->set_physics(Node::STATIC);
     }
-    auto meshes = scene_root->hook_type<Mesh>();
-    for(auto&& mesh: meshes)
-        mesh->set_physics(Node::STATIC);
     
     m_pPhysics->generate(m_pRoot.get(), Physics::GEN_RECURSIVE);
     m_pPhysics->world()->setGravity(btVector3(0.0, -9.8, 0.0));
