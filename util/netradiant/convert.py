@@ -3,8 +3,9 @@ import sys
 import os
 import shutil
 import json
+import path
 
-SCALE = 0.1
+SCALE = 0.025
 
 m = os.path.splitext(sys.argv[1])[0]
 old_obj_fn = m+".obj"
@@ -24,13 +25,17 @@ mtl = open(old_mtl_fn,'r')
 mtl_r = open(mtl_fn,'w')
 for l in mtl:
     if l.startswith("newmtl "):
-        mtl_r.write(l)
+        tokens = l.split(' ')
+        mtl_r.write(tokens[0] + " " + os.path.basename(tokens[1]))
         mtl_r.write("map_Kd " + os.path.basename(l.split()[1]) + ".png\n\n")
 
 obj = open(old_obj_fn,'r')
 obj_r = open(obj_fn,'w')
 for l in obj:
-    if l.startswith("v "):
+    if l.startswith("usemtl "):
+        tokens = l.split(' ')
+        obj_r.write(tokens[0] + " " + os.path.basename(tokens[1]))
+    elif l.startswith("v "):
         tokens = l.split(" ")
         tokens = tokens[1:]
         for i in range(0,len(tokens)):
@@ -75,6 +80,6 @@ for l in qmap:
         jsonmap["nodes"] += [node]
         node = None
 
-with open(m+".json", "w") as f:
+with open("new_"+m+".json", "w") as f:
     f.write(json.dumps(jsonmap, sort_keys=True, indent=4))
 
