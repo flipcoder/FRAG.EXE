@@ -139,7 +139,6 @@ void GameState :: preload()
     );
     m_pConsoleRoot->add(m_pConsole);
     
-    map = Filesystem::cutExtension(map);
     // TODO: ensure filename contains only valid filename chars
     if(not map.empty())
         m_pScript->execute_file("mods/FRAG.EXE/data/maps/"+ map +".py");
