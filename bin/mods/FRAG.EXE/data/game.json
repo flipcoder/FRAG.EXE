@@ -45,7 +45,7 @@
         "grenadelauncher": {
             "name": "Grenade Launcher",
             "slot": 5,
-            "projectile": "grenade.obj",
+            "projectile": "projectile_grenade.obj",
             "model": "gun_grenadelauncher.obj",
             "pos": [0.0355, -0.06, -0.188],
             "zoomed_pos": [0.0, -0.0474, -0.1525],
