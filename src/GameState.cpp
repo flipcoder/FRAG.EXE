@@ -110,14 +110,19 @@ void GameState :: preload()
     //);
     
     //m_pRoot->add(m_pQor->make<Mesh>("apartment_scene.obj"));
-    string map = m_pQor->args().filenames(-1, "test.json");
+    string map = m_pQor->args().filenames(-1, "test");
     std::shared_ptr<Node> scene_root;
-    if(Filesystem::getExtension(map) == "json"){
-        auto scene = m_pQor->make<Scene>(map);
+    
+    map = Filesystem::cutExtension(map);
+    //if(Filesystem::getExtension(map) == "json"){
+    if(m_pQor->exists(map +  ".json")){
+        auto scene = m_pQor->make<Scene>(map + ".json");
         scene_root = scene->root();
         m_pRoot->add(scene->root());
-    }else{
-        scene_root = m_pQor->make<Mesh>(map);
+    }
+    
+    if(m_pQor->exists(map +  ".obj")){
+        scene_root = m_pQor->make<Mesh>(map + ".obj");
         m_pRoot->add(scene_root);
     }
     auto meshes = scene_root->hook_type<Mesh>();
