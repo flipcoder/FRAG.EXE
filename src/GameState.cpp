@@ -91,10 +91,6 @@ void GameState :: preload()
     //});
     //m_pRoot->add(player);
     
-    auto mus = m_pQor->make<Sound>("cave.ogg");
-    m_pRoot->add(mus);
-    mus->ambient(true);
-    
     m_pSkyboxCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pSkyboxCamera->perspective();
     m_pSkyboxRoot->add(m_pQor->make<Mesh>("skybox1.obj"));

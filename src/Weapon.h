@@ -10,6 +10,7 @@ class WeaponSpec;
 class WeaponSpecEntry
 {
     public:
+        
         WeaponSpecEntry() {}
         WeaponSpecEntry(std::string name, const std::shared_ptr<Meta>& cfg, WeaponSpec* spec);
         ~WeaponSpecEntry() = default;
@@ -30,13 +31,18 @@ class WeaponSpecEntry
         float spread() const { return m_Spread; }
         Freq::Time delay() const { return m_Delay; }
         bool scope() const { return m_bScope; }
+        bool gravity() const { return m_bGravity; }
+        float speed() const { return m_Speed; }
+        int bias() const { return m_Bias; }
         
     private:
+        
         std::string m_Name;
         std::shared_ptr<Meta> m_pConfig;
         WeaponSpec* m_pSpec;
         std::string m_Model;
         std::string m_Projectile;
+        bool m_bGravity = false;
         std::string m_Sound;
         int m_Slot = 0;
         int m_Bias = 0;
@@ -46,6 +52,7 @@ class WeaponSpecEntry
         glm::vec3 m_ViewModelPos;
         glm::vec3 m_ViewModelZoomedPos;
         bool m_bScope = false;
+        float m_Speed = 0.0f;
 };
 
 class WeaponSpec
@@ -93,7 +100,10 @@ class WeaponStash
 
         Weapon* active() { return m_pActive; }
 
+        void sort_slot(std::vector<Weapon>& slot);
+
     private:
+        
         std::vector<std::vector<Weapon>> m_Slots;
         WeaponSpec* m_pSpec;
         Weapon* m_pActive = nullptr;

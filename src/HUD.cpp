@@ -16,8 +16,8 @@ HUD :: HUD(Player* player, Window* window, Input* input, Cache<Resource,std::str
     add(m_pCanvas);
     //m_pCanvas->position(vec3(0.0f, float(sh) - 72.0f, 0.0f));
     //m_pCanvas->position(vec3(0.0f, float(sh) - 72.0f, 0.0f));
-    m_FontDesc = Pango::FontDescription("Audiowide Normal 56");
-    m_pCanvas->layout()->set_font_description(m_FontDesc);
+    //m_FontDesc = Pango::FontDescription("Audiowide Normal 56");
+    //m_pCanvas->layout()->set_font_description(m_FontDesc);
 }
 
 void HUD :: redraw()
@@ -34,11 +34,16 @@ void HUD :: redraw()
     
     //m_pCanvas->clear(Color(1.0f, 1.0f, 1.0f, 0.0f));
     m_pCanvas->font("Audiowide",80);
+    //m_pCanvas->font("Digital Dream",80);
     
+    string hps = to_string(m_HP);
+    float fade = 1.0f * m_HP / 100.0f;
+    
+    // Draw backgrounds
     Cairo::TextExtents extents;
     auto cairo = m_pCanvas->context();
-    cairo->get_text_extents("+ 100%", extents);
-    cairo->set_source_rgba(1.0f, 0.0f, 0.0f, 0.5f);
+    cairo->get_text_extents("+ "+hps+"%", extents);
+    cairo->set_source_rgba(1.0f-fade, fade, 0.0f, 0.5f);
     m_pCanvas->rectangle(
         m_Border  - m_Border/2.0f, sh - extents.height - m_Border  - m_Border/2.0f,
         extents.width  + m_Border, extents.height  + m_Border,
@@ -54,8 +59,8 @@ void HUD :: redraw()
     
     m_pCanvas->text("+", Color::black(), vec2(4.0f + m_Border, sh + 4.0f - m_Border), Canvas::LEFT);
     m_pCanvas->text("+", Color(1.0f,0.0f,0.0f), vec2(m_Border, sh - m_Border), Canvas::LEFT);
-    m_pCanvas->text("  100%", Color::black(), vec2(4.0f + m_Border, sh + 4.0f - m_Border), Canvas::LEFT);
-    m_pCanvas->text("  100%", Color::white(), vec2(m_Border,sh - m_Border), Canvas::LEFT);
+    m_pCanvas->text("  "+hps+"%", Color::black(), vec2(4.0f + m_Border, sh + 4.0f - m_Border), Canvas::LEFT);
+    m_pCanvas->text("  "+hps+"%", Color::white(), vec2(m_Border,sh - m_Border), Canvas::LEFT);
     
     m_pCanvas->text("100 / 100", Color::black(), vec2(4.0f + sw - m_Border, sh + 4.0f - m_Border), Canvas::RIGHT);
     m_pCanvas->text("100 / 100", Color::white(), vec2(sw - m_Border,sh - m_Border), Canvas::RIGHT);
@@ -87,5 +92,18 @@ void HUD :: logic_self(Freq::Time)
         redraw();
         m_bDirty = false;
     }
+}
+
+void HUD :: hp(int value)
+{
+    m_HP = value;
+    m_bDirty = true;
+}
+
+void HUD :: ammo(int value, int max)
+{
+    m_Ammo = value;
+    m_AmmoMax = max;
+    m_bDirty = true;
 }
 

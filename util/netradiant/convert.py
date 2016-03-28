@@ -36,11 +36,17 @@ for l in obj:
         tokens = l.split(' ')
         obj_r.write(tokens[0] + " " + os.path.basename(tokens[1]))
     elif l.startswith("v "):
-        tokens = l.split(" ")
-        tokens = tokens[1:]
+        tokens = l.split(" ")[1:]
         for i in range(0,len(tokens)):
             tokens[i] = str(float(tokens[i]) * SCALE)
+        tokens[0] = str(-float(tokens[0]))
         l = "v " + " ".join(tokens) + "\n"
+        obj_r.write(l)
+    elif l.startswith("f "):
+        tokens = l.split(" ")[1:]
+        for i in range(0,len(tokens)//2):
+            tokens[i], tokens[len(tokens)-2-i] = tokens[len(tokens)-2-i], tokens[i]
+        l = "f " + " ".join(tokens) + "\n"
         obj_r.write(l)
     else:
         obj_r.write(l)
@@ -52,13 +58,12 @@ for l in qmap:
     if l.startswith('\"origin\"'):
         if node:
             if node["type"]=="light":
-                tokens = l.split(' ')
-                tokens = tokens[1:]
+                tokens = l.split(' ')[1:]
                 for i in range(0,len(tokens)):
                     tokens[i] = tokens[i].replace('\"','')
                 node["light"] = "point"
                 node["matrix"] = [
-                    1.0, 0.0, 0.0, 0.0,
+                    -1.0, 0.0, 0.0, 0.0,
                     0.0, 1.0, 0.0, 0.0,
                     0.0, 0.0, 1.0, 0.0,
                     float(tokens[0]) * SCALE,

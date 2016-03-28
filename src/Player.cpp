@@ -30,12 +30,13 @@ Player :: Player(
     m_pGameSpec(spec),
     m_WeaponStash(spec->weapons())
 {
+    auto _this = this;
+    
     m_pOrthoCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pOrthoCamera->ortho();
     m_pOrthoRoot->add(m_pOrthoCamera);
-    m_pOrthoRoot->add(make_shared<HUD>(
-        this, window, controller->input(), cache
-    ));
+    m_pHUD = make_shared<HUD>(this, window, controller->input(), cache);
+    m_pOrthoRoot->add(m_pHUD);
     m_pPlayerMesh = make_shared<Mesh>();
     m_pPlayerMesh->set_box(Box(
         vec3(-0.2f, -0.6f, -0.2f),
@@ -52,6 +53,15 @@ Player :: Player(
     m_pPlayerMesh->add(m_pCamera);
     m_pCamera->position(vec3(0.0f, 0.6f, 0.0f));
     m_pRoot->add(m_pPlayerMesh);
+    m_pPlayerMesh->config()->set<int>("hp", 10);
+    m_pPlayerMesh->config()->set<int>("maxhp", 10);
+    auto hp_change = [_this](){
+        int value = _this->m_pPlayerMesh->config()->at<int>("hp");
+        int maxvalue = _this->m_pPlayerMesh->config()->at<int>("maxhp");
+        _this->m_pHUD->hp(kit::round_int(100.0f * value / maxvalue));
+    };
+    hp_change();
+    m_pPlayerMesh->config()->on_change("hp",hp_change);
     m_pDecal = cache->cache_cast<ITexture>("decal_bullethole1.png");
     m_pSpark = cache->cache_cast<ITexture>("spark.png");
     m_pController = m_pQor->session()->profile(0)->controller();
@@ -73,11 +83,10 @@ Player :: Player(
     auto pmesh = m_pPlayerMesh.get();
     auto camera = m_pCamera.get();
     auto interface = m_pInterface.get();
-    auto _this = this;
     m_pPhysics->on_generate([_this, physics, pmesh,interface,cache,camera]{
         auto pmesh_body = (btRigidBody*)pmesh->body()->body();
         pmesh_body->setActivationState(DISABLE_DEACTIVATION);
-        pmesh_body->setAngularFactor(btVector3(0,0,0));
+        //pmesh_body->setAngularFactor(btVector3(0,0,0));
         pmesh_body->setCcdMotionThreshold(1.0f);
         //pmesh_body->setGravity();
         //pmesh_body->setCcdSweptSphereRadius(0.25f);
@@ -357,12 +366,38 @@ void Player :: logic(Freq::Time t)
             m->set_physics_shape(Node::HULL);
             m->mass(1.0f);
             m_pViewModel->node()->add(m);
+            m->move(glm::vec3(0.0f, 0.0f, -1.0f));
             m->collapse(Space::WORLD);
             auto dir = Matrix::heading(*m->matrix(Space::WORLD));
             m_pPhysics->generate(m.get());
-            ((btRigidBody*)m->body()->body())->applyCentralImpulse(
-                Physics::toBulletVector(dir * 10.0f)
-            );
+            auto body = ((btRigidBody*)m->body()->body());
+            body->applyCentralImpulse(Physics::toBulletVector(dir *
+                m_WeaponStash.active()->spec()->speed()
+            ));
+            auto vel = m->velocity();
+            
+            auto mp = m.get();
+            auto cache = m_pCache;
+            
+            if(not m_WeaponStash.active()->spec()->gravity()) {
+                body->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+                mp->inertia(false);
+                //body->setAngularFactor(btVector3(0.0f, 1.0f, 0.0f));
+                m->on_tick.connect([mp,vel,cache](Freq::Time){
+                    auto body = ((btRigidBody*)mp->body()->body());
+                    if(glm::dot(mp->velocity(),vel) < 1.0f - K_EPSILON ||
+                        glm::length(mp->velocity()) != glm::length(vel))
+                    {
+                        auto snd = make_shared<Sound>(
+                            cache->transform("explosion.wav"), cache
+                        );
+                        mp->stick(snd);
+                        snd->detach_on_done();
+                        snd->play();
+                        mp->detach();
+                    }
+                });
+            }
         }
         
     }

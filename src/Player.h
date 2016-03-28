@@ -11,6 +11,7 @@
 #include "GameSpec.h"
 
 class Qor;
+class HUD;
 
 class Player:
     public IRealtime
@@ -53,6 +54,7 @@ class Player:
         std::shared_ptr<Controller> m_pController;
         std::shared_ptr<PlayerInterface3D> m_pInterface;
         std::shared_ptr<Mesh> m_pCrosshair;
+        std::shared_ptr<HUD> m_pHUD;
         Cache<Resource, std::string>* m_pCache;
         Physics* m_pPhysics;
         Window* m_pWindow;

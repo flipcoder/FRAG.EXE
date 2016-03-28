@@ -11,13 +11,15 @@ WeaponSpecEntry :: WeaponSpecEntry(
     m_pSpec(spec),
     m_Model(m_pConfig->at<string>("model", string())),
     m_Projectile(m_pConfig->at<string>("projectile", string())),
+    m_bGravity(m_pConfig->at<bool>("gravity", false)),
     m_Sound(m_pConfig->at<string>("sound", string())),
     m_Slot(m_pConfig->at<int>("slot")),
     m_Bias(m_pConfig->at<int>("bias",0)),
     m_Burst(m_pConfig->at<int>("burst",1)),
     m_Spread(m_pConfig->at<double>("spread",0.0f)),
     m_Delay(Freq::Time::seconds(m_pConfig->at<double>("delay",1.0f))),
-    m_bScope(m_pConfig->at<bool>("scope",false))
+    m_bScope(m_pConfig->at<bool>("scope",false)),
+    m_Speed(m_pConfig->at<double>("speed",0.0f))
 {
     auto m = m_pConfig->at<shared_ptr<Meta>>("pos", make_shared<Meta>(MetaFormat::JSON, "[0.0,0.0,0.0]"));
     m_ViewModelPos = glm::vec3(
@@ -61,8 +63,17 @@ bool WeaponStash :: give(WeaponSpecEntry* spec)
         // TODO: attempt to merge
         return false;
     }
-    m_Slots[spec->slot()].emplace_back(spec);
+    slot.emplace_back(spec);
+    sort_slot(slot);
+    
     return true;
+}
+
+void WeaponStash :: sort_slot(std::vector<Weapon>& slot)
+{
+    std::sort(ENTIRE(slot), [](Weapon& a, Weapon& b){
+        return a.spec()->bias() < b.spec()->bias();
+    });
 }
 
 bool WeaponStash :: next(int delta)

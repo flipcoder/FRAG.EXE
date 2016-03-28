@@ -26,6 +26,9 @@ class HUD:
             return m_bInput;
         }
 
+        void hp(int value);
+        void ammo(int value, int max);
+
     private:
         
         void redraw();
@@ -34,12 +37,16 @@ class HUD:
         Input* m_pInput = nullptr;
         std::shared_ptr<Canvas> m_pCanvas;
         Cache<Resource, std::string>* m_pCache;
-        Pango::FontDescription m_FontDesc;
+        //Pango::FontDescription m_FontDesc;
         float m_Border = 24.0f;
         Player* m_pPlayer;
         
         bool m_bInput = false;
         bool m_bDirty = true;
+
+        int m_HP = 0;
+        int m_Ammo = 0;
+        int m_AmmoMax = 0;
 };
 
 #endif
