@@ -15,6 +15,7 @@
 #include "Qor/Material.h"
 #include "Qor/kit/log/log.h"
 #include <glm/gtx/orthonormalize.hpp>
+#include "Qor/BasicPartitioner.h"
 using namespace std;
 using namespace glm;
 
@@ -24,6 +25,7 @@ GameState :: GameState(
 ):
     m_pQor(engine),
     m_pInput(engine->input()),
+    m_pPartitioner(engine->pipeline()->partitioner()),
     m_pRoot(make_shared<Node>()),
     m_pSkyboxRoot(make_shared<Node>()),
     m_pInterpreter(engine->interpreter()),
@@ -40,6 +42,7 @@ void GameState :: preload()
     auto win = m_pQor->window();
     m_pController = m_pQor->session()->profile(0)->controller();
     m_pPlayer = kit::make_unique<Player>(
+        this,
         m_pRoot.get(),
         m_pController,
         m_pQor->resources(),
@@ -218,6 +221,20 @@ void GameState :: enter()
             m_pQor->pop_state();
         }
     )));
+
+    auto cache = m_pQor->resources();
+    auto root = m_pRoot;
+    event("message", [root, cache](const std::shared_ptr<Meta>& m){
+        string msg = m->at<string>("message");
+        auto fn = boost::to_lower_copy(boost::replace_all_copy(msg, " ", ""))+".wav";
+        auto snd = make_shared<Sound>(cache->transform(fn), cache);
+        snd->ambient(true);
+        root->add(snd);
+        snd->play();
+    });
+    //event("message", make_shared<Meta>(
+    //    MetaFormat::JSON, R"({"message": "RED TEAM SCORES", "color": "FF0000"})"
+    //));
 }
 
 void GameState :: logic(Freq::Time t)

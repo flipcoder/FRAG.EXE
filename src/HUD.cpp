@@ -24,6 +24,8 @@ void HUD :: redraw()
 {
     auto sw = m_pWindow->size().x;
     auto sh = m_pWindow->size().y;
+    auto cx = m_pWindow->center().x;
+    auto cy = m_pWindow->center().y;
     auto win = m_pWindow;
     
     // clear black
@@ -65,6 +67,9 @@ void HUD :: redraw()
     m_pCanvas->text("100 / 100", Color::black(), vec2(4.0f + sw - m_Border, sh + 4.0f - m_Border), Canvas::RIGHT);
     m_pCanvas->text("100 / 100", Color::white(), vec2(sw - m_Border,sh - m_Border), Canvas::RIGHT);
 
+    m_pCanvas->text(m_Msg, Color::black(), vec2(cx,cy / 4.0f) + 4.0f, Canvas::CENTER);
+    m_pCanvas->text(m_Msg, m_MsgColor, vec2(cx,cy / 4.0f), Canvas::CENTER);
+
     m_pCanvas->font("Audiowide",40);
     cairo->get_text_extents("1000", extents);
     cairo->set_source_rgba(1.0f, 0.0f, 0.0f, 0.5f);
@@ -86,8 +91,19 @@ void HUD :: redraw()
     //m_pCanvas->dirty(false);
 }
 
-void HUD :: logic_self(Freq::Time)
+void HUD :: logic_self(Freq::Time t)
 {
+    if(not m_Msg.empty())
+    {
+        m_MsgTime = Freq::Time(std::max<int>(0, int(m_MsgTime.value) - t.ms()));
+        m_MsgColor.a() = kit::saturate(m_MsgTime.value/500.0);
+        if(not m_MsgTime)
+        {
+            m_Msg = string();
+            m_bDirty = true;
+        }
+    }
+
     if(m_bDirty) {
         redraw();
         m_bDirty = false;
@@ -104,6 +120,14 @@ void HUD :: ammo(int value, int max)
 {
     m_Ammo = value;
     m_AmmoMax = max;
+    m_bDirty = true;
+}
+
+void HUD :: message(string msg, Color c)
+{
+    m_Msg = msg;
+    m_MsgColor = c;
+    m_MsgTime = Freq::Time::seconds(4);
     m_bDirty = true;
 }
 

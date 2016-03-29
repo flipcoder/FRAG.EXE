@@ -28,6 +28,7 @@ class HUD:
 
         void hp(int value);
         void ammo(int value, int max);
+        void message(std::string msg, Color c);
 
     private:
         
@@ -47,6 +48,9 @@ class HUD:
         int m_HP = 0;
         int m_Ammo = 0;
         int m_AmmoMax = 0;
+        std::string m_Msg;
+        Color m_MsgColor;
+        Freq::Time m_MsgTime = Freq::Time(0);
 };
 
 #endif

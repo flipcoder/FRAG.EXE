@@ -66,6 +66,9 @@ class GameState:
             return m_pPhysics.get();
         }
 
+        BasicPartitioner* partitioner() {
+            return m_pPartitioner;
+        }
 
     private:
 
@@ -73,6 +76,7 @@ class GameState:
         
         Qor* m_pQor = nullptr;
         Input* m_pInput = nullptr;
+        BasicPartitioner* m_pPartitioner = nullptr;
         Pipeline* m_pPipeline = nullptr;
 
         std::shared_ptr<Console> m_pConsole;

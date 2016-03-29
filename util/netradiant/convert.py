@@ -57,23 +57,28 @@ node = None
 for l in qmap:
     if l.startswith('\"origin\"'):
         if node:
-            if node["type"]=="light":
-                tokens = l.split(' ')[1:]
-                for i in range(0,len(tokens)):
-                    tokens[i] = tokens[i].replace('\"','')
-                node["light"] = "point"
-                node["matrix"] = [
-                    -1.0, 0.0, 0.0, 0.0,
-                    0.0, 1.0, 0.0, 0.0,
-                    0.0, 0.0, 1.0, 0.0,
-                    float(tokens[0]) * SCALE,
-                    float(tokens[1]) * SCALE,
-                    float(tokens[2]) * SCALE,
-                    1.0
-                ]
-    if l.startswith('\"classname\" \"light\"'):
+            node["matrix"] = [
+                -1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                float(tokens[0]) * SCALE,
+                float(tokens[1]) * SCALE,
+                float(tokens[2]) * SCALE,
+                1.0
+            ]
+    elif l.startswith('\"classname\" \"light\"'):
         node = {"type":"light"}
-    if l.startswith('\"light\" '):
+        if node["type"]=="light":
+            tokens = l.split(' ')[1:]
+            for i in range(0,len(tokens)):
+                tokens[i] = tokens[i].replace('\"','')
+            node["light"] = "point"
+    elif l.startswith('\"classname\" \"misc_model\"'):
+        node = {"type":"mesh"}
+    elif l.startswith('\"model\" '):
+        fn = os.path.basename(l.split(' ')[1].replace('\"',''))
+        node = {"data":fn}
+    elif l.startswith('\"light\" '):
         if node:
             if node["type"] == "light":
                 tokens = l.split(" ")
@@ -81,7 +86,7 @@ for l in qmap:
                 for i in range(0,len(tokens)):
                     tokens[i] = tokens[i].replace('\"','')
                 node["distance"] = float(tokens[0]) * SCALE
-    if l.startswith("}") and node:
+    elif l.startswith("}") and node:
         jsonmap["nodes"] += [node]
         node = None
 

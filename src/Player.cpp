@@ -5,12 +5,15 @@
 #include "Qor/Physics.h"
 #include "Qor/Particle.h"
 #include "Qor/Material.h"
+#include "GameState.h"
+#include "Qor/BasicPartitioner.h"
 using namespace std;
 using namespace glm;
 
 const unsigned Player :: MAX_DECALS = 32;
 
 Player :: Player(
+    GameState* state,
     Node* root,
     shared_ptr<Controller> controller,
     Cache<Resource, string>* cache,
@@ -20,6 +23,7 @@ Player :: Player(
     GameSpec* spec,
     std::function<bool()> lock_if
 ):
+    m_pState(state),
     m_pRoot(root),
     m_pOrthoRoot(make_shared<Node>()),
     m_pController(controller),
@@ -112,6 +116,14 @@ Player :: Player(
 
     m_bScope = true;
     scope(false);
+
+    auto hud = m_pHUD.get();
+    m_pState->event("message",[hud](const std::shared_ptr<Meta>& m){
+        //hud->message(m->at<string>("message"), Color(m->at<string>("color", string("FFFFFF"))));
+        hud->message(m->at<string>("message"), Color::red());
+    });
+
+    state->partitioner()->register_object(m_pPlayerMesh, 0);
 }
 
 void Player :: scope(bool b)

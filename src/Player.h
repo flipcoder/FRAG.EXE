@@ -12,12 +12,14 @@
 
 class Qor;
 class HUD;
+class GameState;
 
 class Player:
     public IRealtime
 {
     public:
         Player(
+            GameState* state,
             Node* root,
             std::shared_ptr<Controller> controller,
             Cache<Resource, std::string>* cache,
@@ -45,6 +47,7 @@ class Player:
         void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
         void refresh_weapon();
         
+        GameState* m_pState;
         Node* m_pRoot;
         std::shared_ptr<Node> m_pOrthoRoot;
         std::shared_ptr<Camera> m_pOrthoCamera;

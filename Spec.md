@@ -79,6 +79,10 @@ Where EVENTNAME is any of the following:
 - enter - When the map starts (after loading)
 - tick
     - Time passed since last frame
+- collision - Tick while object is touching another object.
+- no_collision - Tick while object is not touching another object
+- touch - When an object starts touching an object.
+- untouch - When an object stops touching another object.
 
 ### Game events
 
@@ -93,8 +97,6 @@ Where EVENTNAME is any of the following:
     - object
 - start - When the round starts
 - stop - When the round ends
-- touch - When a player starts touching an object.
-- untouch - When a player stops touching an object.
 - damage - When a player does damage to a object.
     - player
     - object
@@ -149,4 +151,13 @@ You may consider reading through
 [QorBook](https://github.com/flipcoder/qor/blob/master/QorBook.md)
 to learn more about scripting.  Specifically the sections about different node
 types since these are what you will be dealing with.
+
+### Music
+
+```
+music = qor.Sound("music.ogg")
+music.ambient(True)
+qor.root().add(music)
+qor.on_enter(music.play)
+```
 
