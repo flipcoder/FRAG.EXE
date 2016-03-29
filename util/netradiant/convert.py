@@ -3,7 +3,6 @@ import sys
 import os
 import shutil
 import json
-import path
 
 SCALE = 0.025
 
@@ -57,6 +56,7 @@ node = None
 for l in qmap:
     if l.startswith('\"origin\"'):
         if node:
+            tokens = l.replace('\"','').split(' ')[1:]
             node["matrix"] = [
                 -1.0, 0.0, 0.0, 0.0,
                 0.0, 1.0, 0.0, 0.0,
