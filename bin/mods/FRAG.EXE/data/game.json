@@ -8,7 +8,9 @@
             "zoomed_pos": [0.0, -0.039, -0.1612],
             "sound": "shot2.wav",
             "delay": 0.2,
-            "ammo_type": "pistolbullets"
+            "ammo_type": "pistolbullets",
+            "clip": 10,
+            "ammo": 50
         },
         "shotgun": {
             "name": "Tactical Shotgun",
@@ -20,7 +22,9 @@
             "burst": 8,
             "spread": 0.1,
             "delay": 0.7,
-            "ammo_type": "shotgunshells"
+            "ammo_type": "shotgunshells",
+            "clip": 0,
+            "ammo": 96
         },
         "ump45": {
             "name": "Silenced UMP-45",
@@ -30,7 +34,9 @@
             "zoomed_pos": [0.0, -0.1557, -0.2559],
             "sound": "shot.wav",
             "delay": 0.025,
-            "ammo_type": "ump45bullets"
+            "ammo_type": "ump45bullets",
+            "clip": 24,
+            "ammo": 128
         },
         "rocketrifle": {
             "name": "Rocket Rifle",
@@ -45,7 +51,9 @@
             "zoomed_pos": [0.0, -0.07, -0.28],
             "sound": "rocket.wav",
             "delay": 0.7,
-            "ammo_type": "rockets"
+            "ammo_type": "rockets",
+            "clip": 0,
+            "ammo": 10
         },
         "grenadelauncher": {
             "name": "Grenade Launcher",
@@ -58,7 +66,9 @@
             "zoomed_pos": [0.0, -0.0474, -0.1525],
             "sound": "grenadelauncher.wav",
             "delay": 0.7,
-            "ammo_type": "grenades"
+            "ammo_type": "grenades",
+            "clip": 0,
+            "ammo": 10
         },
         "sniper": {
             "name": "Sniper Rifle",
@@ -69,7 +79,9 @@
             "sound": "snipershot.wav",
             "delay": 0.7,
             "ammo_type": "sniperbullets",
-            "scope": true
+            "scope": true,
+            "clip": 0,
+            "ammo": 10
         }
     },
     "pickups": {

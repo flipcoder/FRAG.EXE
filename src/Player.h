@@ -43,6 +43,7 @@ class Player:
         
     private:
         
+        void update_hud();
         void scope(bool b);
         void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
         void refresh_weapon();

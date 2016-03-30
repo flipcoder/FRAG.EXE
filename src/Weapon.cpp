@@ -19,7 +19,9 @@ WeaponSpecEntry :: WeaponSpecEntry(
     m_Spread(m_pConfig->at<double>("spread",0.0f)),
     m_Delay(Freq::Time::seconds(m_pConfig->at<double>("delay",1.0f))),
     m_bScope(m_pConfig->at<bool>("scope",false)),
-    m_Speed(m_pConfig->at<double>("speed",0.0f))
+    m_Speed(m_pConfig->at<double>("speed",0.0f)),
+    m_Ammo(m_pConfig->at<int>("ammo",0)), // 0 == unlimited
+    m_Clip(m_pConfig->at<int>("clip",0)) // = no reload needed
 {
     auto m = m_pConfig->at<shared_ptr<Meta>>("pos", make_shared<Meta>(MetaFormat::JSON, "[0.0,0.0,0.0]"));
     m_ViewModelPos = glm::vec3(
@@ -167,5 +169,50 @@ bool WeaponStash :: slot(int num)
 Weapon :: Weapon(WeaponSpecEntry* spec):
     m_pSpec(spec)
     //m_Clip(spec->clip())
-{}
+{
+    fill();
+}
+
+bool Weapon :: fill()
+{
+   bool success =
+       m_Clip != m_pSpec->clip() ||
+       m_Ammo != m_pSpec->ammo();
+   m_Clip = m_pSpec->clip();
+   m_Ammo = m_pSpec->ammo();
+   return success;
+}
+
+bool Weapon :: can_reload() const
+{
+    return m_pSpec->clip() > 0 && // no reload needed
+        m_Ammo > 0 &&
+        m_Clip != m_pSpec->clip(); // clip full?
+}
+
+bool Weapon :: reload()
+{
+    if(not can_reload())
+        return false;
+    int needed = m_pSpec->clip() - m_Clip;
+    int transfer = std::min<int>(needed, m_Ammo);
+    m_Clip = m_Clip + transfer;
+    m_Ammo = m_Ammo - transfer;
+    return true;
+}
+
+int Weapon :: fire()
+{
+    int burst;
+    if(m_pSpec->clip() == 0) { // no reload needed
+        burst = std::min<int>(m_Ammo, m_pSpec->burst());
+        m_Ammo = m_Ammo - burst;
+    }
+    else
+    {
+        burst = std::min<int>(m_Clip, m_pSpec->burst());
+        m_Clip = m_Clip - burst;
+    }
+    return burst;
+}
 

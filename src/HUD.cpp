@@ -40,6 +40,15 @@ void HUD :: redraw()
     
     string hps = to_string(m_HP);
     float fade = 1.0f * m_HP / 100.0f;
+
+    string ammo;
+    if(m_Ammo == -1)
+    {
+        if(m_AmmoMax != -1)
+            ammo = to_string(m_AmmoMax);
+    }
+    else
+        ammo = to_string(m_Ammo) + " / " + to_string(m_AmmoMax);
     
     // Draw backgrounds
     Cairo::TextExtents extents;
@@ -51,7 +60,7 @@ void HUD :: redraw()
         extents.width  + m_Border, extents.height  + m_Border,
         16.0f
     ); m_pCanvas->context()->fill();
-    cairo->get_text_extents("100 / 100", extents);
+    cairo->get_text_extents(ammo, extents);
     cairo->set_source_rgba(1.0f, 1.0f, 0.0f, 0.5f);
     m_pCanvas->rectangle(
         sw - extents.width - m_Border - m_Border/2.0f, sh - extents.height - m_Border - m_Border/2.0f,
@@ -64,8 +73,8 @@ void HUD :: redraw()
     m_pCanvas->text("  "+hps+"%", Color::black(), vec2(4.0f + m_Border, sh + 4.0f - m_Border), Canvas::LEFT);
     m_pCanvas->text("  "+hps+"%", Color::white(), vec2(m_Border,sh - m_Border), Canvas::LEFT);
     
-    m_pCanvas->text("100 / 100", Color::black(), vec2(4.0f + sw - m_Border, sh + 4.0f - m_Border), Canvas::RIGHT);
-    m_pCanvas->text("100 / 100", Color::white(), vec2(sw - m_Border,sh - m_Border), Canvas::RIGHT);
+    m_pCanvas->text(ammo, Color::black(), vec2(4.0f + sw - m_Border, sh + 4.0f - m_Border), Canvas::RIGHT);
+    m_pCanvas->text(ammo, Color::white(), vec2(sw - m_Border,sh - m_Border), Canvas::RIGHT);
 
     m_pCanvas->text(m_Msg, Color::black(), vec2(cx,cy / 4.0f) + 4.0f, Canvas::CENTER);
     m_pCanvas->text(m_Msg, m_MsgColor, vec2(cx,cy / 4.0f), Canvas::CENTER);

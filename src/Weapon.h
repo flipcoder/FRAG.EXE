@@ -34,6 +34,8 @@ class WeaponSpecEntry
         bool gravity() const { return m_bGravity; }
         float speed() const { return m_Speed; }
         int bias() const { return m_Bias; }
+        int clip() const { return m_Clip; }
+        int ammo() const { return m_Ammo; }
         
     private:
         
@@ -53,6 +55,8 @@ class WeaponSpecEntry
         glm::vec3 m_ViewModelZoomedPos;
         bool m_bScope = false;
         float m_Speed = 0.0f;
+        int m_Ammo = 0;
+        int m_Clip = 0;
 };
 
 class WeaponSpec
@@ -81,9 +85,22 @@ class Weapon
     public:
         Weapon(WeaponSpecEntry* spec);
         WeaponSpecEntry* spec() { return m_pSpec; }
+        
+        bool fill();
+        int fire();
+        bool reload();
+        bool can_reload() const;
+        //kit::reactive<int>& ammo() { return m_Ammo; }
+        //kit::reactive<int>& clip() { return m_Clip; }
+        int ammo() const { return m_Ammo; }
+        int clip() const { return m_Clip; }
+        
     private:
         WeaponSpecEntry* m_pSpec;
-        //int m_Clip;
+        int m_Ammo = 0;
+        int m_Clip = 0;
+        //kit::reactive<int> m_Ammo;
+        //kit::reactive<int> m_Clip;
 };
 
 class WeaponStash
