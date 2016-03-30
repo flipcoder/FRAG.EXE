@@ -12,12 +12,10 @@ HUD :: HUD(Player* player, Window* window, Input* input, Cache<Resource,std::str
     auto sw = m_pWindow->size().x;
     auto sh = m_pWindow->size().y;
 
+    m_pFadeCanvas = make_shared<Canvas>(sw, sh);
+    add(m_pFadeCanvas);
     m_pCanvas = make_shared<Canvas>(sw, sh);
     add(m_pCanvas);
-    //m_pCanvas->position(vec3(0.0f, float(sh) - 72.0f, 0.0f));
-    //m_pCanvas->position(vec3(0.0f, float(sh) - 72.0f, 0.0f));
-    //m_FontDesc = Pango::FontDescription("Audiowide Normal 56");
-    //m_pCanvas->layout()->set_font_description(m_FontDesc);
 }
 
 void HUD :: redraw()
@@ -28,15 +26,8 @@ void HUD :: redraw()
     auto cy = m_pWindow->center().y;
     auto win = m_pWindow;
     
-    // clear black
-    //auto cairo = m_pCanvas->context();
-    //cairo->set_source_rgb(0.0f, 0.0f, 0.0f);
-    //cairo->paint();
     m_pCanvas->clear(Color(0.0f, 0.0f, 0.0f, 0.0f));
-    
-    //m_pCanvas->clear(Color(1.0f, 1.0f, 1.0f, 0.0f));
     m_pCanvas->font("Audiowide",80);
-    //m_pCanvas->font("Digital Dream",80);
     
     string hps = to_string(m_HP);
     float fade = 1.0f * m_HP / 100.0f;
@@ -45,7 +36,10 @@ void HUD :: redraw()
     if(m_Ammo == -1)
     {
         if(m_AmmoMax != -1)
+        {
             ammo = to_string(m_AmmoMax);
+        }
+        // else leave blank
     }
     else
         ammo = to_string(m_Ammo) + " / " + to_string(m_AmmoMax);
@@ -53,21 +47,16 @@ void HUD :: redraw()
     // Draw backgrounds
     Cairo::TextExtents extents;
     auto cairo = m_pCanvas->context();
-
-    m_pCanvas->color(m_Fade);
-    m_pCanvas->rectangle(
-       0.0f, 0.0f, sw, sh
-    ); cairo->fill();
     
     cairo->get_text_extents("+ "+hps+"%", extents);
-    cairo->set_source_rgba(1.0f-fade, fade, 0.0f, 0.5f);
+    cairo->set_source_rgba(fade, 0.0f, 0.0f, 0.5f);
     m_pCanvas->rectangle(
         m_Border  - m_Border/2.0f, sh - extents.height - m_Border  - m_Border/2.0f,
         extents.width  + m_Border, extents.height  + m_Border,
         16.0f
     ); m_pCanvas->context()->fill();
     cairo->get_text_extents(ammo, extents);
-    cairo->set_source_rgba(1.0f, 1.0f, 0.0f, 0.5f);
+    cairo->set_source_rgba(1.0f, boost::starts_with(ammo, "0") ? 0.0f : 1.0f, 0.0f, 0.5f);
     m_pCanvas->rectangle(
         sw - extents.width - m_Border - m_Border/2.0f, sh - extents.height - m_Border - m_Border/2.0f,
         extents.width + m_Border, extents.height + m_Border,
@@ -106,6 +95,20 @@ void HUD :: redraw()
     //m_pCanvas->dirty(false);
 }
 
+void HUD :: redraw_fade()
+{
+    auto sw = m_pWindow->size().x;
+    auto sh = m_pWindow->size().y;
+    auto win = m_pWindow;
+    auto cairo = m_pFadeCanvas->context();
+    m_pFadeCanvas->clear(Color(0.0f, 0.0f, 0.0f, 0.0f));
+    m_pFadeCanvas->color(m_Fade);
+    m_pFadeCanvas->rectangle(
+       0.0f, 0.0f, sw, sh
+    ); cairo->fill();
+    m_pFadeCanvas->dirty(true);
+}
+
 void HUD :: logic_self(Freq::Time t)
 {
     if(not m_Msg.empty())
@@ -119,6 +122,10 @@ void HUD :: logic_self(Freq::Time t)
         }
     }
 
+    if(m_bFadeDirty) {
+        redraw_fade();
+        m_bFadeDirty = false;
+    }
     if(m_bDirty) {
         redraw();
         m_bDirty = false;
@@ -150,7 +157,7 @@ void HUD :: fade(Color c)
 {
     if(m_Fade != c){
         m_Fade = c;
-        m_bDirty=true;
+        m_bFadeDirty=true;
     }
 }
 

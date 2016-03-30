@@ -41,6 +41,11 @@ class Player:
         
         //void stand(glm::vec3 pos);
         
+        void die();
+        void hurt(int dmg);
+        bool dead();
+        bool alive();
+        
     private:
         
         void update_hud();

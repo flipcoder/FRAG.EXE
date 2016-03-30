@@ -24,7 +24,7 @@ qor.on_enter(music.play)
 #     snd.play()
 #     f.discard()
 
-btn = qor.cube(1.0, "switch1_off.png")
+btn = qor.quad(1.0, "switch1_off.png")
 btn.position(qor.vec3(0.0, 0.0, -4.0))
 btn.set_physics(qor.PhysicsType.STATIC)
 btn.set_physics_shape(qor.PhysicsShape.MESH)
