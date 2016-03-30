@@ -30,7 +30,7 @@ class HUD:
         void ammo(int value, int max);
         void message(std::string msg, Color c);
 
-        void fade(Color c) { m_Fade = c; }
+        void fade(Color c);
         Color fade() const { return m_Fade; }
 
     private:

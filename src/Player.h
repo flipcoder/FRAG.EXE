@@ -75,6 +75,9 @@ class Player:
 
         bool m_bScope = false;
         float m_fFOV;
+
+        Color m_FlashColor;
+        Freq::Alarm m_FlashAlarm;
 };
 
 #endif

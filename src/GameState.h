@@ -70,6 +70,8 @@ class GameState:
             return m_pPartitioner;
         }
 
+        Freq::Timeline* timeline() { return &m_GameTime; }
+        
     private:
 
         //void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
@@ -96,6 +98,7 @@ class GameState:
         std::shared_ptr<Controller> m_pController;
         std::shared_ptr<Scene> m_pScene;
 
+        Freq::Timeline m_GameTime;
         GameSpec m_GameSpec;
 
         unsigned m_Shader = ~0u;

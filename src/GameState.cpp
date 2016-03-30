@@ -239,17 +239,12 @@ void GameState :: enter()
 
 void GameState :: logic(Freq::Time t)
 {
+    t = m_GameTime.logic(t);
+    
     Actuation::logic(t);
     m_pPhysics->logic(t);
     
     m_pPlayer->logic(t);
-    //LOG(Vector::to_string(m_pPlayer->mesh()->position(Space::WORLD)));
-
-    //auto box = m_pQor->make<Mesh>("box.obj");
-    //box->set_physics_shape(Node::HULL);
-    //auto shape = m_pPhysics->generate_shape(box.get());
-    //auto body = kit::make_unique<btRigidBody>(info);
-    //m_pPhysics->contact((btRigidBody*)body.get());
     
     m_pSkyboxRoot->logic(t);
     m_pOrthoRoot->logic(t);

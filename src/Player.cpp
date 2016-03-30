@@ -32,7 +32,8 @@ Player :: Player(
     m_pWindow(window),
     m_pQor(engine),
     m_pGameSpec(spec),
-    m_WeaponStash(spec->weapons())
+    m_WeaponStash(spec->weapons()),
+    m_FlashAlarm(state->timeline())
 {
     auto _this = this;
     
@@ -198,6 +199,7 @@ void Player :: scope(bool b)
 
 void Player :: logic(Freq::Time t)
 {
+    auto _this = this;
     auto pmesh = m_pPlayerMesh.get();
     auto pmesh_body = (btRigidBody*)pmesh->body()->body();
     pmesh_body->applyCentralForce(
@@ -207,6 +209,31 @@ void Player :: logic(Freq::Time t)
     if(m_LockIf && m_LockIf())
         return;
     
+    if(m_pController->input()->key(SDLK_z).pressed_now()) {
+        int hp = m_pPlayerMesh->config()->at<int>("hp");
+        hp = std::max(0,hp-1);
+        m_pPlayerMesh->config()->set<int>("hp", hp);
+        assert(hp >= 0);
+        if(hp){
+            m_FlashColor = Color::red();
+            m_FlashAlarm.set(Freq::Time::seconds(1));
+            Sound::play(m_pCamera.get(), "hurt.wav", m_pQor->resources());
+        }
+        else
+            Sound::play(m_pCamera.get(), "death.wav", m_pQor->resources());
+    }
+    
+    if(m_pController->input()->key(SDLK_x).pressed_now()) {
+        m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
+            R"({"message": "RED TEAM SCORES", "color": "FF0000"})"
+        ));
+    }
+    if(m_pController->input()->key(SDLK_c).pressed_now()) {
+        m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
+            R"({"message": "BLUE TEAM SCORES", "color": "0000FF"})"
+        ));
+    }
+    
     if(m_pController->button("zoom").pressed_now()){
         bool zoomed = not m_pViewModel->zoomed(); // opposite of what it is now
         auto wpn = m_WeaponStash.active()->spec();
@@ -214,7 +241,8 @@ void Player :: logic(Freq::Time t)
             scope(false);
         }
         auto vm = m_pViewModel.get();
-        auto _this = this;
+        if(wpn->scope())
+            Sound::play(m_pCamera.get(), "zoom.wav", m_pQor->resources());
         m_pViewModel->zoom(zoomed, [zoomed,vm,_this]{
             if(zoomed) {
                 auto wpn = _this->m_WeaponStash.active()->spec();
@@ -255,7 +283,6 @@ void Player :: logic(Freq::Time t)
                     scope(false);
                     m_pViewModel->fast_zoom(false);
                     auto vm = m_pViewModel.get();
-                    auto _this = this;
                     m_pViewModel->equip(false,[_this]{
                         _this->refresh_weapon();
                     });
@@ -272,7 +299,6 @@ void Player :: logic(Freq::Time t)
                 scope(false);
                 m_pViewModel->fast_zoom(false);
                 auto vm = m_pViewModel.get();
-                auto _this = this;
                 m_pViewModel->equip(false,[_this]{
                     _this->refresh_weapon();
                 });
@@ -287,7 +313,6 @@ void Player :: logic(Freq::Time t)
                 scope(false);
                 m_pViewModel->fast_zoom(false);
                 auto vm = m_pViewModel.get();
-                auto _this = this;
                 m_pViewModel->equip(false,[_this]{
                     _this->refresh_weapon();
                 });
@@ -307,9 +332,10 @@ void Player :: logic(Freq::Time t)
                 m_pViewModel->equip_time(Freq::Time(250));
                 Sound::play(m_pCamera.get(), "reload.wav", m_pQor->resources());
                 auto* weapon_stash = &m_WeaponStash;
-                m_pViewModel->equip(false, [vm, weapon_stash]{
+                m_pViewModel->equip(false, [_this, vm, weapon_stash]{
                     weapon_stash->active()->reload();
                     vm->equip(true);
+                    _this->update_hud();
                 });
             }
         }
@@ -391,7 +417,7 @@ void Player :: logic(Freq::Time t)
                     }
                 }
             } else {
-                Sound::play(m_pCamera.get(), "click.wav", m_pQor->resources());
+                Sound::play(m_pCamera.get(), "empty.wav", m_pQor->resources());
             }
             if(player_hit)
                 Sound::play(m_pCamera.get(), "hit.wav", m_pQor->resources());
@@ -402,6 +428,8 @@ void Player :: logic(Freq::Time t)
             update_hud();
             if(burst)
             {
+                Sound::play(m_pCamera.get(), m_WeaponStash.active()->spec()->sound(), m_pQor->resources());
+                
                 // projectile
                 auto m = m_pQor->make<Mesh>(m_WeaponStash.active()->spec()->projectile());
                 m->set_physics(Node::DYNAMIC);
@@ -441,7 +469,7 @@ void Player :: logic(Freq::Time t)
                     });
                 }
             }else{
-                Sound::play(m_pCamera.get(), "click.wav", m_pQor->resources());
+                Sound::play(m_pCamera.get(), "empty.wav", m_pQor->resources());
             }
         }
         
@@ -474,6 +502,10 @@ void Player :: logic(Freq::Time t)
 
     //LOGf("model pos %s", Vector::to_string(m_pViewModel->model_pos()));
     //LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
+    m_pHUD->fade(Color(
+        m_FlashColor,
+        m_FlashAlarm.fraction_left() * 0.5f)
+    );
 }
 
 void Player :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset)

@@ -146,3 +146,11 @@ void HUD :: message(string msg, Color c)
     m_bDirty = true;
 }
 
+void HUD :: fade(Color c)
+{
+    if(m_Fade != c){
+        m_Fade = c;
+        m_bDirty=true;
+    }
+}
+
