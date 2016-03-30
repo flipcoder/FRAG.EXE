@@ -30,6 +30,9 @@ class HUD:
         void ammo(int value, int max);
         void message(std::string msg, Color c);
 
+        void fade(Color c) { m_Fade = c; }
+        Color fade() const { return m_Fade; }
+
     private:
         
         void redraw();
@@ -48,6 +51,8 @@ class HUD:
         int m_HP = 0;
         int m_Ammo = 0;
         int m_AmmoMax = 0;
+        Color m_Fade = Color(1.0f,0.0f,0.0f,0.0f);
+        
         std::string m_Msg;
         Color m_MsgColor;
         Freq::Time m_MsgTime = Freq::Time(0);

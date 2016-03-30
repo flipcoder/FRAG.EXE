@@ -53,6 +53,12 @@ void HUD :: redraw()
     // Draw backgrounds
     Cairo::TextExtents extents;
     auto cairo = m_pCanvas->context();
+
+    m_pCanvas->color(m_Fade);
+    m_pCanvas->rectangle(
+       0.0f, 0.0f, sw, sh
+    ); cairo->fill();
+    
     cairo->get_text_extents("+ "+hps+"%", extents);
     cairo->set_source_rgba(1.0f-fade, fade, 0.0f, 0.5f);
     m_pCanvas->rectangle(
