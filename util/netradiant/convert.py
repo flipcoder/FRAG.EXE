@@ -67,13 +67,11 @@ for l in qmap:
                 1.0
             ]
     elif l.startswith('\"classname\" \"light\"'):
-        if node:
-            node = {"type":"light"}
-            if node["type"]=="light":
-                tokens = l.split(' ')[1:]
-                for i in range(0,len(tokens)):
-                    tokens[i] = tokens[i].replace('\"','')
-                node["light"] = "point"
+        node = {"type":"light"}
+        tokens = l.split(' ')[1:]
+        for i in range(0,len(tokens)):
+            tokens[i] = tokens[i].replace('\"','')
+        node["light"] = "point"
     elif l.startswith('\"classname\" \"misc_model\"'):
         node = {"type":"mesh"}
     elif l.lower().startswith('\"classname\" \"spawn'):
