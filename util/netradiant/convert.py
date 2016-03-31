@@ -81,7 +81,7 @@ for l in qmap:
         }
     elif l.startswith('\"model\" '):
         fn = os.path.basename(l.split(' ')[1].replace('\"',''))
-        node = {"data":os.path.basename(fn)}
+        node = {"data":os.path.basename(fn.strip())}
     elif l.startswith('\"_color\" '):
         if node:
             tokens = l.replace('\"','').split(' ')[1:]
