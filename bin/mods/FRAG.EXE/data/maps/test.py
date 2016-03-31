@@ -24,11 +24,22 @@ qor.on_enter(music.play)
 #     snd.play()
 #     f.discard()
 
+class Wrapper:
+    def __init__(self, value):
+        self.value = value
+
+i = 0
+for w in ['ump45', 'gun_glock', 'gun_rocketrifle', 'gun_grenadelauncher', 'item_healthkit']:
+    wpn = qor.Mesh(w + '.obj')
+    wpn.position(qor.vec3(3.0, 0.0, i), qor.Space.PARENT)
+    wpn.on_tick(lambda t, wpn=wpn: wpn.rotate(t, qor.vec3(0.0, 1.0, 0.0), qor.Space.LOCAL))
+    wpn.spawn()
+    i += 1
+
 lift = qor.Mesh("lift.obj")
 liftsnd = qor.Sound("elevator.wav")
 liftsnd.loop(True)
 lift.add(liftsnd)
-qor.on_enter(liftsnd.play)
 lift.position(qor.vec3(-3.0, 0.0, 0.0))
 lift.set_physics(qor.PhysicsType.DYNAMIC)
 lift.set_physics_shape(qor.PhysicsShape.HULL)
@@ -37,12 +48,10 @@ lift.inertia(False)
 lift.spawn()
 lift.generate()
 lift.gravity(qor.vec3(0.0))
-class Wrapper:
-    def __init__(self, value):
-        self.value = value
 liftvel = Wrapper(0.0)
 def golift(m):
     liftvel.value = 1.0
+    liftsnd.play()
 lift.on_event("use", golift)
 lift.on_tick(lambda t: lift.move(qor.vec3(0.0, liftvel.value * t, 0.0), qor.Space.PARENT))
 
