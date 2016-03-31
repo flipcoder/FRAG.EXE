@@ -96,9 +96,10 @@ void GameState :: preload()
     
     m_pSkyboxCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pSkyboxCamera->perspective();
-    m_pSkyboxRoot->add(m_pQor->make<Mesh>("skybox1.obj"));
+    m_pSkyboxRoot->add(m_pQor->make<Mesh>("skybox2.obj"));
     m_pSkyboxCamera->track(m_pCamera);
     m_pSkyboxCamera->mode(Tracker::ORIENT);
+    m_pSkyboxCamera->position(glm::vec3(0.0f));
     m_pSkyboxRoot->add(m_pSkyboxCamera);
     
     //m_pPipeline = make_shared<Pipeline>(
@@ -160,7 +161,7 @@ void GameState :: enter()
         }
     }, Node::Each::RECURSIVE);
 
-    auto spawns = m_pRoot->hook(R"(Spawn\.*)", Node::Hook::REGEX);
+    auto spawns = m_pRoot->hook(R"([Ss]pawn.*)", Node::Hook::REGEX);
     if(not spawns.empty())
     {
         auto spawn = spawns[rand() % spawns.size()];
@@ -249,6 +250,8 @@ void GameState :: logic(Freq::Time t)
     m_pSkyboxRoot->logic(t);
     m_pOrthoRoot->logic(t);
     m_pRoot->logic(t);
+    
+    //LOGf("skybox: %s", Vector::to_string(m_pSkyboxCamera->position(Space::WORLD)));
 }
 
 void GameState :: render() const

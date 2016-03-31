@@ -21,8 +21,7 @@ int main(int argc, const char** argv)
     
     Args args(argc, argv);
     args.set("mod","FRAG.EXE");
-    //args.set("basic_shader","fog");
-    //args.set("no_loading_fade","true");
+    args.set("title", "FRAG.EXE");
     
     Texture::DEFAULT_FLAGS = Texture::TRANSPARENT | Texture::MIPMAP;
     
