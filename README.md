@@ -1,6 +1,6 @@
 # FRAG.EXE
 
-First person shooter demonstration.
+First person shooter.
 Written in C++11 using my own engine (Qor).
     
 Work in progress.
