@@ -49,7 +49,7 @@ void HUD :: redraw()
     auto cairo = m_pCanvas->context();
     
     cairo->get_text_extents("+ "+hps+"%", extents);
-    cairo->set_source_rgba(fade, 0.0f, 0.0f, 0.5f);
+    cairo->set_source_rgba(1.0f - fade, fade, 0.0f, 0.5f);
     m_pCanvas->rectangle(
         m_Border  - m_Border/2.0f, sh - extents.height - m_Border  - m_Border/2.0f,
         extents.width  + m_Border, extents.height  + m_Border,
@@ -64,7 +64,7 @@ void HUD :: redraw()
     ); m_pCanvas->context()->fill();
     
     m_pCanvas->text("+", Color::black(), vec2(4.0f + m_Border, sh + 4.0f - m_Border), Canvas::LEFT);
-    m_pCanvas->text("+", Color(1.0f,0.0f,0.0f), vec2(m_Border, sh - m_Border), Canvas::LEFT);
+    m_pCanvas->text("+", Color(1.0f - fade,fade,0.0f), vec2(m_Border, sh - m_Border), Canvas::LEFT);
     m_pCanvas->text("  "+hps+"%", Color::black(), vec2(4.0f + m_Border, sh + 4.0f - m_Border), Canvas::LEFT);
     m_pCanvas->text("  "+hps+"%", Color::white(), vec2(m_Border,sh - m_Border), Canvas::LEFT);
     

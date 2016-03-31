@@ -125,8 +125,7 @@ Player :: Player(
 
     auto hud = m_pHUD.get();
     m_pState->event("message",[hud](const std::shared_ptr<Meta>& m){
-        //hud->message(m->at<string>("message"), Color(m->at<string>("color", string("FFFFFF"))));
-        hud->message(m->at<string>("message"), Color::red());
+        hud->message(m->at<string>("message"), Color(m->at<string>("color", string("FFFFFF"))));
     });
 
     state->partitioner()->register_object(m_pPlayerMesh, 0);
