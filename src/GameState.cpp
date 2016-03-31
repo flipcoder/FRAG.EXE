@@ -247,6 +247,7 @@ void GameState :: logic(Freq::Time t)
     
     m_pPlayer->logic(t);
     
+    m_pConsoleRoot->logic(t);
     m_pSkyboxRoot->logic(t);
     m_pOrthoRoot->logic(t);
     m_pRoot->logic(t);
