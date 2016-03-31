@@ -24,20 +24,27 @@ qor.on_enter(music.play)
 #     snd.play()
 #     f.discard()
 
-# lift = qor.Mesh("lift.obj")
-# lift.position(qor.vec3(-3.0, 0.0, 0.0))
-# lift.set_physics(qor.PhysicsType.DYNAMIC)
-# lift.set_physics_shape(qor.PhysicsShape.HULL)
+lift = qor.Mesh("lift.obj")
+liftsnd = qor.Sound("elevator.wav")
+liftsnd.loop(True)
+lift.add(liftsnd)
+qor.on_enter(liftsnd.play)
+lift.position(qor.vec3(-3.0, 0.0, 0.0))
+lift.set_physics(qor.PhysicsType.DYNAMIC)
+lift.set_physics_shape(qor.PhysicsShape.HULL)
 # lift.mass(1000.0)
-# lift.inertia(False)
-# lift.spawn()
-# lift.generate()
-# # lift.gravity(qor.vec3(0.0))
-# liftvel = 2.0
-# def golift(m):
-#     liftvel = -1.0
-# lift.on_event("use", golift)
-# lift.on_tick(lambda t: lift.velocity(qor.vec3(0.0, t * liftvel, 0.0)))
+lift.inertia(False)
+lift.spawn()
+lift.generate()
+lift.gravity(qor.vec3(0.0))
+class Wrapper:
+    def __init__(self, value):
+        self.value = value
+liftvel = Wrapper(0.0)
+def golift(m):
+    liftvel.value = 1.0
+lift.on_event("use", golift)
+lift.on_tick(lambda t: lift.move(qor.vec3(0.0, liftvel.value * t, 0.0), qor.Space.PARENT))
 
 btn = qor.quad(1.0, "switch1_off.png")
 btn.position(qor.vec3(0.0, 0.0, -4.0))

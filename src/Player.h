@@ -79,6 +79,7 @@ class Player:
         static const unsigned MAX_DECALS;
 
         bool m_bScope = false;
+        bool m_bEnter = false;
         float m_fFOV;
 
         Color m_FlashColor;

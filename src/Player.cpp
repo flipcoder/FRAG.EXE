@@ -201,6 +201,11 @@ void Player :: scope(bool b)
 
 void Player :: logic(Freq::Time t)
 {
+    if(not m_bEnter){
+        Sound::play(m_pCamera.get(), "spawn.wav", m_pQor->resources());
+        m_bEnter = true;
+    }
+    
     int hp = m_pPlayerMesh->config()->at<int>("hp");
     
     if(not hp)
