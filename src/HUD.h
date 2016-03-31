@@ -36,10 +36,12 @@ class HUD:
     private:
         
         void redraw();
+        void redraw_fade();
         
         Window* m_pWindow = nullptr;
         Input* m_pInput = nullptr;
         std::shared_ptr<Canvas> m_pCanvas;
+        std::shared_ptr<Canvas> m_pFadeCanvas;
         Cache<Resource, std::string>* m_pCache;
         //Pango::FontDescription m_FontDesc;
         float m_Border = 24.0f;
@@ -47,6 +49,7 @@ class HUD:
         
         bool m_bInput = false;
         bool m_bDirty = true;
+        bool m_bFadeDirty = true;
 
         int m_HP = 0;
         int m_Ammo = 0;

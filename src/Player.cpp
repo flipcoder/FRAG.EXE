@@ -83,7 +83,9 @@ Player :: Player(
         m_pCamera,
         m_pPlayerMesh,
         m_pQor->session()->profile(0)->config(),
-        m_LockIf
+        [_this]{
+            return (_this->m_LockIf && _this->m_LockIf()) || _this->dead();
+        }
     );
     m_pInterface->speed(12.0f);
     
@@ -199,6 +201,11 @@ void Player :: scope(bool b)
 
 void Player :: logic(Freq::Time t)
 {
+    int hp = m_pPlayerMesh->config()->at<int>("hp");
+    
+    if(not hp)
+        return;
+    
     auto _this = this;
     auto pmesh = m_pPlayerMesh.get();
     auto pmesh_body = (btRigidBody*)pmesh->body()->body();
@@ -210,17 +217,7 @@ void Player :: logic(Freq::Time t)
         return;
     
     if(m_pController->input()->key(SDLK_z).pressed_now()) {
-        int hp = m_pPlayerMesh->config()->at<int>("hp");
-        hp = std::max(0,hp-1);
-        m_pPlayerMesh->config()->set<int>("hp", hp);
-        assert(hp >= 0);
-        if(hp){
-            m_FlashColor = Color::red();
-            m_FlashAlarm.set(Freq::Time::seconds(1));
-            Sound::play(m_pCamera.get(), "hurt.wav", m_pQor->resources());
-        }
-        else
-            Sound::play(m_pCamera.get(), "death.wav", m_pQor->resources());
+        hurt(1);
     }
     
     if(m_pController->input()->key(SDLK_x).pressed_now()) {
@@ -504,8 +501,8 @@ void Player :: logic(Freq::Time t)
     //LOGf("zoomed model pos %s", Vector::to_string(m_pViewModel->zoomed_model_pos()));
     m_pHUD->fade(Color(
         m_FlashColor,
-        m_FlashAlarm.fraction_left() * 0.5f)
-    );
+        (ceil(m_FlashAlarm.fraction_left() * 10)/10) * 0.5f
+    ));
 }
 
 void Player :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset)
@@ -592,4 +589,38 @@ void Player :: refresh_weapon()
 //{
 //    m_pPlayerMesh->position(pos);
 //}
+
+void Player :: die()
+{
+    m_pViewModel->equip(false);
+    m_pPlayerMesh->config()->set<int>("hp", 0);
+    Sound::play(m_pCamera.get(), "death.wav", m_pQor->resources());
+}
+
+void Player :: hurt(int dmg)
+{
+    int hp = m_pPlayerMesh->config()->at<int>("hp");
+    hp = std::max(0,hp-dmg);
+    m_pPlayerMesh->config()->set<int>("hp", hp);
+    m_FlashColor = Color::red();
+    m_FlashAlarm.set(Freq::Time::seconds(2.0f * dmg*1.0f/10));
+    if(not hp)
+        die();
+    else
+        Sound::play(m_pCamera.get(), "hurt.wav", m_pQor->resources());
+}
+
+bool Player :: alive()
+{
+    int hp = m_pPlayerMesh->config()->at<int>("hp");
+    assert(hp >= 0);
+    return hp > 0;
+}
+    
+bool Player :: dead()
+{
+    int hp = m_pPlayerMesh->config()->at<int>("hp");
+    assert(hp >= 0);
+    return hp == 0;
+}
 
