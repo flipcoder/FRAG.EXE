@@ -92,7 +92,7 @@ void GameState :: preload()
 {
     m_pPhysics = make_shared<Physics>(m_pRoot.get(), this);
     
-    play();
+    spectate();
     
     m_pConsoleCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pConsoleRoot = make_shared<Node>();
