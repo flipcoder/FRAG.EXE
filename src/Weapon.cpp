@@ -152,7 +152,7 @@ Weapon* WeaponStash :: next_in_slot(Weapon* active, int dir, bool wrap)
 bool WeaponStash :: slot(int num)
 {
     auto last_active = m_pActive;
-    if(num == m_pActive->spec()->slot())
+    if(m_pActive && num == m_pActive->spec()->slot())
     {
         auto active = next_in_slot(m_pActive, 1, true);
         if(active)

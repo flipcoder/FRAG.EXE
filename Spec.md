@@ -34,7 +34,7 @@ See "game.json" for the current list of all default weapons, items with their st
 
 - physics (string)
     - (empty) - disables physics
-    - static
+    - static - default
     - dynamic
     - actor
     - ghost

@@ -60,12 +60,18 @@ void GameState :: play()
     m_pOrthoCamera = m_pPlayer->ortho_camera();
     m_pOrthoRoot = m_pPlayer->ortho_root();
     
+    respawn(m_pPlayer.get());
+}
+
+bool GameState :: respawn(Player* p)
+{
     auto spawns = m_pRoot->hook(R"([Ss]pawn.*)", Node::Hook::REGEX);
     if(not spawns.empty())
     {
         auto spawn = spawns[rand() % spawns.size()];
-        m_pPlayer->mesh()->teleport(spawn->position(Space::WORLD));
+        p->mesh()->teleport(spawn->position(Space::WORLD));
     }
+    return true;
 }
 
 void GameState :: spectate()

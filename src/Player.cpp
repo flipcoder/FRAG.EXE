@@ -59,25 +59,25 @@ Player :: Player(
     m_pPlayerMesh->add(m_pCamera);
     m_pCamera->position(vec3(0.0f, 0.6f, 0.0f));
     m_pRoot->add(m_pPlayerMesh);
-    m_pPlayerMesh->config()->set<int>("hp", 10);
-    m_pPlayerMesh->config()->set<int>("maxhp", 10);
-    
-    auto hp_change = [_this](){
-        int value = _this->m_pPlayerMesh->config()->at<int>("hp");
-        int maxvalue = _this->m_pPlayerMesh->config()->at<int>("maxhp");
-        _this->m_pHUD->hp(kit::round_int(100.0f * value / maxvalue));
-    };
-    m_pPlayerMesh->config()->on_change("hp",hp_change);
-    hp_change();
-
+     
     m_pDecal = cache->cache_cast<ITexture>("decal_bullethole1.png");
     m_pSpark = cache->cache_cast<ITexture>("spark.png");
     m_pController = m_pQor->session()->profile(0)->controller();
 
     m_WeaponStash.give_all();
-    m_WeaponStash.next();
+    m_WeaponStash.slot(3);
     refresh_weapon();
     update_hud();
+    
+    auto hp_change = [_this](){
+        int value = _this->m_pPlayerMesh->config()->at<int>("hp");
+        int maxvalue = std::max(1,_this->m_pPlayerMesh->config()->at<int>("maxhp"));
+        _this->m_pHUD->hp(kit::round_int(100.0f * value / maxvalue));
+    };
+    m_pPlayerMesh->config()->ensure("hp",0); // these will be reset anyway
+    m_pPlayerMesh->config()->ensure("maxhp",0);
+    m_pPlayerMesh->config()->on_change("hp",hp_change);
+    reset();
     
     m_pInterface = kit::init_shared<PlayerInterface3D>(
         m_pController,
@@ -216,7 +216,14 @@ void Player :: logic(Freq::Time t)
     int hp = m_pPlayerMesh->config()->at<int>("hp");
     
     if(not hp)
+    {
+        if(m_pController->button("fire").pressed_now() ||
+            m_pController->button("use").pressed_now()
+        ){
+            reset();
+        }
         return;
+    }
     
     auto _this = this;
     auto pmesh = m_pPlayerMesh.get();
@@ -614,6 +621,16 @@ void Player :: die()
     m_pViewModel->equip(false);
     m_pPlayerMesh->config()->set<int>("hp", 0);
     Sound::play(m_pCamera.get(), "death.wav", m_pQor->resources());
+}
+
+void Player :: reset()
+{
+    if(m_pState->respawn(this)){
+        m_pViewModel->equip(true);
+        m_pPlayerMesh->config()->set<int>("maxhp", 10); // this won't trigger
+        m_pPlayerMesh->config()->set<int>("hp", 10); // ...so do this 2nd
+        m_bEnter = false;
+    }
 }
 
 void Player :: hurt(int dmg)

@@ -75,6 +75,7 @@ class GameState:
         
         void play();
         void spectate();
+        bool respawn(Player* p);
         
     private:
 

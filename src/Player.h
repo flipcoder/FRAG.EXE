@@ -46,6 +46,7 @@ class Player:
         void hurt(int dmg);
         bool dead();
         bool alive();
+        void reset();
         
     private:
         
