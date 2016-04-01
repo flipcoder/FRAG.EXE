@@ -42,6 +42,7 @@ void GameState :: play()
     
     auto win = m_pQor->window();
     m_pController = m_pQor->session()->profile(0)->controller();
+    auto console = m_pConsole.get();
     m_pPlayer = kit::make_unique<Player>(
         this,
         m_pRoot.get(),
@@ -51,7 +52,7 @@ void GameState :: play()
         m_pQor->window(),
         m_pQor,
         &m_GameSpec,
-        [&]{ return m_pConsole->input();}
+        [console]{ return console->input();}
     );
     m_pPhysics->generate(m_pPlayer->mesh().get());
     
@@ -71,6 +72,7 @@ void GameState :: spectate()
 {
     m_pPlayer = nullptr;
     
+    auto console = m_pConsole.get();
     m_pSpectator = kit::make_unique<Spectator>(
         this,
         m_pRoot.get(),
@@ -80,7 +82,7 @@ void GameState :: spectate()
         m_pQor->window(),
         m_pQor,
         &m_GameSpec,
-        [&]{ return m_pConsole->input();}
+        [console]{ return console->input();}
     );
     
     m_pCamera = m_pSpectator->camera();
@@ -91,11 +93,14 @@ void GameState :: spectate()
 void GameState :: preload()
 {
     m_pPhysics = make_shared<Physics>(m_pRoot.get(), this);
-    
-    spectate();
-    
+     
     m_pConsoleCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pConsoleRoot = make_shared<Node>();
+    m_pConsoleCamera->ortho(false);
+    m_pConsole = make_shared<Console>(
+        m_pQor->interpreter(), m_pQor->window(), m_pInput, m_pQor->resources()
+    );
+    m_pConsoleRoot->add(m_pConsole);
 
     //auto l = make_shared<Light>();
     //l->dist(20.0f);
@@ -169,11 +174,6 @@ void GameState :: preload()
     
     m_pPhysics->generate(m_pRoot.get(), Physics::GEN_RECURSIVE);
     m_pPhysics->world()->setGravity(btVector3(0.0, -9.8, 0.0));
-
-    m_pConsole = make_shared<Console>(
-        m_pQor->interpreter(), m_pQor->window(), m_pInput, m_pQor->resources()
-    );
-    m_pConsoleRoot->add(m_pConsole);
     
     // TODO: ensure filename contains only valid filename chars
     if(not map.empty())
@@ -190,6 +190,8 @@ GameState :: ~GameState()
 
 void GameState :: enter()
 {
+    spectate();
+    
     //m_pRoot->each([](Node* node){
     //    auto s = dynamic_cast<Sound*>(node);
     //    if(s) {

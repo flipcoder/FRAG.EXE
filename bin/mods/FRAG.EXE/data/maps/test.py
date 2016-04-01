@@ -28,13 +28,13 @@ class Wrapper:
     def __init__(self, value):
         self.value = value
 
-i = 0
-for w in ['ump45', 'gun_glock', 'gun_rocketrifle', 'gun_grenadelauncher', 'item_healthkit']:
-    wpn = qor.Mesh(w + '.obj')
-    wpn.position(qor.vec3(3.0, 0.0, i), qor.Space.PARENT)
-    wpn.on_tick(lambda t, wpn=wpn: wpn.rotate(t, qor.vec3(0.0, 1.0, 0.0), qor.Space.LOCAL))
-    wpn.spawn()
-    i += 1
+# i = 0
+# for w in ['ump45', 'gun_glock', 'gun_rocketrifle', 'gun_grenadelauncher', 'item_healthkit']:
+#     wpn = qor.Mesh(w + '.obj')
+#     wpn.position(qor.vec3(3.0, 0.0, i), qor.Space.PARENT)
+#     wpn.on_tick(lambda t, wpn=wpn: wpn.rotate(t, qor.vec3(0.0, 1.0, 0.0), qor.Space.LOCAL))
+#     wpn.spawn()
+#     i += 1
 
 lift = qor.Mesh("lift.obj")
 liftsnd = qor.Sound("elevator.wav")

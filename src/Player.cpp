@@ -33,8 +33,8 @@ Player :: Player(
     m_pQor(engine),
     m_pGameSpec(spec),
     m_WeaponStash(spec->weapons()),
-    m_FlashAlarm(state->timeline())
-    //m_LockIf(lock_if)
+    m_FlashAlarm(state->timeline()),
+    m_LockIf(lock_if)
 {
     auto _this = this;
     
@@ -135,6 +135,7 @@ Player :: Player(
 Player :: ~Player()
 {
     m_pPlayerMesh->detach();
+    m_pViewModel->detach();
     //m_pInterface->unplug();
 }
 
