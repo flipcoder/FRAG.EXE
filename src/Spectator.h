@@ -1,5 +1,5 @@
-#ifndef _PLAYER_H_W5TRRMBU
-#define _PLAYER_H_W5TRRMBU
+#ifndef SPECTATOR_H
+#define SPECTATOR_H
 
 #include "Qor/PlayerInterface3D.h"
 #include "Qor/Camera.h"
@@ -14,11 +14,11 @@ class Qor;
 class HUD;
 class GameState;
 
-class Player:
+class Spectator:
     public IRealtime
 {
     public:
-        Player(
+        Spectator(
             GameState* state,
             Node* root,
             std::shared_ptr<Controller> controller,
@@ -29,8 +29,7 @@ class Player:
             GameSpec* gamespec,
             std::function<bool()> lock_if = std::function<bool()>()
         );
-        
-        ~Player();
+        ~Spectator();
         
         void logic(Freq::Time t);
 
@@ -38,53 +37,24 @@ class Player:
         std::shared_ptr<Node> ortho_root() { return m_pOrthoRoot; }
         std::shared_ptr<Camera> ortho_camera() { return m_pOrthoCamera; }
 
-        bool can_jump() const;
-
-        std::shared_ptr<Mesh> mesh() { return m_pPlayerMesh; }
-        
-        void die();
-        void hurt(int dmg);
-        bool dead();
-        bool alive();
-        
     private:
-        
-        void update_hud();
-        void scope(bool b);
-        void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
-        void refresh_weapon();
         
         GameState* m_pState;
         Node* m_pRoot;
+        std::shared_ptr<Node> m_pSpectator;
         std::shared_ptr<Node> m_pOrthoRoot;
         std::shared_ptr<Camera> m_pOrthoCamera;
-        std::shared_ptr<Mesh> m_pPlayerMesh;
         std::shared_ptr<Camera> m_pCamera;
-        std::shared_ptr<ViewModel> m_pViewModel;
         std::shared_ptr<Controller> m_pController;
         std::shared_ptr<PlayerInterface3D> m_pInterface;
-        std::shared_ptr<Mesh> m_pCrosshair;
-        std::shared_ptr<HUD> m_pHUD;
         Cache<Resource, std::string>* m_pCache;
         Physics* m_pPhysics;
         Window* m_pWindow;
         Qor* m_pQor;
         std::function<bool()> m_LockIf;
-
+        
         GameSpec* m_pGameSpec;
-        WeaponStash m_WeaponStash;
 
-        std::shared_ptr<ITexture> m_pDecal;
-        std::shared_ptr<ITexture> m_pSpark;
-        std::deque<std::shared_ptr<Mesh>> m_Decals;
-        static const unsigned MAX_DECALS;
-
-        bool m_bScope = false;
-        bool m_bEnter = false;
-        float m_fFOV;
-
-        Color m_FlashColor;
-        Freq::Alarm m_FlashAlarm;
 };
 
 #endif

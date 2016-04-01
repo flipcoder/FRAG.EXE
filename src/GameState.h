@@ -1,5 +1,5 @@
-#ifndef _DEMOSTATE_H_VZ3QNB09
-#define _DEMOSTATE_H_VZ3QNB09
+#ifndef _GAMESTATE_H_BIFJJEN3
+#define _GAMESTATE_H_BIFJJEN3
 
 #include "Qor/State.h"
 #include "Qor/Input.h"
@@ -14,6 +14,7 @@
 #include "Qor/ViewModel.h"
 #include "Qor/Console.h"
 #include "Player.h"
+#include "Spectator.h"
 #include "GameSpec.h"
 
 class Qor;
@@ -72,6 +73,9 @@ class GameState:
 
         Freq::Timeline* timeline() { return &m_GameTime; }
         
+        void play();
+        void spectate();
+        
     private:
 
         //void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
@@ -89,6 +93,7 @@ class GameState:
         Interpreter* m_pInterpreter;
         std::shared_ptr<Interpreter::Context> m_pScript;
         std::unique_ptr<Player> m_pPlayer;
+        std::unique_ptr<Spectator> m_pSpectator;
         std::shared_ptr<Camera> m_pCamera;
         std::shared_ptr<Camera> m_pOrthoCamera;
         std::shared_ptr<Camera> m_pSkyboxCamera;

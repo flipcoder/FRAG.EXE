@@ -52,8 +52,8 @@ class HUD:
         bool m_bFadeDirty = true;
 
         int m_HP = 0;
+        int m_Clip = 0;
         int m_Ammo = 0;
-        int m_AmmoMax = 0;
         Color m_Fade = Color(1.0f,0.0f,0.0f,0.0f);
         
         std::string m_Msg;

@@ -33,16 +33,16 @@ void HUD :: redraw()
     float fade = 1.0f * m_HP / 100.0f;
 
     string ammo;
-    if(m_Ammo == -1)
+    if(m_Clip == -1)
     {
-        if(m_AmmoMax != -1)
+        if(m_Ammo != -1)
         {
-            ammo = to_string(m_AmmoMax);
+            ammo = to_string(m_Ammo);
         }
         // else leave blank
     }
     else
-        ammo = to_string(m_Ammo) + " / " + to_string(m_AmmoMax);
+        ammo = to_string(m_Clip) + " / " + to_string(m_Ammo);
     
     // Draw backgrounds
     Cairo::TextExtents extents;
@@ -140,8 +140,8 @@ void HUD :: hp(int value)
 
 void HUD :: ammo(int value, int max)
 {
-    m_Ammo = value;
-    m_AmmoMax = max;
+    m_Clip = value;
+    m_Ammo = max;
     m_bDirty = true;
 }
 

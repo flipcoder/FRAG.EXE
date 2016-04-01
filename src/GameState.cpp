@@ -36,9 +36,10 @@ GameState :: GameState(
     m_Shader = m_pPipeline->load_shaders({"lit"});
 }
 
-void GameState :: preload()
+void GameState :: play()
 {
-    m_pPhysics = make_shared<Physics>(m_pRoot.get(), this);
+    m_pSpectator = nullptr;
+    
     auto win = m_pQor->window();
     m_pController = m_pQor->session()->profile(0)->controller();
     m_pPlayer = kit::make_unique<Player>(
@@ -47,16 +48,51 @@ void GameState :: preload()
         m_pController,
         m_pQor->resources(),
         m_pPhysics.get(),
-        win,
+        m_pQor->window(),
+        m_pQor,
+        &m_GameSpec,
+        [&]{ return m_pConsole->input();}
+    );
+    m_pPhysics->generate(m_pPlayer->mesh().get());
+    
+    m_pCamera = m_pPlayer->camera();
+    m_pOrthoCamera = m_pPlayer->ortho_camera();
+    m_pOrthoRoot = m_pPlayer->ortho_root();
+    
+    auto spawns = m_pRoot->hook(R"([Ss]pawn.*)", Node::Hook::REGEX);
+    if(not spawns.empty())
+    {
+        auto spawn = spawns[rand() % spawns.size()];
+        m_pPlayer->mesh()->teleport(spawn->position(Space::WORLD));
+    }
+}
+
+void GameState :: spectate()
+{
+    m_pPlayer = nullptr;
+    
+    m_pSpectator = kit::make_unique<Spectator>(
+        this,
+        m_pRoot.get(),
+        m_pController,
+        m_pQor->resources(),
+        m_pPhysics.get(),
+        m_pQor->window(),
         m_pQor,
         &m_GameSpec,
         [&]{ return m_pConsole->input();}
     );
     
-    // just render this player for now
-    m_pCamera = m_pPlayer->camera();
-    m_pOrthoCamera = m_pPlayer->ortho_camera();
-    m_pOrthoRoot = m_pPlayer->ortho_root();
+    m_pCamera = m_pSpectator->camera();
+    m_pOrthoCamera = m_pSpectator->ortho_camera();
+    m_pOrthoRoot = m_pSpectator->ortho_root();
+}
+
+void GameState :: preload()
+{
+    m_pPhysics = make_shared<Physics>(m_pRoot.get(), this);
+    
+    play();
     
     m_pConsoleCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pConsoleRoot = make_shared<Node>();
@@ -135,7 +171,7 @@ void GameState :: preload()
     m_pPhysics->world()->setGravity(btVector3(0.0, -9.8, 0.0));
 
     m_pConsole = make_shared<Console>(
-        m_pQor->interpreter(), win, m_pInput, m_pQor->resources()
+        m_pQor->interpreter(), m_pQor->window(), m_pInput, m_pQor->resources()
     );
     m_pConsoleRoot->add(m_pConsole);
     
@@ -154,19 +190,12 @@ GameState :: ~GameState()
 
 void GameState :: enter()
 {
-    m_pRoot->each([](Node* node){
-        auto s = dynamic_cast<Sound*>(node);
-        if(s) {
-            s->play();
-        }
-    }, Node::Each::RECURSIVE);
-
-    auto spawns = m_pRoot->hook(R"([Ss]pawn.*)", Node::Hook::REGEX);
-    if(not spawns.empty())
-    {
-        auto spawn = spawns[rand() % spawns.size()];
-        m_pPlayer->mesh()->teleport(spawn->position(Space::WORLD));
-    }
+    //m_pRoot->each([](Node* node){
+    //    auto s = dynamic_cast<Sound*>(node);
+    //    if(s) {
+    //        s->play();
+    //    }
+    //}, Node::Each::RECURSIVE);
 
     //m_pPlayer = kit::init_shared<PlayerInterface3D>(
     //    m_pController,
@@ -245,7 +274,10 @@ void GameState :: logic(Freq::Time t)
     Actuation::logic(t);
     m_pPhysics->logic(t);
     
-    m_pPlayer->logic(t);
+    if(m_pPlayer)
+        m_pPlayer->logic(t);
+    if(m_pSpectator)
+        m_pSpectator->logic(t);
     
     m_pConsoleRoot->logic(t);
     m_pSkyboxRoot->logic(t);

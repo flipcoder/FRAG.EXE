@@ -34,6 +34,7 @@ Player :: Player(
     m_pGameSpec(spec),
     m_WeaponStash(spec->weapons()),
     m_FlashAlarm(state->timeline())
+    //m_LockIf(lock_if)
 {
     auto _this = this;
     
@@ -129,6 +130,12 @@ Player :: Player(
     });
 
     state->partitioner()->register_object(m_pPlayerMesh, 0);
+}
+
+Player :: ~Player()
+{
+    m_pPlayerMesh->detach();
+    //m_pInterface->unplug();
 }
 
 void Player :: update_hud()
@@ -507,6 +514,13 @@ void Player :: logic(Freq::Time t)
         m_FlashColor,
         (ceil(m_FlashAlarm.fraction_left() * 10)/10) * 0.5f
     ));
+
+    if(m_pController->input()->key(SDLK_F12))
+    {
+        // pull up an f12 lawn chair
+        m_pState->spectate();
+        return;
+    }
 }
 
 void Player :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset)
