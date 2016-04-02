@@ -31,7 +31,7 @@ GameState :: GameState(
     m_pInterpreter(engine->interpreter()),
     m_pScript(make_shared<Interpreter::Context>(engine->interpreter())),
     m_pPipeline(engine->pipeline()),
-    m_GameSpec("game.json", engine->resources())
+    m_GameSpec("game.json", engine->resources(), m_pRoot.get())
 {
     m_Shader = m_pPipeline->load_shaders({"lit"});
 }
@@ -191,6 +191,8 @@ void GameState :: preload()
     //auto lights = m_pRoot->hook_type<Light>();
     //for(auto&& l: lights)
     //    l->detach();
+
+    m_GameSpec.setup();
 }
 
 GameState :: ~GameState()
