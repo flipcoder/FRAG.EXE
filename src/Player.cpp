@@ -281,7 +281,8 @@ void Player :: logic(Freq::Time t)
         Node* n = std::get<0>(hit);
         if(n)
         {
-            n = n->subroot();
+            if(n->compositor())
+                n = n->compositor();
             if(n->has_event("use")){
                 Sound::play(m_pCamera.get(), "switch.wav", m_pQor->resources());
                 n->event("use", make_shared<Meta>());

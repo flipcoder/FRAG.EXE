@@ -69,7 +69,7 @@ bool GameState :: respawn(Player* p)
     if(not spawns.empty())
     {
         auto spawn = spawns[rand() % spawns.size()];
-        p->mesh()->teleport(spawn->position(Space::WORLD));
+        p->mesh()->teleport(spawn->position(Space::WORLD) + glm::vec3(0.0f, 0.6f, 0.0f));
     }
     return true;
 }
@@ -168,6 +168,9 @@ void GameState :: preload()
         auto meshes = scene_root->hook_type<Mesh>();
         for(auto&& mesh: meshes)
             mesh->set_physics(Node::STATIC);
+        //auto children = scene_root->children();
+        //for(auto&& ch: children)
+        //    ch->collapse(Space::WORLD);
     }
     
     if(m_pQor->exists(map +  ".obj")){
