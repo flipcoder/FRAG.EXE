@@ -6,13 +6,15 @@
 #include "Qor/kit/meta/meta.h"
 #include "Qor/kit/cache/cache.h"
 #include "Qor/Resource.h"
+#include "Qor/BasicPartitioner.h"
 #include "Weapon.h"
 class Node;
 
 class GameSpec
 {
     public:
-        GameSpec(std::string fn, Cache<Resource, std::string>* cache, Node* root);
+        GameSpec(std::string fn, Cache<Resource, std::string>* cache,
+            Node* root, BasicPartitioner* part);
         WeaponSpec* weapons() { return &m_WeaponSpec; }
 
         void setup();
@@ -22,6 +24,7 @@ class GameSpec
         Cache<Resource, std::string>* m_pCache;
         WeaponSpec m_WeaponSpec;
         Node* m_pRoot;
+        BasicPartitioner* m_pPart;
 };
 
 #endif

@@ -31,7 +31,7 @@ GameState :: GameState(
     m_pInterpreter(engine->interpreter()),
     m_pScript(make_shared<Interpreter::Context>(engine->interpreter())),
     m_pPipeline(engine->pipeline()),
-    m_GameSpec("game.json", engine->resources(), m_pRoot.get())
+    m_GameSpec("game.json", engine->resources(), m_pRoot.get(), m_pPartitioner)
 {
     m_Shader = m_pPipeline->load_shaders({"lit"});
 }
@@ -61,6 +61,9 @@ void GameState :: play()
     m_pOrthoRoot = m_pPlayer->ortho_root();
     
     respawn(m_pPlayer.get());
+    
+    m_pSkyboxCamera->track(m_pCamera);
+    m_pSkyboxCamera->position(glm::vec3(0.0f));
 }
 
 bool GameState :: respawn(Player* p)
@@ -94,6 +97,9 @@ void GameState :: spectate()
     m_pCamera = m_pSpectator->camera();
     m_pOrthoCamera = m_pSpectator->ortho_camera();
     m_pOrthoRoot = m_pSpectator->ortho_root();
+    
+    m_pSkyboxCamera->track(m_pCamera);
+    m_pSkyboxCamera->position(glm::vec3(0.0f));
 }
 
 void GameState :: preload()
@@ -144,10 +150,8 @@ void GameState :: preload()
     m_pSkyboxCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pSkyboxCamera->perspective();
     m_pSkyboxRoot->add(m_pQor->make<Mesh>("skybox2.obj"));
-    m_pSkyboxCamera->track(m_pCamera);
-    m_pSkyboxCamera->mode(Tracker::ORIENT);
-    m_pSkyboxCamera->position(glm::vec3(0.0f));
     m_pSkyboxRoot->add(m_pSkyboxCamera);
+    m_pSkyboxCamera->mode(Tracker::ORIENT);
     
     //m_pPipeline = make_shared<Pipeline>(
     //    m_pQor->window(),
