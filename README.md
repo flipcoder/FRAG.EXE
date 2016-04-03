@@ -7,6 +7,10 @@ Work in progress.
 
 Engine here: http://github.com/flipcoder/qor
 
+## Screenshots
+
+![Screenshot 1](http://i.imgur.com/J9mBu3l.png)
+
 ## Videos
 
 [![Video 1](http://img.youtube.com/vi/Ul5RqDA54RE/0.jpg)](https://youtu.be/Ul5RqDA54RE) 
