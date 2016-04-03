@@ -7,6 +7,10 @@ music.ambient(True)
 qor.root().add(music)
 qor.on_enter(music.play)
 
+lamp = qor.Mesh("item_floorlamp.obj")
+lamp.position(qor.vec3(3.0, 0.0, 0.0))
+lamp.spawn()
+
 # def redflagcb(f,p):
 #     qor.log("red flag taken");
 #     snd = qor.Sound("redflagtaken.wav")

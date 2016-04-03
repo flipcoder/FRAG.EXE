@@ -34,5 +34,24 @@ void GameSpec :: setup()
             });
         }
     }
+    for(auto&& item: *m_pConfig->meta("items"))
+    {
+        auto m = item.as<shared_ptr<Meta>>();
+        string model = m->at("model", string());
+        if(model.empty())
+            continue;
+        auto spawns = m_pRoot->hook(item.key + string(".*"), Node::Hook::REGEX);
+        for(auto&& spawn: spawns)
+        {
+            auto m = make_shared<Mesh>(m_pCache->transform(model), m_pCache);
+            m->position(spawn->position(Space::WORLD) + glm::vec3(0.0f, 0.5f, 0.0f));
+            m_pRoot->add(m);
+            auto mp = m.get();
+            m->on_tick.connect([mp](Freq::Time t){
+                mp->rotate(t.s(), glm::vec3(0.0f, 1.0f, 0.0f));
+            });
+
+        }
+    }
 }
 

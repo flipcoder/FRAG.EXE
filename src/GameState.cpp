@@ -114,11 +114,6 @@ void GameState :: preload()
     );
     m_pConsoleRoot->add(m_pConsole);
 
-    //auto l = make_shared<Light>();
-    //l->dist(20.0f);
-    //l->position(glm::vec3(0.0f, 1.0f, 0.0f));
-    //m_pRoot->add(l);
-
     //auto p = m_pQor->make<Particle>("particle.png");
     //p->position(vec3(-1.0f, 1.0f, 0.0f));
     //p->flags(Particle::UPRIGHT);
@@ -172,9 +167,6 @@ void GameState :: preload()
         auto meshes = scene_root->hook_type<Mesh>();
         for(auto&& mesh: meshes)
             mesh->set_physics(Node::STATIC);
-        //auto children = scene_root->children();
-        //for(auto&& ch: children)
-        //    ch->collapse(Space::WORLD);
     }
     
     if(m_pQor->exists(map +  ".obj")){
@@ -187,14 +179,14 @@ void GameState :: preload()
     
     m_pPhysics->generate(m_pRoot.get(), Physics::GEN_RECURSIVE);
     m_pPhysics->world()->setGravity(btVector3(0.0, -9.8, 0.0));
-    
-    // TODO: ensure filename contains only valid filename chars
-    if(not map.empty())
-        m_pScript->execute_file("mods/FRAG.EXE/data/maps/"+ map +".py");
 
     //auto lights = m_pRoot->hook_type<Light>();
     //for(auto&& l: lights)
     //    l->detach();
+    
+    // TODO: ensure filename contains only valid filename chars
+    if(not map.empty())
+        m_pScript->execute_file("mods/FRAG.EXE/data/maps/"+ map +".py");
 
     m_GameSpec.setup();
 }
