@@ -13,6 +13,16 @@ GameSpec :: GameSpec(std::string fn, Cache<Resource, std::string>* cache,
     m_pPart(part)
 {}
 
+void GameSpec :: register_player(Player* p)
+{
+    m_Players.push_back(p);
+}
+
+void GameSpec :: deregister_player(Player* p)
+{
+    kit::remove(m_Players, p);
+}
+
 void GameSpec :: setup()
 {
     // cache

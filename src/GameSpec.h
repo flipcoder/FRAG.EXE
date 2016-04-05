@@ -9,6 +9,7 @@
 #include "Qor/BasicPartitioner.h"
 #include "Weapon.h"
 class Node;
+class Player;
 
 class GameSpec
 {
@@ -18,6 +19,8 @@ class GameSpec
         WeaponSpec* weapons() { return &m_WeaponSpec; }
 
         void setup();
+        void register_player(Player* p);
+        void deregister_player(Player* p);
         
     private:
         std::shared_ptr<Meta> m_pConfig;
@@ -25,6 +28,8 @@ class GameSpec
         WeaponSpec m_WeaponSpec;
         Node* m_pRoot;
         BasicPartitioner* m_pPart;
+
+        std::vector<Player*> m_Players;
 };
 
 #endif

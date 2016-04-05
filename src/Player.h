@@ -47,6 +47,7 @@ class Player:
         bool dead();
         bool alive();
         void reset();
+        void crouch(bool b);
         
     private:
         
@@ -81,11 +82,16 @@ class Player:
         static const unsigned MAX_DECALS;
 
         bool m_bScope = false;
+        bool m_bCrouched = false;
         bool m_bEnter = false;
         float m_fFOV;
 
         Color m_FlashColor;
         Freq::Alarm m_FlashAlarm;
+
+        Box m_StandBox;
+        Box m_CrouchBox;
+
 };
 
 #endif

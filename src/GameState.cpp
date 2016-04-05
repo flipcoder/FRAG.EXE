@@ -74,7 +74,13 @@ bool GameState :: respawn(Player* p)
         auto spawn = spawns[rand() % spawns.size()];
         p->mesh()->teleport(spawn->position(Space::WORLD) + glm::vec3(0.0f, 0.6f, 0.0f));
     }
+    m_GameSpec.register_player(p);
     return true;
+}
+
+void GameState :: despawn(Player* p)
+{
+    m_GameSpec.deregister_player(p);
 }
 
 void GameState :: spectate()
