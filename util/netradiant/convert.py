@@ -58,12 +58,12 @@ for l in qmap:
         if node:
             tokens = l.replace('\"','').split(' ')[1:]
             node["matrix"] = [
-                -1.0, 0.0, 0.0, 0.0,
+                1.0, 0.0, 0.0, 0.0,
                 0.0, 1.0, 0.0, 0.0,
                 0.0, 0.0, 1.0, 0.0,
-                float(tokens[0]) * SCALE,
-                float(tokens[1]) * SCALE,
+                -float(tokens[0]) * SCALE,
                 float(tokens[2]) * SCALE,
+                float(tokens[1]) * SCALE,
                 1.0
             ]
     elif l.startswith('\"classname\" \"light\"'):

@@ -179,8 +179,11 @@ void GameState :: preload()
         auto scene_root = m_pQor->make<Mesh>(map + ".obj");
         m_pRoot->add(scene_root);
         auto meshes = scene_root->hook_type<Mesh>();
-        for(auto&& mesh: meshes)
-            mesh->set_physics(Node::STATIC);
+        for(auto&& mesh: meshes) {
+            auto meshparent = mesh->compositor() ? mesh->compositor()->parent() : mesh->parent();
+            if(not dynamic_cast<Particle*>(meshparent))
+                mesh->set_physics(Node::STATIC);
+        }
     }
     
     m_pPhysics->generate(m_pRoot.get(), Physics::GEN_RECURSIVE);
