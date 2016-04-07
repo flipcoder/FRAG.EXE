@@ -183,6 +183,11 @@ void GameState :: preload()
             auto meshparent = mesh->compositor() ? mesh->compositor()->parent() : mesh->parent();
             if(not dynamic_cast<Particle*>(meshparent))
                 mesh->set_physics(Node::STATIC);
+
+            if(mesh->material()){
+                if(Filesystem::getFileName(mesh->material()->texture()->filename()) == "caulk.png")
+                    mesh->detach();
+            }
         }
     }
     
