@@ -55,6 +55,15 @@ void WeaponStash :: give_all()
         give(&e.second);
 }
 
+bool WeaponStash :: fill_all()
+{
+    for(auto&& slot: m_Slots)
+        for(auto&& wpn: slot)
+            wpn.fill();
+    return true;
+}
+
+
 bool WeaponStash :: give(const std::shared_ptr<Meta>& config)
 {
     // attempt to parse spec as a weapon

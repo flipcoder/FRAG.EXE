@@ -86,11 +86,13 @@
     },
     "items": {
         "ammobox": {
+            "name": "Ammo Box",
             "type": "ammo",
             "quantity": "50%",
             "model": "item_ammobox.obj"
         },
         "medkit": {
+            "name": "MedKit",
             "type": "health",
             "quantity": "100%",
             "model": "item_healthkit.obj"

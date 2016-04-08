@@ -679,14 +679,28 @@ void Player :: reset()
 void Player :: hurt(int dmg)
 {
     int hp = m_pPlayerMesh->config()->at<int>("hp");
-    hp = std::max(0,hp-dmg);
+    
+    auto maxhp = m_pPlayerMesh->config()->at<int>("maxhp");
+    
+    hp = std::min(std::max(0, hp - dmg), maxhp);
     m_pPlayerMesh->config()->set<int>("hp", hp);
-    m_FlashColor = Color::red();
-    m_FlashAlarm.set(Freq::Time::seconds(2.0f * dmg*1.0f/10));
+
     if(not hp)
         die();
-    else
+    else if(dmg > 0)
+    {
+        m_FlashColor = Color::red();
+        m_FlashAlarm.set(Freq::Time::seconds(2.0f * dmg*1.0f/10));
         Sound::play(m_pCamera.get(), "hurt.wav", m_pQor->resources());
+    }
+    else if(dmg < 0)
+    {
+        m_FlashColor = Color::green();
+        m_FlashAlarm.set(Freq::Time::seconds(0.5f));
+        Sound::play(m_pCamera.get(), "health.wav", m_pQor->resources());
+    }
+    
+    update_hud();
 }
 
 bool Player :: alive()
@@ -705,20 +719,36 @@ bool Player :: dead()
         
 void Player :: give(const shared_ptr<Meta>& item)
 {
-    auto name = item->at<string>("name", "something");
+    auto name = item->at<string>("name", "");
     if(name.empty())
-        name = "something";
+        return;
     
     if(m_WeaponStash.give(item)){
         LOGf("Picked up %s!",
-            m_pGameSpec->config()->meta("weapons")->meta(name)->template at<string>("name")
+            m_pGameSpec->config()->meta("weapons")->meta(name)->template at<string>("name", "???")
         );
+        update_hud();
         m_FlashColor = Color::yellow();
         m_FlashAlarm.set(Freq::Time::seconds(0.5f));
-        update_hud();
-        Sound::play(m_pCamera.get(), "health.wav", m_pCache);
+        Sound::play(m_pCamera.get(), "reload.wav", m_pCache);
         return;
+    } else if(name == "medkit") {
+        LOGf("Picked up %s!", 
+            m_pGameSpec->config()->meta("items")->meta(name)->template at<string>("name", "???")
+        );
+        
+        heal(10);
+    } else if (name == "ammobox") {
+        LOGf("Picked up %s!", 
+            m_pGameSpec->config()->meta("items")->meta(name)->template at<string>("name", "???")
+        );
+
+        m_FlashColor = Color::yellow();
+        m_FlashAlarm.set(Freq::Time::seconds(0.5f));
+        Sound::play(m_pCamera.get(), "reload.wav", m_pCache);
+        m_WeaponStash.fill_all();
     }
+
 
     // Item is something else...
 }

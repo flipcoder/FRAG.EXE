@@ -112,6 +112,7 @@ class WeaponStash
         bool give(std::string name);
         bool give(const std::shared_ptr<Meta>& config);
         bool give(WeaponSpecEntry* spec, std::shared_ptr<Meta> config = nullptr);
+        bool fill_all();
 
         bool next(int delta=1);
         bool slot(int num);

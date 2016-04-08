@@ -44,6 +44,7 @@ class Player:
         
         void die();
         void hurt(int dmg);
+        void heal(int hp) { hurt(-hp); }
         bool dead();
         bool alive();
         void reset();
