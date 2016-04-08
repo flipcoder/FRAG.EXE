@@ -44,6 +44,10 @@ Player :: Player(
     m_pHUD = make_shared<HUD>(this, window, controller->input(), cache);
     m_pOrthoRoot->add(m_pHUD);
     m_pPlayerMesh = make_shared<Mesh>();
+    // forward mesh gifts to this object
+    //m_pPlayerMesh->event("give", [_this](std::shared_ptr<Meta>& m){
+    //    _this->give(m);
+    //});
     m_StandBox = Box(
         vec3(-0.6f, -0.3f, -0.6f),
         vec3(0.6f, 0.3f, 0.6f)
@@ -58,6 +62,7 @@ Player :: Player(
     m_pPlayerMesh->friction(0.0f);
     m_pPlayerMesh->mass(80.0f);
     m_pPlayerMesh->inertia(false);
+    m_pPlayerMesh->add_tag("player");
     m_pCamera = make_shared<Camera>(cache, window);
     m_fFOV = m_pCamera->fov();
     //m_pRoot->add(m_pCamera);
@@ -69,8 +74,8 @@ Player :: Player(
     m_pSpark = cache->cache_cast<ITexture>("spark.png");
     m_pController = m_pQor->session()->profile(0)->controller();
 
-    m_WeaponStash.give_all();
-    m_WeaponStash.slot(3);
+    m_WeaponStash.give("glock");
+    m_WeaponStash.slot(2);
     refresh_weapon();
     update_hud();
     
@@ -696,5 +701,25 @@ bool Player :: dead()
     int hp = m_pPlayerMesh->config()->at<int>("hp");
     assert(hp >= 0);
     return hp == 0;
+}
+        
+void Player :: give(const shared_ptr<Meta>& item)
+{
+    auto name = item->at<string>("name", "something");
+    if(name.empty())
+        name = "something";
+    
+    if(m_WeaponStash.give(item)){
+        LOGf("Picked up %s!",
+            m_pGameSpec->config()->meta("weapons")->meta(name)->template at<string>("name")
+        );
+        m_FlashColor = Color::yellow();
+        m_FlashAlarm.set(Freq::Time::seconds(0.5f));
+        update_hud();
+        Sound::play(m_pCamera.get(), "health.wav", m_pCache);
+        return;
+    }
+
+    // Item is something else...
 }
 

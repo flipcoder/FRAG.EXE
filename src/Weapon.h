@@ -83,7 +83,7 @@ class WeaponSpec
 class Weapon
 {
     public:
-        Weapon(WeaponSpecEntry* spec);
+        Weapon(WeaponSpecEntry* spec, std::shared_ptr<Meta> config = nullptr);
         WeaponSpecEntry* spec() { return m_pSpec; }
         
         bool fill();
@@ -109,7 +109,9 @@ class WeaponStash
         WeaponStash(WeaponSpec* spec);
 
         void give_all();
-        bool give(WeaponSpecEntry* spec);
+        bool give(std::string name);
+        bool give(const std::shared_ptr<Meta>& config);
+        bool give(WeaponSpecEntry* spec, std::shared_ptr<Meta> config = nullptr);
 
         bool next(int delta=1);
         bool slot(int num);

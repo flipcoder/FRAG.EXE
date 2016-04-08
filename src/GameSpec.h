@@ -21,15 +21,20 @@ class GameSpec
         void setup();
         void register_player(Player* p);
         void deregister_player(Player* p);
+        std::shared_ptr<Meta> config() { return m_pConfig; };
         
     private:
+        void register_pickup_with_player(std::shared_ptr<Mesh> item, Player* player);
+        
         std::shared_ptr<Meta> m_pConfig;
         Cache<Resource, std::string>* m_pCache;
         WeaponSpec m_WeaponSpec;
         Node* m_pRoot;
-        BasicPartitioner* m_pPart;
+        BasicPartitioner* m_pPartitioner;
 
         std::vector<Player*> m_Players;
+        std::vector<std::shared_ptr<Mesh>> m_WeaponPickups;
+        std::vector<std::shared_ptr<Mesh>> m_ItemPickups;
 };
 
 #endif
