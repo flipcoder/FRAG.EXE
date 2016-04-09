@@ -44,17 +44,20 @@ class Player:
         
         void die();
         void hurt(int dmg);
+        void heal(int hp) { hurt(-hp); }
         bool dead();
         bool alive();
         void reset();
+        void crouch(bool b);
+        void give(const std::shared_ptr<Meta>& item);
+        void update_hud();
         
     private:
         
-        void update_hud();
         void scope(bool b);
         void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
         void refresh_weapon();
-        
+
         GameState* m_pState;
         Node* m_pRoot;
         std::shared_ptr<Node> m_pOrthoRoot;
@@ -81,11 +84,16 @@ class Player:
         static const unsigned MAX_DECALS;
 
         bool m_bScope = false;
+        bool m_bCrouched = false;
         bool m_bEnter = false;
         float m_fFOV;
 
         Color m_FlashColor;
         Freq::Alarm m_FlashAlarm;
+
+        Box m_StandBox;
+        Box m_CrouchBox;
+
 };
 
 #endif

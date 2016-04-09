@@ -7,6 +7,10 @@ music.ambient(True)
 qor.root().add(music)
 qor.on_enter(music.play)
 
+lamp = qor.Mesh("item_floorlamp.obj")
+lamp.position(qor.vec3(3.0, 0.0, 0.0))
+lamp.spawn()
+
 # def redflagcb(f,p):
 #     qor.log("red flag taken");
 #     snd = qor.Sound("redflagtaken.wav")
@@ -43,7 +47,7 @@ lift.add(liftsnd)
 lift.position(qor.vec3(-3.0, 0.0, 0.0))
 lift.set_physics(qor.PhysicsType.KINEMATIC)
 lift.set_physics_shape(qor.PhysicsShape.HULL)
-# lift.mass(1000.0)
+lift.mass(1000.0)
 lift.inertia(False)
 lift.spawn()
 lift.generate()

@@ -44,28 +44,38 @@ Player :: Player(
     m_pHUD = make_shared<HUD>(this, window, controller->input(), cache);
     m_pOrthoRoot->add(m_pHUD);
     m_pPlayerMesh = make_shared<Mesh>();
-    m_pPlayerMesh->set_box(Box(
-        vec3(-0.2f, -0.6f, -0.2f),
-        vec3(0.2f, 0.6f, 0.2f)
-    ));
+    // forward mesh gifts to this object
+    //m_pPlayerMesh->event("give", [_this](std::shared_ptr<Meta>& m){
+    //    _this->give(m);
+    //});
+    m_StandBox = Box(
+        vec3(-0.6f, -0.3f, -0.6f),
+        vec3(0.6f, 0.3f, 0.6f)
+    );
+    m_CrouchBox = Box(
+        vec3(-0.6f, -0.1f, -0.6f),
+        vec3(0.6f, 0.1f, 0.6f)
+    );
+    m_pPlayerMesh->set_box(m_StandBox);
     m_pPlayerMesh->set_physics(Node::Physics::DYNAMIC);
     m_pPlayerMesh->set_physics_shape(Node::CAPSULE);
     m_pPlayerMesh->friction(0.0f);
     m_pPlayerMesh->mass(80.0f);
     m_pPlayerMesh->inertia(false);
+    m_pPlayerMesh->add_tag("player");
     m_pCamera = make_shared<Camera>(cache, window);
     m_fFOV = m_pCamera->fov();
     //m_pRoot->add(m_pCamera);
     m_pPlayerMesh->add(m_pCamera);
-    m_pCamera->position(vec3(0.0f, 0.6f, 0.0f));
+    m_pCamera->position(vec3(0.0f, m_pPlayerMesh->box().size().y / 2.5f, 0.0f));
     m_pRoot->add(m_pPlayerMesh);
      
     m_pDecal = cache->cache_cast<ITexture>("decal_bullethole1.png");
     m_pSpark = cache->cache_cast<ITexture>("spark.png");
     m_pController = m_pQor->session()->profile(0)->controller();
 
-    m_WeaponStash.give_all();
-    m_WeaponStash.slot(3);
+    m_WeaponStash.give("glock");
+    m_WeaponStash.slot(2);
     refresh_weapon();
     update_hud();
     
@@ -88,7 +98,7 @@ Player :: Player(
             return (_this->m_LockIf && _this->m_LockIf()) || _this->dead();
         }
     );
-    m_pInterface->speed(12.0f);
+    m_pInterface->speed(16.0f);
     
     //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
     auto pmesh = m_pPlayerMesh.get();
@@ -105,12 +115,19 @@ Player :: Player(
         //pmesh_body->setDamping(0.0f, 0.0f);
         ////pmesh_body->setRestitution(0.0f);
         interface->on_jump([_this, physics, pmesh_body, cache, camera]{
+            if(_this->m_bCrouched){
+                _this->crouch(false);
+                return;
+            }
             if(not _this->can_jump())
                 return;
             pmesh_body->applyCentralImpulse(
                 btVector3(0.0f, 1000.0f, 0.0f)
             );
             Sound::play(camera, "jump.wav", cache);
+        });
+        interface->on_crouch([_this]{
+            _this->crouch(!_this->m_bCrouched);
         });
     });
     m_pPlayerMesh->move(vec3(0.0f, 0.6f, 0.0f));
@@ -134,9 +151,21 @@ Player :: Player(
 
 Player :: ~Player()
 {
+    m_pState->despawn(this);
     m_pPlayerMesh->detach();
     m_pViewModel->detach();
     //m_pInterface->unplug();
+}
+
+void Player :: crouch(bool b)
+{
+    if(b == m_bCrouched)
+        return;
+    m_pPlayerMesh->clear_body();
+    m_pPlayerMesh->set_box(b ? m_CrouchBox : m_StandBox);
+    m_pCamera->position(vec3(0.0f, m_pPlayerMesh->box().size().y / 2.0f, 0.0f));
+    m_pPhysics->generate(m_pPlayerMesh.get());
+    m_bCrouched = b;
 }
 
 void Player :: update_hud()
@@ -470,19 +499,30 @@ void Player :: logic(Freq::Time t)
                     body->setGravity(btVector3(0.0f, 0.0f, 0.0f));
                     mp->inertia(false);
                     //body->setAngularFactor(btVector3(0.0f, 1.0f, 0.0f));
-                    m->on_tick.connect([mp,vel,cache](Freq::Time){
-                        auto body = ((btRigidBody*)mp->body()->body());
-                        if(glm::dot(mp->velocity(),vel) < 1.0f - K_EPSILON ||
-                            glm::length(mp->velocity()) != glm::length(vel))
-                        {
-                            auto snd = make_shared<Sound>(
-                                cache->transform("explosion.wav"), cache
-                            );
-                            mp->stick(snd);
-                            snd->detach_on_done();
-                            snd->play();
-                            mp->detach();
-                        }
+                    //m->on_tick.connect([mp,vel,cache](Freq::Time){
+                    //    auto body = ((btRigidBody*)mp->body()->body());
+                    //    if(glm::dot(mp->velocity(),vel) < 1.0f - K_EPSILON ||
+                    //        glm::length(mp->velocity()) != glm::length(vel))
+                    //    {
+                    //        auto snd = make_shared<Sound>(
+                    //            cache->transform("explosion.wav"), cache
+                    //        );
+                    //        mp->stick(snd);
+                    //        snd->detach_on_done();
+                    //        snd->play();
+                    //        mp->detach();
+                    //    }
+                    //});
+                    m_pPhysics->on_collision(m.get(), [mp,cache](Node*,Node*,vec3,vec3,vec3){
+                        if(mp->detaching())
+                            return;
+                        auto snd = make_shared<Sound>(
+                            cache->transform("explosion.wav"), cache
+                        );
+                        mp->stick(snd);
+                        snd->detach_on_done();
+                        snd->play();
+                        mp->safe_detach();
                     });
                 }
             }else{
@@ -580,10 +620,12 @@ void Player :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float of
 
 bool Player :: can_jump() const
 {
+    if(m_bCrouched)
+        return false;
     auto pos = m_pPlayerMesh->position(Space::WORLD);
     auto jump_hit = m_pPhysics->first_hit(
         pos,
-        pos - glm::vec3(0.0f, 0.6f + 0.2f, 0.0f)
+        pos - glm::vec3(0.0f, 1.2f, 0.0f)
     );
     Node* jump_hit_node = std::get<0>(jump_hit);
     return jump_hit_node;
@@ -637,14 +679,28 @@ void Player :: reset()
 void Player :: hurt(int dmg)
 {
     int hp = m_pPlayerMesh->config()->at<int>("hp");
-    hp = std::max(0,hp-dmg);
+    
+    auto maxhp = m_pPlayerMesh->config()->at<int>("maxhp");
+    
+    hp = std::min(std::max(0, hp - dmg), maxhp);
     m_pPlayerMesh->config()->set<int>("hp", hp);
-    m_FlashColor = Color::red();
-    m_FlashAlarm.set(Freq::Time::seconds(2.0f * dmg*1.0f/10));
+
     if(not hp)
         die();
-    else
+    else if(dmg > 0)
+    {
+        m_FlashColor = Color::red();
+        m_FlashAlarm.set(Freq::Time::seconds(2.0f * dmg*1.0f/10));
         Sound::play(m_pCamera.get(), "hurt.wav", m_pQor->resources());
+    }
+    else if(dmg < 0)
+    {
+        m_FlashColor = Color::green();
+        m_FlashAlarm.set(Freq::Time::seconds(0.5f));
+        Sound::play(m_pCamera.get(), "health.wav", m_pQor->resources());
+    }
+    
+    update_hud();
 }
 
 bool Player :: alive()
@@ -659,5 +715,41 @@ bool Player :: dead()
     int hp = m_pPlayerMesh->config()->at<int>("hp");
     assert(hp >= 0);
     return hp == 0;
+}
+        
+void Player :: give(const shared_ptr<Meta>& item)
+{
+    auto name = item->at<string>("name", "");
+    if(name.empty())
+        return;
+    
+    if(m_WeaponStash.give(item)){
+        LOGf("Picked up %s!",
+            m_pGameSpec->config()->meta("weapons")->meta(name)->template at<string>("name", "???")
+        );
+        update_hud();
+        m_FlashColor = Color::yellow();
+        m_FlashAlarm.set(Freq::Time::seconds(0.5f));
+        Sound::play(m_pCamera.get(), "reload.wav", m_pCache);
+        return;
+    } else if(name == "medkit") {
+        LOGf("Picked up %s!", 
+            m_pGameSpec->config()->meta("items")->meta(name)->template at<string>("name", "???")
+        );
+        
+        heal(10);
+    } else if (name == "ammobox") {
+        LOGf("Picked up %s!", 
+            m_pGameSpec->config()->meta("items")->meta(name)->template at<string>("name", "???")
+        );
+
+        m_FlashColor = Color::yellow();
+        m_FlashAlarm.set(Freq::Time::seconds(0.5f));
+        Sound::play(m_pCamera.get(), "reload.wav", m_pCache);
+        m_WeaponStash.fill_all();
+    }
+
+
+    // Item is something else...
 }
 

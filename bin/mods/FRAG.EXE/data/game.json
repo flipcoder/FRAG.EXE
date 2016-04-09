@@ -84,15 +84,18 @@
             "ammo": 10
         }
     },
-    "pickups": {
-        "pistolbullets": {
+    "items": {
+        "ammobox": {
+            "name": "Ammo Box",
             "type": "ammo",
-            "ammo_type": "pistolbullets",
-            "quantity": "100%"
+            "quantity": "50%",
+            "model": "item_ammobox.obj"
         },
         "medkit": {
+            "name": "MedKit",
             "type": "health",
-            "quantity": "100%"
+            "quantity": "100%",
+            "model": "item_healthkit.obj"
         }
     }
 }
