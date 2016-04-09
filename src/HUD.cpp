@@ -1,5 +1,6 @@
 #include "HUD.h"
 #include "Player.h"
+#include "Qor/Headless.h"
 using namespace std;
 using namespace glm;
 
@@ -20,6 +21,9 @@ HUD :: HUD(Player* player, Window* window, Input* input, Cache<Resource,std::str
 
 void HUD :: redraw()
 {
+    if(Headless::enabled())
+        return;
+    
     auto sw = m_pWindow->size().x;
     auto sh = m_pWindow->size().y;
     auto cx = m_pWindow->center().x;
@@ -97,6 +101,9 @@ void HUD :: redraw()
 
 void HUD :: redraw_fade()
 {
+    if(Headless::enabled())
+        return;
+    
     auto sw = m_pWindow->size().x;
     auto sh = m_pWindow->size().y;
     auto win = m_pWindow;

@@ -35,9 +35,9 @@ void GameSpec :: register_pickup_with_player(std::shared_ptr<Mesh> item, Player*
         if(not a->attached() && not a->detaching())
             return;
         // spawn item with spawn
-        //a->safe_detach(); 
         a->config()->set<string>("name", a->name());
         player->give(a->config());
+        a->safe_detach();
         //part->deregister_object(a->as_node());
     });
 }
