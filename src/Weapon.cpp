@@ -115,6 +115,14 @@ void WeaponStash :: sort_slot(std::vector<Weapon>& slot)
     });
 }
 
+unsigned WeaponStash :: weapon_count() const
+{
+    unsigned r = 0;
+    for(auto&& slot: m_Slots)
+        r += slot.size();
+    return r;
+}
+
 bool WeaponStash :: next(int delta)
 {
     assert(delta);
@@ -139,6 +147,10 @@ bool WeaponStash :: next(int delta)
         Weapon* next = next_in_slot(m_pActive, dir);
         if(not next)
         {
+            // don't switch if only slot
+            if(weapon_count() == 1)
+                return false;
+            
             int i = 0;
             do{
                 active_slot = (active_slot + dir) % 10;

@@ -30,7 +30,7 @@ Spectator :: Spectator(
     m_pPhysics(physics),
     m_pWindow(window),
     m_pQor(engine),
-    m_pGameSpec(spec),
+    m_pSpec(spec),
     m_LockIf(lock_if)
 {
     auto _this = this;
@@ -69,8 +69,10 @@ void Spectator :: logic(Freq::Time t)
         m_pController->button("fire").pressed_now() ||
         m_pController->button("use").pressed_now()
     ){
-        m_pState->play();
+        m_pSpec->play();
         return;
     }
+
+    m_pOrthoRoot->logic(t);
 }
 

@@ -31,7 +31,7 @@ Player :: Player(
     m_pPhysics(physics),
     m_pWindow(window),
     m_pQor(engine),
-    m_pGameSpec(spec),
+    m_pSpec(spec),
     m_WeaponStash(spec->weapons()),
     m_FlashAlarm(state->timeline()),
     m_LockIf(lock_if)
@@ -41,20 +41,23 @@ Player :: Player(
     m_pOrthoCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pOrthoCamera->ortho();
     m_pOrthoRoot->add(m_pOrthoCamera);
-    m_pHUD = make_shared<HUD>(this, window, controller->input(), cache);
+    m_pHUD = make_shared<HUD>(this, window, controller ? controller->input() : nullptr, cache);
     m_pOrthoRoot->add(m_pHUD);
     m_pPlayerMesh = make_shared<Mesh>();
     // forward mesh gifts to this object
-    //m_pPlayerMesh->event("give", [_this](std::shared_ptr<Meta>& m){
+    //m_pPlayerMesh->event("give", [_this](std::shared_ptr<Meta> m){
     //    _this->give(m);
     //});
+    m_pPlayerMesh->event("hit", [_this](std::shared_ptr<Meta> m){
+        _this->hurt(m->at<int>("damage"));
+    });
     m_StandBox = Box(
         vec3(-0.6f, -0.3f, -0.6f),
         vec3(0.6f, 0.3f, 0.6f)
     );
     m_CrouchBox = Box(
-        vec3(-0.6f, -0.1f, -0.6f),
-        vec3(0.6f, 0.1f, 0.6f)
+        vec3(-0.6f, -0.025f, -0.6f),
+        vec3(0.6f, 0.025f, 0.6f)
     );
     m_pPlayerMesh->set_box(m_StandBox);
     m_pPlayerMesh->set_physics(Node::Physics::DYNAMIC);
@@ -63,6 +66,13 @@ Player :: Player(
     m_pPlayerMesh->mass(80.0f);
     m_pPlayerMesh->inertia(false);
     m_pPlayerMesh->add_tag("player");
+    if(not m_pController)
+    {
+        auto m = make_shared<Mesh>(m_pCache->transform("player.obj"), m_pCache);
+        m_pPlayerMesh->add(m);
+        m->disable_physics();
+    }
+    
     m_pCamera = make_shared<Camera>(cache, window);
     m_fFOV = m_pCamera->fov();
     //m_pRoot->add(m_pCamera);
@@ -72,7 +82,6 @@ Player :: Player(
      
     m_pDecal = cache->cache_cast<ITexture>("decal_bullethole1.png");
     m_pSpark = cache->cache_cast<ITexture>("spark.png");
-    m_pController = m_pQor->session()->profile(0)->controller();
 
     m_WeaponStash.give("glock");
     m_WeaponStash.slot(2);
@@ -87,18 +96,19 @@ Player :: Player(
     m_pPlayerMesh->config()->ensure("hp",0); // these will be reset anyway
     m_pPlayerMesh->config()->ensure("maxhp",0);
     m_pPlayerMesh->config()->on_change("hp",hp_change);
-    reset();
     
-    m_pInterface = kit::init_shared<PlayerInterface3D>(
-        m_pController,
-        m_pCamera,
-        m_pPlayerMesh,
-        m_pQor->session()->profile(0)->config(),
-        [_this]{
-            return (_this->m_LockIf && _this->m_LockIf()) || _this->dead();
-        }
-    );
-    m_pInterface->speed(16.0f);
+    if(m_pController) {
+        m_pInterface = kit::init_shared<PlayerInterface3D>(
+            m_pController,
+            m_pCamera,
+            m_pPlayerMesh,
+            m_pQor->session()->profile(0)->config(),
+            [_this]{
+                return (_this->m_LockIf && _this->m_LockIf()) || _this->dead();
+            }
+        );
+        m_pInterface->speed(16.0f);
+    }
     
     //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
     auto pmesh = m_pPlayerMesh.get();
@@ -114,21 +124,12 @@ Player :: Player(
         //pmesh_body->setRestitution(0.0f);
         //pmesh_body->setDamping(0.0f, 0.0f);
         ////pmesh_body->setRestitution(0.0f);
-        interface->on_jump([_this, physics, pmesh_body, cache, camera]{
-            if(_this->m_bCrouched){
-                _this->crouch(false);
-                return;
-            }
-            if(not _this->can_jump())
-                return;
-            pmesh_body->applyCentralImpulse(
-                btVector3(0.0f, 1000.0f, 0.0f)
-            );
-            Sound::play(camera, "jump.wav", cache);
-        });
-        interface->on_crouch([_this]{
-            _this->crouch(!_this->m_bCrouched);
-        });
+        if(interface){
+            interface->on_jump(std::bind(&Player::jump, _this));
+            interface->on_crouch([_this]{
+                _this->crouch(!_this->m_bCrouched);
+            });
+        }
     });
     m_pPlayerMesh->move(vec3(0.0f, 0.6f, 0.0f));
 
@@ -151,10 +152,26 @@ Player :: Player(
 
 Player :: ~Player()
 {
-    m_pState->despawn(this);
+    //m_pSpec->despawn(this);
     m_pPlayerMesh->detach();
     m_pViewModel->detach();
     //m_pInterface->unplug();
+}
+
+void Player :: jump()
+{
+    if(m_bCrouched){
+        crouch(false);
+        return;
+    }
+    if(not can_jump())
+        return;
+    
+    auto pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
+    pmesh_body->applyCentralImpulse(
+        btVector3(0.0f, 1000.0f, 0.0f)
+    );
+    Sound::play(m_pCamera.get(), "jump.wav", m_pCache);
 }
 
 void Player :: crouch(bool b)
@@ -237,11 +254,21 @@ void Player :: scope(bool b)
 
 void Player :: logic(Freq::Time t)
 {
+    auto _this = this;
+    auto pmesh = m_pPlayerMesh.get();
+    auto pmesh_body = (btRigidBody*)pmesh->body()->body();
+    pmesh_body->applyCentralForce(
+        Physics::toBulletVector(glm::vec3(0.0f, -31.0f * pmesh->mass(), 0.0f))
+    );
+    
     if(not m_bEnter){
         Sound::play(m_pCamera.get(), "spawn.wav", m_pQor->resources());
         m_bEnter = true;
     }
-    
+
+    if(not m_pController)
+        return;
+
     int hp = m_pPlayerMesh->config()->at<int>("hp");
     
     if(not hp)
@@ -253,13 +280,6 @@ void Player :: logic(Freq::Time t)
         }
         return;
     }
-    
-    auto _this = this;
-    auto pmesh = m_pPlayerMesh.get();
-    auto pmesh_body = (btRigidBody*)pmesh->body()->body();
-    pmesh_body->applyCentralForce(
-        Physics::toBulletVector(glm::vec3(0.0f, -31.0f * pmesh->mass(), 0.0f))
-    );
     
     if(m_LockIf && m_LockIf())
         return;
@@ -447,19 +467,24 @@ void Player :: logic(Freq::Time t)
                     if(n)
                     {
                         //if(not n->hook("#player",Node::Hook::REVERSE).empty())
-                        if(n->parent()->has_event("hit")){
+                        if(n->compositor())
+                            n = n->compositor();
+                        
+                        if(n->has_event("hit")){
                             auto hitinfo = make_shared<Meta>();
                             hitinfo->set<int>("damage", 1);
                             player_hit = true;
-                            n->parent()->event("hit", hitinfo);
+                            n->event("hit", hitinfo);
                         }
-                        
-                        decal(
-                            std::get<1>(hit),
-                            std::get<2>(hit),
-                            Matrix::up(*m_pCamera->matrix(Space::WORLD)),
-                            i * 0.0001
-                        );
+                        else
+                        {
+                            decal(
+                                std::get<1>(hit),
+                                std::get<2>(hit),
+                                Matrix::up(*m_pCamera->matrix(Space::WORLD)),
+                                i * 0.0001
+                            );
+                        }
                     }
                 }
             } else {
@@ -567,7 +592,7 @@ void Player :: logic(Freq::Time t)
     if(m_pController->input()->key(SDLK_F12))
     {
         // pull up an f12 lawn chair
-        m_pState->spectate();
+        m_pSpec->spectate();
         return;
     }
 }
@@ -668,7 +693,7 @@ void Player :: die()
 
 void Player :: reset()
 {
-    if(m_pState->respawn(this)){
+    if(m_pSpec->respawn(this)){
         m_pViewModel->equip(true);
         m_pPlayerMesh->config()->set<int>("maxhp", 10); // this won't trigger
         m_pPlayerMesh->config()->set<int>("hp", 10); // ...so do this 2nd
@@ -678,6 +703,9 @@ void Player :: reset()
 
 void Player :: hurt(int dmg)
 {
+    if(dead())
+        return;
+    
     int hp = m_pPlayerMesh->config()->at<int>("hp");
     
     auto maxhp = m_pPlayerMesh->config()->at<int>("maxhp");
@@ -725,7 +753,7 @@ void Player :: give(const shared_ptr<Meta>& item)
     
     if(m_WeaponStash.give(item)){
         LOGf("Picked up %s!",
-            m_pGameSpec->config()->meta("weapons")->meta(name)->template at<string>("name", "???")
+            m_pSpec->config()->meta("weapons")->meta(name)->template at<string>("name", "???")
         );
         update_hud();
         m_FlashColor = Color::yellow();
@@ -734,13 +762,13 @@ void Player :: give(const shared_ptr<Meta>& item)
         return;
     } else if(name == "medkit") {
         LOGf("Picked up %s!", 
-            m_pGameSpec->config()->meta("items")->meta(name)->template at<string>("name", "???")
+            m_pSpec->config()->meta("items")->meta(name)->template at<string>("name", "???")
         );
         
         heal(10);
     } else if (name == "ammobox") {
         LOGf("Picked up %s!", 
-            m_pGameSpec->config()->meta("items")->meta(name)->template at<string>("name", "???")
+            m_pSpec->config()->meta("items")->meta(name)->template at<string>("name", "???")
         );
 
         m_FlashColor = Color::yellow();
