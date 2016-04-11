@@ -482,15 +482,13 @@ void Player :: logic(Freq::Time t)
                             player_hit = true;
                             n->event("hit", hitinfo);
                         }
-                        else
-                        {
-                            decal(
-                                std::get<1>(hit),
-                                std::get<2>(hit),
-                                Matrix::up(*m_pCamera->matrix(Space::WORLD)),
-                                i * 0.0001
-                            );
-                        }
+                        
+                        decal(n,
+                            std::get<1>(hit),
+                            std::get<2>(hit),
+                            Matrix::up(*m_pCamera->matrix(Space::WORLD)),
+                            i * 0.0001
+                        );
                     }
                 }
             } else {
@@ -603,7 +601,7 @@ void Player :: logic(Freq::Time t)
     }
 }
 
-void Player :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset)
+void Player :: decal(Node* n, glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset)
 {
     const float decal_scale = 0.1f;
     auto m = make_shared<Mesh>(make_shared<MeshGeometry>(Prefab::quad(
@@ -626,7 +624,9 @@ void Player :: decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float of
         f->detach();
         m_Decals.pop_front();
     }
-    m_pRoot->add(m);
+    n->add(m);
+    *m->matrix() = glm::inverse(*n->matrix(Space::WORLD)) * *m->matrix();
+    n->pend();
     
     // spark
     auto m2 = make_shared<Mesh>(make_shared<MeshGeometry>(Prefab::quad(

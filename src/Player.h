@@ -60,7 +60,7 @@ class Player:
     private:
         
         void scope(bool b);
-        void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
+        void decal(Node* n, glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
         void refresh_weapon();
 
         GameState* m_pState;
