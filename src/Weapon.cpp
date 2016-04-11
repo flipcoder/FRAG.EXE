@@ -55,17 +55,54 @@ void WeaponStash :: give_all()
         give(&e.second);
 }
 
-bool WeaponStash :: give(WeaponSpecEntry* spec)
+bool WeaponStash :: fill_all()
 {
-    auto& slot = m_Slots[spec->slot()];
-    if(std::find_if(ENTIRE(slot), [spec](Weapon& w){
-        return w.spec()->name() == spec->name();
-    }) != slot.end())
-    {
-        // TODO: attempt to merge
+    for(auto&& slot: m_Slots)
+        for(auto&& wpn: slot)
+            wpn.fill();
+    return true;
+}
+
+
+bool WeaponStash :: give(const std::shared_ptr<Meta>& config)
+{
+    // attempt to parse spec as a weapon
+    string name;
+    try{
+        name = config->at<string>("name");
+    }catch(...){
         return false;
     }
-    slot.emplace_back(spec);
+    for(auto&& e: *m_pSpec)
+    {
+        if(name == e.second.name()) {
+            // merge details
+            return give(&e.second, config);
+        }
+    }
+    return false;
+}
+
+bool WeaponStash :: give(std::string name)
+{
+    auto m = make_shared<Meta>();
+    m->set<string>("name", name);
+    return give(m);
+}
+
+bool WeaponStash :: give(WeaponSpecEntry* spec, std::shared_ptr<Meta> config)
+{
+    auto& slot = m_Slots[spec->slot()];
+    auto wpn = std::find_if(ENTIRE(slot), [spec](Weapon& w){
+        return w.spec()->name() == spec->name();
+    });
+    if(wpn != slot.end())
+    {
+        // TODO: attempt to merge
+        //return wpn->merge(config);
+        return wpn->fill();
+    }
+    slot.emplace_back(spec, config);
     sort_slot(slot);
     
     return true;
@@ -76,6 +113,14 @@ void WeaponStash :: sort_slot(std::vector<Weapon>& slot)
     std::sort(ENTIRE(slot), [](Weapon& a, Weapon& b){
         return a.spec()->bias() < b.spec()->bias();
     });
+}
+
+unsigned WeaponStash :: weapon_count() const
+{
+    unsigned r = 0;
+    for(auto&& slot: m_Slots)
+        r += slot.size();
+    return r;
 }
 
 bool WeaponStash :: next(int delta)
@@ -102,6 +147,10 @@ bool WeaponStash :: next(int delta)
         Weapon* next = next_in_slot(m_pActive, dir);
         if(not next)
         {
+            // don't switch if only slot
+            if(weapon_count() == 1)
+                return false;
+            
             int i = 0;
             do{
                 active_slot = (active_slot + dir) % 10;
@@ -166,11 +215,20 @@ bool WeaponStash :: slot(int num)
     return false;
 }
 
-Weapon :: Weapon(WeaponSpecEntry* spec):
+Weapon :: Weapon(WeaponSpecEntry* spec, std::shared_ptr<Meta> config):
     m_pSpec(spec)
     //m_Clip(spec->clip())
 {
-    fill();
+    if(config && not config->empty())
+    {
+        // deserialize config, otherwise do defaults
+        fill();
+    }
+    else
+    {
+        // default is to fill
+        fill();
+    }
 }
 
 bool Weapon :: fill()

@@ -50,14 +50,14 @@ class GameState:
         }
         
         virtual std::shared_ptr<Node> camera() override {
-            return m_pCamera;
+            return m_GameSpec.camera();
         }
         virtual std::shared_ptr<const Node> camera() const override {
-            return m_pCamera;
+            return m_GameSpec.camera();
         }
 
         virtual void camera(const std::shared_ptr<Node>& camera) override {
-            m_pCamera = std::dynamic_pointer_cast<Camera>(camera);
+            //m_pCamera = std::dynamic_pointer_cast<Camera>(camera);
         }
         
         virtual Physics* physics() override {
@@ -73,13 +73,16 @@ class GameState:
 
         Freq::Timeline* timeline() { return &m_GameTime; }
         
-        void play();
-        void spectate();
-        bool respawn(Player* p);
+        //void play();
+        //void spectate();
+        //bool respawn(Player* p);
+        //void despawn(Player* p);
         
     private:
 
         //void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
+
+        bool m_bDedicated = false;
         
         Qor* m_pQor = nullptr;
         Input* m_pInput = nullptr;
@@ -93,15 +96,9 @@ class GameState:
         std::shared_ptr<Node> m_pSkyboxRoot;
         Interpreter* m_pInterpreter;
         std::shared_ptr<Interpreter::Context> m_pScript;
-        std::unique_ptr<Player> m_pPlayer;
-        std::unique_ptr<Spectator> m_pSpectator;
-        std::shared_ptr<Camera> m_pCamera;
-        std::shared_ptr<Camera> m_pOrthoCamera;
         std::shared_ptr<Camera> m_pSkyboxCamera;
         std::shared_ptr<Camera> m_pConsoleCamera;
         std::shared_ptr<Physics> m_pPhysics;
-        std::shared_ptr<ViewModel> m_pViewModel;
-        std::shared_ptr<Controller> m_pController;
         std::shared_ptr<Scene> m_pScene;
 
         Freq::Timeline m_GameTime;

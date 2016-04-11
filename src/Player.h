@@ -15,7 +15,8 @@ class HUD;
 class GameState;
 
 class Player:
-    public IRealtime
+    public IRealtime,
+    public std::enable_shared_from_this<Player>
 {
     public:
         Player(
@@ -32,11 +33,12 @@ class Player:
         
         ~Player();
         
-        void logic(Freq::Time t);
+        virtual void logic(Freq::Time t) override;
 
-        std::shared_ptr<Camera> camera() { return m_pCamera; }
-        std::shared_ptr<Node> ortho_root() { return m_pOrthoRoot; }
-        std::shared_ptr<Camera> ortho_camera() { return m_pOrthoCamera; }
+        const std::shared_ptr<Camera>& camera() { return m_pCamera; }
+        const std::shared_ptr<Node>& ortho_root() { return m_pOrthoRoot; }
+        const std::shared_ptr<Camera>& ortho_camera() { return m_pOrthoCamera; }
+        const std::shared_ptr<Controller>& controller() { return m_pController; }
 
         bool can_jump() const;
 
@@ -44,17 +46,23 @@ class Player:
         
         void die();
         void hurt(int dmg);
+        void heal(int hp) { hurt(-hp); }
         bool dead();
         bool alive();
         void reset();
+        void crouch(bool b);
+        void jump();
+        void give(const std::shared_ptr<Meta>& item);
+        void update_hud();
+
+        bool local() const { return !!m_pController; }
         
     private:
         
-        void update_hud();
         void scope(bool b);
-        void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
+        void decal(Node* n, glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
         void refresh_weapon();
-        
+
         GameState* m_pState;
         Node* m_pRoot;
         std::shared_ptr<Node> m_pOrthoRoot;
@@ -72,7 +80,7 @@ class Player:
         Qor* m_pQor;
         std::function<bool()> m_LockIf;
 
-        GameSpec* m_pGameSpec;
+        GameSpec* m_pSpec;
         WeaponStash m_WeaponStash;
 
         std::shared_ptr<ITexture> m_pDecal;
@@ -81,11 +89,16 @@ class Player:
         static const unsigned MAX_DECALS;
 
         bool m_bScope = false;
+        bool m_bCrouched = false;
         bool m_bEnter = false;
         float m_fFOV;
 
         Color m_FlashColor;
         Freq::Alarm m_FlashAlarm;
+
+        Box m_StandBox;
+        Box m_CrouchBox;
+
 };
 
 #endif
