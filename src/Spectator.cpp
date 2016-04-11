@@ -62,6 +62,8 @@ Spectator :: ~Spectator()
 
 void Spectator :: logic(Freq::Time t)
 {
+    m_pOrthoRoot->logic(t);
+    
     if(m_LockIf && m_LockIf())
         return;
     
@@ -72,7 +74,5 @@ void Spectator :: logic(Freq::Time t)
         m_pSpec->play();
         return;
     }
-
-    m_pOrthoRoot->logic(t);
 }
 

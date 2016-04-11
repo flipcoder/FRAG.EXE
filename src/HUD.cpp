@@ -118,6 +118,9 @@ void HUD :: redraw_fade()
 
 void HUD :: logic_self(Freq::Time t)
 {
+    if(Headless::enabled())
+        return;
+    
     if(not m_Msg.empty())
     {
         m_MsgTime = Freq::Time(std::max<int>(0, int(m_MsgTime.value) - t.ms()));

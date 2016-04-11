@@ -254,6 +254,8 @@ void Player :: scope(bool b)
 
 void Player :: logic(Freq::Time t)
 {
+    m_pOrthoRoot->logic(t);
+   
     auto _this = this;
     auto pmesh = m_pPlayerMesh.get();
     auto pmesh_body = (btRigidBody*)pmesh->body()->body();

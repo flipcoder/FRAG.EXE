@@ -31,7 +31,7 @@ class Spectator:
         );
         ~Spectator();
         
-        void logic(Freq::Time t);
+        virtual void logic(Freq::Time t) override;
 
         const std::shared_ptr<Camera>& camera() { return m_pCamera; }
         const std::shared_ptr<Node>& ortho_root() { return m_pOrthoRoot; }
