@@ -15,7 +15,8 @@ class HUD;
 class GameState;
 
 class Player:
-    public IRealtime
+    public IRealtime,
+    public std::enable_shared_from_this<Player>
 {
     public:
         Player(
@@ -32,11 +33,12 @@ class Player:
         
         ~Player();
         
-        void logic(Freq::Time t);
+        virtual void logic(Freq::Time t) override;
 
-        std::shared_ptr<Camera> camera() { return m_pCamera; }
-        std::shared_ptr<Node> ortho_root() { return m_pOrthoRoot; }
-        std::shared_ptr<Camera> ortho_camera() { return m_pOrthoCamera; }
+        const std::shared_ptr<Camera>& camera() { return m_pCamera; }
+        const std::shared_ptr<Node>& ortho_root() { return m_pOrthoRoot; }
+        const std::shared_ptr<Camera>& ortho_camera() { return m_pOrthoCamera; }
+        const std::shared_ptr<Controller>& controller() { return m_pController; }
 
         bool can_jump() const;
 
@@ -49,13 +51,16 @@ class Player:
         bool alive();
         void reset();
         void crouch(bool b);
+        void jump();
         void give(const std::shared_ptr<Meta>& item);
         void update_hud();
+
+        bool local() const { return !!m_pController; }
         
     private:
         
         void scope(bool b);
-        void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
+        void decal(Node* n, glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
         void refresh_weapon();
 
         GameState* m_pState;
@@ -75,7 +80,7 @@ class Player:
         Qor* m_pQor;
         std::function<bool()> m_LockIf;
 
-        GameSpec* m_pGameSpec;
+        GameSpec* m_pSpec;
         WeaponStash m_WeaponStash;
 
         std::shared_ptr<ITexture> m_pDecal;

@@ -41,7 +41,8 @@ solution("FRAG")
             "BulletDynamics",
             "BulletCollision",
             "LinearMath",
-            "z"
+            "z",
+            "RakNetDLL"
         }
         files {
             "src/**.h",
@@ -61,8 +62,10 @@ solution("FRAG")
         includedirs {
             "vendor/include/",
             "/usr/local/include/",
+            "/usr/local/include/",
             --"/usr/include/cegui-0/",
             "/usr/include/bullet/",
+            "/usr/include/raknet/DependentExtensions"
         }
         libdirs {
             --"/usr/lib/cegui-0.8/",

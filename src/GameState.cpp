@@ -31,86 +31,37 @@ GameState :: GameState(
     m_pInterpreter(engine->interpreter()),
     m_pScript(make_shared<Interpreter::Context>(engine->interpreter())),
     m_pPipeline(engine->pipeline()),
-    m_GameSpec("game.json", engine->resources(), m_pRoot.get(), m_pPartitioner)
+    m_GameSpec(
+        "game.json", engine->resources(), m_pRoot.get(), m_pPartitioner,
+        engine->session()->profile(0)->controller(), engine,
+        this
+    )
 {
     m_Shader = m_pPipeline->load_shaders({"lit"});
-}
 
-void GameState :: play()
-{
-    m_pSpectator = nullptr;
-    
-    auto win = m_pQor->window();
-    m_pController = m_pQor->session()->profile(0)->controller();
-    auto console = m_pConsole.get();
-    m_pPlayer = kit::make_unique<Player>(
-        this,
-        m_pRoot.get(),
-        m_pController,
-        m_pQor->resources(),
-        m_pPhysics.get(),
-        m_pQor->window(),
-        m_pQor,
-        &m_GameSpec,
-        [console]{ return console->input();}
-    );
-    m_pPhysics->generate(m_pPlayer->mesh().get());
-    
-    m_pCamera = m_pPlayer->camera();
-    m_pOrthoCamera = m_pPlayer->ortho_camera();
-    m_pOrthoRoot = m_pPlayer->ortho_root();
-    
-    respawn(m_pPlayer.get());
-    
-    m_pSkyboxCamera->track(m_pCamera);
-    m_pSkyboxCamera->position(glm::vec3(0.0f));
-}
-
-bool GameState :: respawn(Player* p)
-{
-    auto spawns = m_pRoot->hook(R"([Ss]pawn.*)", Node::Hook::REGEX);
-    if(not spawns.empty())
-    {
-        auto spawn = spawns[rand() % spawns.size()];
-        p->mesh()->teleport(spawn->position(Space::WORLD) + glm::vec3(0.0f, 0.6f, 0.0f));
-    }
-    m_GameSpec.register_player(p);
-    return true;
-}
-
-void GameState :: despawn(Player* p)
-{
-    m_GameSpec.deregister_player(p);
-}
-
-void GameState :: spectate()
-{
-    m_pPlayer = nullptr;
-    
-    auto console = m_pConsole.get();
-    m_pSpectator = kit::make_unique<Spectator>(
-        this,
-        m_pRoot.get(),
-        m_pController,
-        m_pQor->resources(),
-        m_pPhysics.get(),
-        m_pQor->window(),
-        m_pQor,
-        &m_GameSpec,
-        [console]{ return console->input();}
-    );
-    
-    m_pCamera = m_pSpectator->camera();
-    m_pOrthoCamera = m_pSpectator->ortho_camera();
-    m_pOrthoRoot = m_pSpectator->ortho_root();
-    
-    m_pSkyboxCamera->track(m_pCamera);
-    m_pSkyboxCamera->position(glm::vec3(0.0f));
+    if(m_pQor->args().has('d', "dedicated"))
+        m_bDedicated = true;
 }
 
 void GameState :: preload()
 {
+    auto _this = this;
+    
     m_pPhysics = make_shared<Physics>(m_pRoot.get(), this);
+    m_GameSpec.set_physics(m_pPhysics.get());
+    m_GameSpec.on_player_spawn.connect([_this](Player* p){
+        if(p->local())
+        {
+            _this->m_pSkyboxRoot->add(_this->m_pSkyboxCamera);
+            _this->m_pSkyboxCamera->track(p->camera());
+            _this->m_pSkyboxCamera->position(glm::vec3(0.0f));
+        }
+    });
+    m_GameSpec.on_spectator_spawn.connect([_this](Spectator* s){
+        _this->m_pSkyboxRoot->add(_this->m_pSkyboxCamera);
+        _this->m_pSkyboxCamera->track(s->camera());
+        _this->m_pSkyboxCamera->position(glm::vec3(0.0f));
+    });
      
     m_pConsoleCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pConsoleRoot = make_shared<Node>();
@@ -119,6 +70,8 @@ void GameState :: preload()
         m_pQor->interpreter(), m_pQor->window(), m_pInput, m_pQor->resources()
     );
     m_pConsoleRoot->add(m_pConsole);
+    auto console = m_pConsole.get();
+    m_GameSpec.set_lock([console]{ return console->input(); });
 
     //auto p = m_pQor->make<Particle>("particle.png");
     //p->position(vec3(-1.0f, 1.0f, 0.0f));
@@ -203,6 +156,9 @@ void GameState :: preload()
         m_pScript->execute_file("mods/FRAG.EXE/data/maps/"+ map +".py");
 
     m_GameSpec.setup();
+
+    // cache
+    m_pQor->make<Mesh>("player.obj");
 }
 
 GameState :: ~GameState()
@@ -211,7 +167,11 @@ GameState :: ~GameState()
 
 void GameState :: enter()
 {
-    spectate();
+    if(not m_bDedicated)
+        m_GameSpec.spawn_local_spectator();
+
+    //m_GameSpec.play(nullptr);
+    //m_GameSpec.play(nullptr);
     
     //m_pRoot->each([](Node* node){
     //    auto s = dynamic_cast<Sound*>(node);
@@ -297,15 +257,15 @@ void GameState :: logic(Freq::Time t)
     Actuation::logic(t);
     m_pPhysics->logic(t);
     
-    if(m_pPlayer)
-        m_pPlayer->logic(t);
-    if(m_pSpectator)
-        m_pSpectator->logic(t);
+    //if(m_pPlayer)
+    //    m_pPlayer->logic(t);
+    //if(m_pSpectator)
+    //    m_pSpectator->logic(t);
     
     m_pConsoleRoot->logic(t);
     m_pSkyboxRoot->logic(t);
-    m_pOrthoRoot->logic(t);
     m_pRoot->logic(t);
+    m_GameSpec.logic(t);
     
     //LOGf("skybox: %s", Vector::to_string(m_pSkyboxCamera->position(Space::WORLD)));
 }
@@ -322,22 +282,27 @@ void GameState :: render() const
         nullptr,
         Pipeline::NO_DEPTH
     );
-    m_pPipeline->override_shader(PassType::NORMAL, m_Shader);
-    m_pPipeline->winding(false);
-    m_pPipeline->blend(false);
-    m_pPipeline->render(
-        m_pRoot.get(),
-        m_pCamera.get(),
-        nullptr,
-        Pipeline::LIGHTS | Pipeline::NO_CLEAR
-    );
+
+    auto camera = m_GameSpec.camera();
+    if(camera)
+    {
+        m_pPipeline->override_shader(PassType::NORMAL, m_Shader);
+        m_pPipeline->winding(false);
+        m_pPipeline->blend(false);
+        m_pPipeline->render(
+            m_pRoot.get(),
+            camera.get(),
+            nullptr,
+            Pipeline::LIGHTS | Pipeline::NO_CLEAR
+        );
+    }
 
     // render ortho overlays
     m_pPipeline->override_shader(PassType::NORMAL, (unsigned)PassType::NONE);
     m_pPipeline->winding(true);
     m_pPipeline->render(
-        m_pOrthoRoot.get(),
-        m_pOrthoCamera.get(),
+        m_GameSpec.ortho_root().get(),
+        m_GameSpec.ortho_camera().get(),
         nullptr,
         Pipeline::NO_CLEAR | Pipeline::NO_DEPTH
     );

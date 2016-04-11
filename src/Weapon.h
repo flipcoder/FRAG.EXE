@@ -122,6 +122,8 @@ class WeaponStash
 
         void sort_slot(std::vector<Weapon>& slot);
 
+        unsigned weapon_count() const;
+
     private:
         
         std::vector<std::vector<Weapon>> m_Slots;

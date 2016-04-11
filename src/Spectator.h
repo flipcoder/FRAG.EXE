@@ -31,11 +31,12 @@ class Spectator:
         );
         ~Spectator();
         
-        void logic(Freq::Time t);
+        virtual void logic(Freq::Time t) override;
 
-        std::shared_ptr<Camera> camera() { return m_pCamera; }
-        std::shared_ptr<Node> ortho_root() { return m_pOrthoRoot; }
-        std::shared_ptr<Camera> ortho_camera() { return m_pOrthoCamera; }
+        const std::shared_ptr<Camera>& camera() { return m_pCamera; }
+        const std::shared_ptr<Node>& ortho_root() { return m_pOrthoRoot; }
+        const std::shared_ptr<Camera>& ortho_camera() { return m_pOrthoCamera; }
+        const std::shared_ptr<Controller>& controller() { return m_pController; }
 
     private:
         
@@ -53,7 +54,7 @@ class Spectator:
         Qor* m_pQor;
         std::function<bool()> m_LockIf;
         
-        GameSpec* m_pGameSpec;
+        GameSpec* m_pSpec;
 
 };
 
