@@ -767,7 +767,7 @@ void Player :: give(const shared_ptr<Meta>& item)
         
         heal(10);
     } else if (name == "ammobox") {
-        LOGf("Picked up %s!", 
+        LOGf("Picked up %s!",
             m_pSpec->config()->meta("items")->meta(name)->template at<string>("name", "???")
         );
 

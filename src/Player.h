@@ -54,6 +54,8 @@ class Player:
         void jump();
         void give(const std::shared_ptr<Meta>& item);
         void update_hud();
+
+        bool local() const { return !!m_pController; }
         
     private:
         

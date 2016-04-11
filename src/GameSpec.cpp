@@ -128,10 +128,9 @@ void GameSpec :: play(shared_ptr<Controller> ctrl)
         m_pPlayer = player.get();
         m_pCamera = m_pPlayer->camera();
         m_pOrthoCamera = m_pPlayer->ortho_camera();
-        //m_pOrthoRoot = m_pPlayer->ortho_root();
-        //m_pSkyboxCamera->track(m_pCamera);
-        //m_pSkyboxCamera->position(glm::vec3(0.0f));
     }
+    
+    on_player_spawn(player.get());
     
     //register_player(player->shared_from_this());
     m_pPhysics->generate(player->mesh().get());
@@ -174,6 +173,9 @@ void GameSpec :: spectate(shared_ptr<Controller> ctrl)
     
     m_pCamera = m_pSpectator->camera();
     m_pOrthoCamera = m_pSpectator->ortho_camera();
+
+    on_spectator_spawn(m_pSpectator.get());
+    
     //m_pSkyboxCamera->track(m_pCamera);
     //m_pSkyboxCamera->position(glm::vec3(0.0f));
 }

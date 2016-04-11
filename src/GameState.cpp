@@ -45,8 +45,23 @@ GameState :: GameState(
 
 void GameState :: preload()
 {
+    auto _this = this;
+    
     m_pPhysics = make_shared<Physics>(m_pRoot.get(), this);
     m_GameSpec.set_physics(m_pPhysics.get());
+    m_GameSpec.on_player_spawn.connect([_this](Player* p){
+        if(p->local())
+        {
+            _this->m_pSkyboxRoot->add(_this->m_pSkyboxCamera);
+            _this->m_pSkyboxCamera->track(p->camera());
+            _this->m_pSkyboxCamera->position(glm::vec3(0.0f));
+        }
+    });
+    m_GameSpec.on_spectator_spawn.connect([_this](Spectator* s){
+        _this->m_pSkyboxRoot->add(_this->m_pSkyboxCamera);
+        _this->m_pSkyboxCamera->track(s->camera());
+        _this->m_pSkyboxCamera->position(glm::vec3(0.0f));
+    });
      
     m_pConsoleCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pConsoleRoot = make_shared<Node>();
@@ -246,7 +261,6 @@ void GameState :: logic(Freq::Time t)
     
     m_pConsoleRoot->logic(t);
     m_pSkyboxRoot->logic(t);
-    //m_pOrthoRoot->logic(t);
     m_pRoot->logic(t);
     m_GameSpec.logic(t);
     
@@ -255,7 +269,7 @@ void GameState :: logic(Freq::Time t)
 
 void GameState :: render() const
 {
-    //// render player view & skybox
+    // render player view & skybox
     m_pPipeline->override_shader(PassType::NORMAL, (unsigned)PassType::NONE);
     m_pPipeline->winding(false);
     m_pPipeline->blend(false);

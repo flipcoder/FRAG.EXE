@@ -49,6 +49,9 @@ class GameSpec:
         std::shared_ptr<Node> ortho_root() const;
 
         virtual void logic(Freq::Time t) override;
+
+        boost::signals2::signal<void(Player*)> on_player_spawn;
+        boost::signals2::signal<void(Spectator*)> on_spectator_spawn;
         
     private:
         
