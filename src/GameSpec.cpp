@@ -32,8 +32,7 @@ void GameSpec :: register_player(shared_ptr<Player> p)
 
 void GameSpec :: deregister_player(Player* p)
 {
-    auto sp = p->shared_from_this();
-    kit::remove(m_Players, sp);
+    kit::remove(m_Players, p->shared_from_this());
     if(p == m_pPlayer)
         m_pPlayer = nullptr;
 }
@@ -105,7 +104,7 @@ void GameSpec :: setup()
 void GameSpec :: play(shared_ptr<Controller> ctrl)
 {
     ctrl = m_pSpectator ? m_pSpectator->controller() : ctrl;
-    
+           
     auto win = m_pQor->window();
     //auto console = m_pConsole.get();
     auto player = std::make_shared<Player>(
@@ -168,8 +167,10 @@ void GameSpec :: spectate(shared_ptr<Controller> ctrl)
         this,
         m_LockIf
     );
-    if(m_pPlayer)
+    if(m_pPlayer){
         deregister_player(m_pPlayer);
+        m_pPlayer = nullptr;
+    }
     
     m_pCamera = m_pSpectator->camera();
     m_pOrthoCamera = m_pSpectator->ortho_camera();
@@ -194,7 +195,8 @@ void GameSpec :: logic(Freq::Time t)
 {
     if(m_pSpectator)
         m_pSpectator->logic(t);
-    for(auto&& player: m_Players)
+    auto players = m_Players;
+    for(auto&& player: players)
         player->logic(t);
 }
 

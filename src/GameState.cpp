@@ -156,6 +156,9 @@ void GameState :: preload()
         m_pScript->execute_file("mods/FRAG.EXE/data/maps/"+ map +".py");
 
     m_GameSpec.setup();
+
+    // cache
+    m_pQor->make<Mesh>("player.obj");
 }
 
 GameState :: ~GameState()

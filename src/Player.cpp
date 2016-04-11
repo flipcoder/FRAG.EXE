@@ -285,6 +285,10 @@ void Player :: logic(Freq::Time t)
     
     if(m_LockIf && m_LockIf())
         return;
+
+    if(m_pController->input()->key(SDLK_v).pressed_now()) {
+        m_pSpec->play(nullptr);
+    }
     
     if(m_pController->input()->key(SDLK_z).pressed_now()) {
         hurt(1);
@@ -688,6 +692,9 @@ void Player :: refresh_weapon()
 
 void Player :: die()
 {
+    if(dead())
+        return;
+    
     m_pViewModel->equip(false);
     m_pPlayerMesh->config()->set<int>("hp", 0);
     Sound::play(m_pCamera.get(), "death.wav", m_pQor->resources());
@@ -754,6 +761,8 @@ void Player :: give(const shared_ptr<Meta>& item)
         return;
     
     if(m_WeaponStash.give(item)){
+        if(not local())
+            return;
         LOGf("Picked up %s!",
             m_pSpec->config()->meta("weapons")->meta(name)->template at<string>("name", "???")
         );
@@ -763,12 +772,15 @@ void Player :: give(const shared_ptr<Meta>& item)
         Sound::play(m_pCamera.get(), "reload.wav", m_pCache);
         return;
     } else if(name == "medkit") {
+        if(not local())
+            return;
         LOGf("Picked up %s!", 
             m_pSpec->config()->meta("items")->meta(name)->template at<string>("name", "???")
         );
-        
         heal(10);
     } else if (name == "ammobox") {
+        if(not local())
+            return;
         LOGf("Picked up %s!",
             m_pSpec->config()->meta("items")->meta(name)->template at<string>("name", "???")
         );
