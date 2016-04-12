@@ -21,7 +21,7 @@ class Spectator:
         Spectator(
             GameState* state,
             Node* root,
-            std::shared_ptr<Controller> controller,
+            std::shared_ptr<Profile> profile,
             Cache<Resource, std::string>* cache,
             Physics* physics,
             Window* window,
@@ -37,6 +37,7 @@ class Spectator:
         const std::shared_ptr<Node>& ortho_root() { return m_pOrthoRoot; }
         const std::shared_ptr<Camera>& ortho_camera() { return m_pOrthoCamera; }
         const std::shared_ptr<Controller>& controller() { return m_pController; }
+        const std::shared_ptr<Profile>& profile() { return m_pProfile; }
 
     private:
         
@@ -46,6 +47,7 @@ class Spectator:
         std::shared_ptr<Node> m_pOrthoRoot;
         std::shared_ptr<Camera> m_pOrthoCamera;
         std::shared_ptr<Camera> m_pCamera;
+        std::shared_ptr<Profile> m_pProfile;
         std::shared_ptr<Controller> m_pController;
         std::shared_ptr<PlayerInterface3D> m_pInterface;
         Cache<Resource, std::string>* m_pCache;

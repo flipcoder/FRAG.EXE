@@ -7,6 +7,7 @@
 #include "Qor/Mesh.h"
 #include "Qor/Input.h"
 #include "Qor/Window.h"
+#include "Qor/Profile.h"
 #include "Weapon.h"
 #include "GameSpec.h"
 
@@ -22,7 +23,8 @@ class Player:
         Player(
             GameState* state,
             Node* root,
-            std::shared_ptr<Controller> controller,
+            std::shared_ptr<Profile> profile,
+            //std::shared_ptr<Controller> controller,
             Cache<Resource, std::string>* cache,
             Physics* physics,
             Window* window,
@@ -39,6 +41,7 @@ class Player:
         const std::shared_ptr<Node>& ortho_root() { return m_pOrthoRoot; }
         const std::shared_ptr<Camera>& ortho_camera() { return m_pOrthoCamera; }
         const std::shared_ptr<Controller>& controller() { return m_pController; }
+        const std::shared_ptr<Profile>& profile() { return m_pProfile; }
 
         bool can_jump() const;
 
@@ -54,8 +57,11 @@ class Player:
         void jump();
         void give(const std::shared_ptr<Meta>& item);
         void update_hud();
+        void add_frags(Player* target, int f = 1);
 
         bool local() const { return !!m_pController; }
+
+        std::string name() { return m_pPlayerMesh->config()->at<std::string>("name"); }
         
     private:
         
@@ -70,6 +76,7 @@ class Player:
         std::shared_ptr<Mesh> m_pPlayerMesh;
         std::shared_ptr<Camera> m_pCamera;
         std::shared_ptr<ViewModel> m_pViewModel;
+        std::shared_ptr<Profile> m_pProfile;
         std::shared_ptr<Controller> m_pController;
         std::shared_ptr<PlayerInterface3D> m_pInterface;
         std::shared_ptr<Mesh> m_pCrosshair;

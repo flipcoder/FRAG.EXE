@@ -13,6 +13,7 @@ class Player;
 class Qor;
 class Spectator;
 class GameState;
+class Profile;
 
 class GameSpec:
     public IRealtime
@@ -20,7 +21,7 @@ class GameSpec:
     public:
         GameSpec(std::string fn, Cache<Resource, std::string>* cache,
             Node* root, BasicPartitioner* part,
-            std::shared_ptr<Controller> ctrl,
+            std::shared_ptr<Profile> prof,
             Qor* engine, GameState* state
         );
         WeaponSpec* weapons() { return &m_WeaponSpec; }
@@ -32,10 +33,10 @@ class GameSpec:
         void deregister_player(Player* p);
         std::shared_ptr<Meta> config() { return m_pConfig; };
         
-        void play(std::shared_ptr<Controller> ctrl = nullptr);
+        void play(std::shared_ptr<Profile> prof = nullptr);
         bool respawn(Player* p);
         void despawn(Player* p);
-        void spectate(std::shared_ptr<Controller> ctrl = nullptr);
+        void spectate(std::shared_ptr<Profile> prof = nullptr);
 
         void spawn_local_player();
         void spawn_local_spectator();
@@ -71,6 +72,7 @@ class GameSpec:
         std::shared_ptr<Spectator> m_pSpectator = nullptr; // local
         std::vector<std::shared_ptr<Mesh>> m_WeaponPickups;
         std::vector<std::shared_ptr<Mesh>> m_ItemPickups;
+        std::shared_ptr<Profile> m_pProfile;
         std::shared_ptr<Controller> m_pController;
         
         // local player cameras

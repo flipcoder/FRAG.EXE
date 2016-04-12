@@ -96,6 +96,15 @@
             "type": "health",
             "quantity": "100%",
             "model": "item_healthkit.obj"
+        },
+        "redflag": {
+            "name": "Red Flag",
+            "model": "item_flag.obj"
+        },
+        "blueflag": {
+            "name": "Blue Flag",
+            "model": "item_flag.obj",
+            "skin": [ "red", "blue" ]
         }
     }
 }

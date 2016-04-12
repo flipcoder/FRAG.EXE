@@ -35,7 +35,7 @@ GameState :: GameState(
     m_pPipeline(engine->pipeline()),
     m_GameSpec(
         "game.json", engine->resources(), m_pRoot.get(), m_pPartitioner,
-        engine->session()->profile(0)->controller(), engine,
+        engine->session()->profile(0), engine,
         this
     )
 {

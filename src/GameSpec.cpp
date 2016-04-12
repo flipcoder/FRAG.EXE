@@ -4,11 +4,13 @@
 #include "Spectator.h"
 #include "Qor/Qor.h"
 #include "GameState.h"
+#include <boost/regex.hpp>
+#include "Qor/Profile.h"
 using namespace std;
 
 GameSpec :: GameSpec(std::string fn, Cache<Resource, std::string>* cache,
     Node* root, BasicPartitioner* part,
-    shared_ptr<Controller> ctrl,
+    shared_ptr<Profile> prof,
     Qor* engine, GameState* state
 ):
     m_pConfig(make_shared<Meta>(cache->transform(fn))),
@@ -16,7 +18,8 @@ GameSpec :: GameSpec(std::string fn, Cache<Resource, std::string>* cache,
     m_WeaponSpec(m_pConfig->meta("weapons")),
     m_pRoot(root),
     m_pPartitioner(part),
-    m_pController(ctrl),
+    m_pProfile(prof),
+    m_pController(prof->controller()),
     m_pQor(engine),
     m_pState(state)
 {}
@@ -86,31 +89,64 @@ void GameSpec :: setup()
         auto spawns = m_pRoot->hook(item.key + string(".*"), Node::Hook::REGEX);
         for(auto&& spawn: spawns)
         {
-            auto m = make_shared<Mesh>(m_pCache->transform(model), m_pCache);
-            m->name(item.key);
-            m->position(spawn->position(Space::WORLD) + glm::vec3(0.0f, 0.5f, 0.0f));
-            m_pRoot->add(m);
-            auto mp = m.get();
-            m->on_tick.connect([mp](Freq::Time t){
+            auto mesh = make_shared<Mesh>(m_pCache->transform(model), m_pCache);
+            auto re = m->at("skin", shared_ptr<Meta>());
+            if(re)
+            {
+                if(mesh->compositor())
+                {
+                    auto children = mesh->hook_type<Mesh>();
+                    for(auto&& c: children)
+                    {
+                        string oldskin = c->material()->texture()->filename();
+                        string skin = boost::regex_replace(
+                            oldskin,
+                            boost::regex(re->at<string>(0), boost::regex_constants::extended),
+                            re->at<string>(1)
+                        );
+                        if(oldskin != skin){
+                            c->fork();
+                            c->material(skin, m_pCache);
+                        }
+                    }
+                }else{
+                    string oldskin = mesh->material()->texture()->filename();
+                    string skin = boost::regex_replace(
+                        oldskin,
+                        boost::regex(re->at<string>(0), boost::regex_constants::extended),
+                        re->at<string>(1)
+                    );
+                    if(oldskin != skin){
+                        mesh->fork();
+                        mesh->material(skin, m_pCache);
+                    }
+                }
+            }
+            
+            mesh->name(item.key);
+            mesh->position(spawn->position(Space::WORLD) + glm::vec3(0.0f, 0.5f, 0.0f));
+            m_pRoot->add(mesh);
+            auto mp = mesh.get();
+            mesh->on_tick.connect([mp](Freq::Time t){
                 mp->rotate(t.s(), glm::vec3(0.0f, 1.0f, 0.0f));
             });
-            m_ItemPickups.push_back(m);
+            m_ItemPickups.push_back(mesh);
             for(auto&& player: m_Players)
-                register_pickup_with_player(m, player.get());
+                register_pickup_with_player(mesh, player.get());
         }
     }
 }
 
-void GameSpec :: play(shared_ptr<Controller> ctrl)
+void GameSpec :: play(shared_ptr<Profile> prof)
 {
-    ctrl = m_pSpectator ? m_pSpectator->controller() : ctrl;
+    prof = m_pSpectator ? m_pSpectator->profile() : prof;
            
     auto win = m_pQor->window();
     //auto console = m_pConsole.get();
     auto player = std::make_shared<Player>(
         m_pState,
         m_pRoot,
-        ctrl,
+        prof,
         m_pQor->resources(),
         m_pPhysics,
         m_pQor->window(),
@@ -122,7 +158,7 @@ void GameSpec :: play(shared_ptr<Controller> ctrl)
     player->reset();
     
     // local?
-    if(ctrl) {
+    if(prof) {
         m_pSpectator = nullptr;
         m_pPlayer = player.get();
         m_pCamera = m_pPlayer->camera();
@@ -154,12 +190,12 @@ void GameSpec :: despawn(Player* p)
     deregister_player(p);
 }
 
-void GameSpec :: spectate(shared_ptr<Controller> ctrl)
+void GameSpec :: spectate(shared_ptr<Profile> prof)
 {
     m_pSpectator = std::make_shared<Spectator>(
         m_pState,
         m_pRoot,
-        m_pPlayer ? m_pPlayer->controller() : ctrl,
+        m_pPlayer ? m_pPlayer->profile() : prof,
         m_pQor->resources(),
         m_pPhysics,
         m_pQor->window(),
@@ -183,12 +219,12 @@ void GameSpec :: spectate(shared_ptr<Controller> ctrl)
 
 void GameSpec :: spawn_local_spectator()
 {
-    spectate(m_pController);
+    spectate(m_pProfile);
 }
 
 void GameSpec :: spawn_local_player()
 {
-    play(m_pController);
+    play(m_pProfile);
 }
 
 void GameSpec :: logic(Freq::Time t)

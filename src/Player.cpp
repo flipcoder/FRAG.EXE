@@ -7,6 +7,7 @@
 #include "Qor/Material.h"
 #include "GameState.h"
 #include "Qor/BasicPartitioner.h"
+#include "Qor/Profile.h"
 using namespace std;
 using namespace glm;
 
@@ -15,7 +16,8 @@ const unsigned Player :: MAX_DECALS = 32;
 Player :: Player(
     GameState* state,
     Node* root,
-    shared_ptr<Controller> controller,
+    shared_ptr<Profile> profile,
+    //shared_ptr<Controller> controller,
     Cache<Resource, string>* cache,
     Physics* physics,
     Window* window,
@@ -26,7 +28,8 @@ Player :: Player(
     m_pState(state),
     m_pRoot(root),
     m_pOrthoRoot(make_shared<Node>()),
-    m_pController(controller),
+    m_pProfile(profile),
+    m_pController(profile ? profile->controller() : nullptr),
     m_pCache(cache),
     m_pPhysics(physics),
     m_pWindow(window),
@@ -41,7 +44,7 @@ Player :: Player(
     m_pOrthoCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pOrthoCamera->ortho();
     m_pOrthoRoot->add(m_pOrthoCamera);
-    m_pHUD = make_shared<HUD>(this, window, controller ? controller->input() : nullptr, cache);
+    m_pHUD = make_shared<HUD>(this, window, m_pController ? m_pController->input() : nullptr, cache);
     m_pOrthoRoot->add(m_pHUD);
     m_pPlayerMesh = make_shared<Mesh>();
     // forward mesh gifts to this object
@@ -49,7 +52,14 @@ Player :: Player(
     //    _this->give(m);
     //});
     m_pPlayerMesh->event("hit", [_this](std::shared_ptr<Meta> m){
+        if(_this->dead())
+            return;
         _this->hurt(m->at<int>("damage"));
+        if(_this->dead()){
+            Player* owner = m->at<Player*>("owner", nullptr);
+            if(owner)
+                owner->add_frags(_this);
+        }
     });
     m_StandBox = Box(
         vec3(-0.6f, -0.3f, -0.6f),
@@ -66,6 +76,13 @@ Player :: Player(
     m_pPlayerMesh->mass(80.0f);
     m_pPlayerMesh->inertia(false);
     m_pPlayerMesh->add_tag("player");
+    m_pPlayerMesh->config()->set<string>("team", rand()%2?"red":"blue");
+    m_pPlayerMesh->config()->set<int>("frags", 0);
+    m_pPlayerMesh->config()->set<int>("deaths", 0);
+    if(local())
+        m_pPlayerMesh->config()->set<string>("name", m_pProfile->name());
+    else
+        m_pPlayerMesh->config()->set<string>("name", "Bot");
     if(not m_pController)
     {
         auto m = make_shared<Mesh>(m_pCache->transform("player.obj"), m_pCache);
@@ -95,6 +112,7 @@ Player :: Player(
     };
     m_pPlayerMesh->config()->ensure("hp",0); // these will be reset anyway
     m_pPlayerMesh->config()->ensure("maxhp",0);
+    m_pPlayerMesh->config()->ensure("frags",0);
     m_pPlayerMesh->config()->on_change("hp",hp_change);
     
     if(m_pController) {
@@ -276,7 +294,8 @@ void Player :: logic(Freq::Time t)
     if(not hp)
     {
         if(m_pController->button("fire").pressed_now() ||
-            m_pController->button("use").pressed_now()
+            m_pController->button("use").pressed_now() ||
+            not local() // TEMP
         ){
             reset();
         }
@@ -479,6 +498,7 @@ void Player :: logic(Freq::Time t)
                         if(n->has_event("hit")){
                             auto hitinfo = make_shared<Meta>();
                             hitinfo->set<int>("damage", 1);
+                            hitinfo->set<Player*>("owner", this);
                             player_hit = true;
                             n->event("hit", hitinfo);
                         }
@@ -694,11 +714,11 @@ void Player :: refresh_weapon()
 
 void Player :: die()
 {
-    if(dead())
-        return;
-    
     m_pViewModel->equip(false);
     m_pPlayerMesh->config()->set<int>("hp", 0);
+    m_pPlayerMesh->config()->set<int>("deaths",
+        1 + m_pPlayerMesh->config()->at<int>("deaths")
+    );
     Sound::play(m_pCamera.get(), "death.wav", m_pQor->resources());
 }
 
@@ -791,9 +811,26 @@ void Player :: give(const shared_ptr<Meta>& item)
         m_FlashAlarm.set(Freq::Time::seconds(0.5f));
         Sound::play(m_pCamera.get(), "reload.wav", m_pCache);
         m_WeaponStash.fill_all();
+    } else if (name == "redflag") {
+        Sound::play(m_pCamera.get(), "redflagtaken.wav", m_pCache);
+        m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
+            R"({"message": "RED FLAG TAKEN", "color": "FF0000"})"
+        ));
+    } else if (name == "blueflag") {
+        Sound::play(m_pCamera.get(), "blueflagtaken.wav", m_pCache);
+        m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
+            R"({"message": "BLUE FLAG TAKEN", "color": "0000FF"})"
+        ));
     }
 
 
     // Item is something else...
+}
+
+void Player :: add_frags(Player* target, int f)
+{
+    int frags = m_pPlayerMesh->config()->at<int>("frags");
+    m_pPlayerMesh->config()->at<int>("frags", std::max(0,frags));
+    LOGf("%s fragged %s.", name() % target->name());
 }
 

@@ -13,7 +13,7 @@ using namespace glm;
 Spectator :: Spectator(
     GameState* state,
     Node* root,
-    shared_ptr<Controller> controller,
+    shared_ptr<Profile> profile,
     Cache<Resource, string>* cache,
     Physics* physics,
     Window* window,
@@ -25,7 +25,8 @@ Spectator :: Spectator(
     m_pRoot(root),
     m_pSpectator(make_shared<Node>()),
     m_pOrthoRoot(make_shared<Node>()),
-    m_pController(controller),
+    m_pProfile(profile),
+    m_pController(profile->controller()),
     m_pCache(cache),
     m_pPhysics(physics),
     m_pWindow(window),
@@ -37,7 +38,6 @@ Spectator :: Spectator(
     
     m_pRoot->add(m_pSpectator);
     m_pCamera = make_shared<Camera>(cache, window);
-    m_pController = m_pQor->session()->profile(0)->controller();
     m_pInterface = kit::init_shared<PlayerInterface3D>(
         m_pController,
         m_pCamera,
