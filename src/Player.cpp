@@ -83,7 +83,7 @@ Player :: Player(
         m_pPlayerMesh->config()->set<string>("name", m_pProfile->name());
     else
         m_pPlayerMesh->config()->set<string>("name", "Bot");
-    if(not m_pController)
+    if(not local())
     {
         auto m = make_shared<Mesh>(m_pCache->transform("player.obj"), m_pCache);
         m_pPlayerMesh->add(m);
@@ -286,27 +286,30 @@ void Player :: logic(Freq::Time t)
         m_bEnter = true;
     }
 
-    if(not m_pController)
-        return;
-
     int hp = m_pPlayerMesh->config()->at<int>("hp");
     
     if(not hp)
     {
-        if(m_pController->button("fire").pressed_now() ||
-            m_pController->button("use").pressed_now() ||
-            not local() // TEMP
+        if(not local()){
+            reset();
+            return;
+        }else if(
+            m_pController->button("fire").pressed_now() ||
+            m_pController->button("use").pressed_now()
         ){
             reset();
         }
         return;
     }
+
+    if(not local())
+        return;
     
     if(m_LockIf && m_LockIf())
         return;
 
     if(m_pController->input()->key(SDLK_v).pressed_now()) {
-        m_pSpec->play(nullptr);
+        m_pSpec->play(m_pProfile->session()->dummy_profile());
     }
     
     if(m_pController->input()->key(SDLK_z).pressed_now()) {

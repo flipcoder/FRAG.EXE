@@ -158,7 +158,7 @@ void GameSpec :: play(shared_ptr<Profile> prof)
     player->reset();
     
     // local?
-    if(prof) {
+    if(not prof->dummy()) {
         m_pSpectator = nullptr;
         m_pPlayer = player.get();
         m_pCamera = m_pPlayer->camera();
