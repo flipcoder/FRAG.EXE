@@ -17,6 +17,7 @@
 #include "Spectator.h"
 #include "GameSpec.h"
 
+class Net;
 class Qor;
 
 class GameState:
@@ -82,7 +83,7 @@ class GameState:
 
         //void decal(glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
 
-        bool m_bDedicated = false;
+        bool m_bServer = false;
         
         Qor* m_pQor = nullptr;
         Input* m_pInput = nullptr;
@@ -106,6 +107,8 @@ class GameState:
 
         unsigned m_Shader = ~0u;
         unsigned m_ColorShader = ~0u;
+
+        std::shared_ptr<Net> m_pNet;
 };
 
 #endif

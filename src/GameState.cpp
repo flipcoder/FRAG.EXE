@@ -6,6 +6,7 @@
 #include "Qor/Sound.h"
 #include "Qor/Sprite.h"
 #include "Qor/Particle.h"
+#include "Qor/kit/kit.h"
 #include <glm/glm.hpp>
 #include <cstdlib>
 #include <chrono>
@@ -16,6 +17,7 @@
 #include "Qor/kit/log/log.h"
 #include <glm/gtx/orthonormalize.hpp>
 #include "Qor/BasicPartitioner.h"
+#include "Net.h"
 using namespace std;
 using namespace glm;
 
@@ -39,8 +41,9 @@ GameState :: GameState(
 {
     m_Shader = m_pPipeline->load_shaders({"lit"});
 
-    if(m_pQor->args().has('d', "dedicated"))
-        m_bDedicated = true;
+    if(m_pQor->args().has('d', "dedicated")||
+       m_pQor->args().has('s', "server"))
+        m_bServer = true;
 }
 
 void GameState :: preload()
@@ -167,7 +170,10 @@ GameState :: ~GameState()
 
 void GameState :: enter()
 {
-    if(not m_bDedicated)
+    m_pNet = make_shared<Net>(m_pQor, m_bServer);
+    m_pQor->session()->module("net", m_pNet);
+    
+    if(not m_bServer)
         m_GameSpec.spawn_local_spectator();
 
     //m_GameSpec.play(nullptr);
@@ -203,8 +209,10 @@ void GameState :: enter()
     Audio::reference_distance(2.0f);
     Audio::max_distance(20.0f);
     
-    m_pPipeline->shader(1)->use();
-    m_pPipeline->override_shader(PassType::NORMAL, m_Shader);
+    if(not Headless::enabled()){
+        m_pPipeline->shader(1)->use();
+        m_pPipeline->override_shader(PassType::NORMAL, m_Shader);
+    }
      
     //m_pCamera->perspective();
     //m_pCamera->listen();
@@ -212,13 +220,16 @@ void GameState :: enter()
 
     on_tick.connect(std::move(screen_fader(
         [this](Freq::Time, float fade) {
-            m_pPipeline->shader(1)->use();
-            int fadev = m_pPipeline->shader(1)->uniform("Brightness");
-            if(fadev != -1)
-                m_pPipeline->shader(1)->uniform(
-                    fadev,
-                    glm::vec3(fade,fade,fade)
-                );
+            if(not Headless::enabled())
+            {
+                m_pPipeline->shader(1)->use();
+                int fadev = m_pPipeline->shader(1)->uniform("Brightness");
+                if(fadev != -1)
+                    m_pPipeline->shader(1)->uniform(
+                        fadev,
+                        glm::vec3(fade,fade,fade)
+                    );
+            }
         },
         [this](Freq::Time){
             if(not m_pConsole->input() && m_pInput->escape())
@@ -226,11 +237,14 @@ void GameState :: enter()
             return false;
         },
         [this](Freq::Time){
-            m_pPipeline->shader(1)->use();
-            int u = m_pPipeline->shader(1)->uniform("Brightness");
-            if(u >= 0)
-                m_pPipeline->shader(1)->uniform(u, Color::white().vec3());
-            m_pPipeline->blend(false);
+            if(not Headless::enabled())
+            {
+                m_pPipeline->shader(1)->use();
+                int u = m_pPipeline->shader(1)->uniform("Brightness");
+                if(u >= 0)
+                    m_pPipeline->shader(1)->uniform(u, Color::white().vec3());
+                m_pPipeline->blend(false);
+            }
             m_pQor->pop_state();
         }
     )));
@@ -252,6 +266,8 @@ void GameState :: enter()
 
 void GameState :: logic(Freq::Time t)
 {
+    m_pNet->logic(t);
+    
     t = m_GameTime.logic(t);
     
     Actuation::logic(t);
