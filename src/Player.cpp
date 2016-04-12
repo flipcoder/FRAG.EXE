@@ -482,13 +482,15 @@ void Player :: logic(Freq::Time t)
                             player_hit = true;
                             n->event("hit", hitinfo);
                         }
-                        
-                        decal(n,
-                            std::get<1>(hit),
-                            std::get<2>(hit),
-                            Matrix::up(*m_pCamera->matrix(Space::WORLD)),
-                            i * 0.0001
-                        );
+                        else
+                        {
+                            decal(n,
+                                std::get<1>(hit),
+                                std::get<2>(hit),
+                                Matrix::up(*m_pCamera->matrix(Space::WORLD)),
+                                i * 0.0001
+                            );
+                        }
                     }
                 }
             } else {
