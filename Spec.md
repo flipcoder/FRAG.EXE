@@ -24,7 +24,7 @@ The following prefixes are recognized:
 - glock
 - shotgun
 - ump45
-- rocketlauncher
+- rocketrifle
 - grenadelauncher
 - sniper
 - medkit
