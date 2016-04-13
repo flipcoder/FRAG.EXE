@@ -509,6 +509,16 @@ void Player :: logic(Freq::Time t)
                             hitinfo->set<Player*>("owner", this);
                             player_hit = true;
                             n->event("hit", hitinfo);
+                            
+                            auto blood = make_shared<Particle>("blood.png", m_pCache);
+                            m_pRoot->add(blood);
+                            blood->move(std::get<1>(hit));
+                            blood->move(glm::normalize(
+                                m_pPlayerMesh->position(Space::WORLD) - blood->position(Space::WORLD)
+                            ) * 0.25f);
+                            blood->velocity(glm::vec3(rand() % 100 / 100.0f, 0.0f, rand() % 100 / 100.0f));
+                            blood->acceleration(glm::vec3(0.0f, -9.8f, 0.0f));
+                            blood->scale(0.25f);
                         }
                         else
                         {
@@ -756,15 +766,19 @@ void Player :: hurt(int dmg)
         die();
     else if(dmg > 0)
     {
-        m_FlashColor = Color::red();
-        m_FlashAlarm.set(Freq::Time::seconds(2.0f * dmg*1.0f/10));
-        Sound::play(m_pCamera.get(), "hurt.wav", m_pQor->resources());
+        if(local()){
+            m_FlashColor = Color::red();
+            m_FlashAlarm.set(Freq::Time::seconds(2.0f * dmg*1.0f/10));
+            Sound::play(m_pCamera.get(), "hurt.wav", m_pQor->resources());
+        }
     }
     else if(dmg < 0)
     {
-        m_FlashColor = Color::green();
-        m_FlashAlarm.set(Freq::Time::seconds(0.5f));
-        Sound::play(m_pCamera.get(), "health.wav", m_pQor->resources());
+        if(local()){
+            m_FlashColor = Color::green();
+            m_FlashAlarm.set(Freq::Time::seconds(0.5f));
+            Sound::play(m_pCamera.get(), "health.wav", m_pQor->resources());
+        }
     }
     
     update_hud();
