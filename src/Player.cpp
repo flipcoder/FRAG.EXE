@@ -76,13 +76,13 @@ Player :: Player(
     m_pPlayerMesh->mass(80.0f);
     m_pPlayerMesh->inertia(false);
     m_pPlayerMesh->add_tag("player");
-    m_pPlayerMesh->config()->set<string>("team", rand()%2?"red":"blue");
-    m_pPlayerMesh->config()->set<int>("frags", 0);
-    m_pPlayerMesh->config()->set<int>("deaths", 0);
-    if(local())
-        m_pPlayerMesh->config()->set<string>("name", m_pProfile->name());
-    else
-        m_pPlayerMesh->config()->set<string>("name", "Bot");
+    m_pProfile->temp()->set<string>("team", rand()%2?"red":"blue");
+    m_pProfile->temp()->set<int>("frags", 0);
+    m_pProfile->temp()->set<int>("deaths", 0);
+    //if(local())
+    //    m_pProfile->temp()->set<string>("name", m_pProfile->name());
+    //else
+    //    m_pProfile->temp()->set<string>("name", "Bot");
     if(not local())
     {
         auto m = make_shared<Mesh>(m_pCache->transform("player.obj"), m_pCache);
@@ -106,14 +106,14 @@ Player :: Player(
     update_hud();
     
     auto hp_change = [_this](){
-        int value = _this->m_pPlayerMesh->config()->at<int>("hp");
-        int maxvalue = std::max(1,_this->m_pPlayerMesh->config()->at<int>("maxhp"));
+        int value = _this->m_pProfile->temp()->at<int>("hp");
+        int maxvalue = std::max(1,_this->m_pProfile->temp()->at<int>("maxhp"));
         _this->m_pHUD->hp(kit::round_int(100.0f * value / maxvalue));
     };
-    m_pPlayerMesh->config()->ensure("hp",0); // these will be reset anyway
-    m_pPlayerMesh->config()->ensure("maxhp",0);
-    m_pPlayerMesh->config()->ensure("frags",0);
-    m_pPlayerMesh->config()->on_change("hp",hp_change);
+    m_pProfile->temp()->ensure("hp",0); // these will be reset anyway
+    m_pProfile->temp()->ensure("maxhp",0);
+    m_pProfile->temp()->ensure("frags",0);
+    m_pProfile->temp()->on_change("hp",hp_change);
     
     if(m_pController) {
         m_pInterface = kit::init_shared<PlayerInterface3D>(
@@ -145,8 +145,12 @@ Player :: Player(
         if(interface){
             interface->on_jump(std::bind(&Player::jump, _this));
             interface->on_crouch([_this]{
-                _this->crouch(!_this->m_bCrouched);
+                _this->crouch(true);
             });
+            interface->on_uncrouch([_this]{
+                return _this->crouch(false);
+            });
+
         }
     });
     m_pPlayerMesh->move(vec3(0.0f, 0.6f, 0.0f));
@@ -179,7 +183,7 @@ Player :: ~Player()
 void Player :: jump()
 {
     if(m_bCrouched){
-        crouch(false);
+        m_pInterface->crouch(false);
         return;
     }
     if(not can_jump())
@@ -192,15 +196,16 @@ void Player :: jump()
     Sound::play(m_pCamera.get(), "jump.wav", m_pCache);
 }
 
-void Player :: crouch(bool b)
+bool Player :: crouch(bool b)
 {
     if(b == m_bCrouched)
-        return;
+        return false;
     m_pPlayerMesh->clear_body();
     m_pPlayerMesh->set_box(b ? m_CrouchBox : m_StandBox);
     m_pCamera->position(vec3(0.0f, m_pPlayerMesh->box().size().y / 2.0f, 0.0f));
     m_pPhysics->generate(m_pPlayerMesh.get());
     m_bCrouched = b;
+    return true;
 }
 
 void Player :: update_hud()
@@ -286,7 +291,7 @@ void Player :: logic(Freq::Time t)
         m_bEnter = true;
     }
 
-    int hp = m_pPlayerMesh->config()->at<int>("hp");
+    int hp = m_pProfile->temp()->at<int>("hp");
     
     if(not hp)
     {
@@ -309,7 +314,7 @@ void Player :: logic(Freq::Time t)
         return;
 
     if(m_pController->input()->key(SDLK_v).pressed_now()) {
-        m_pSpec->play(m_pProfile->session()->dummy_profile());
+        m_pSpec->play(m_pProfile->session()->dummy_profile("Bot"));
     }
     
     if(m_pController->input()->key(SDLK_z).pressed_now()) {
@@ -500,7 +505,7 @@ void Player :: logic(Freq::Time t)
                         
                         if(n->has_event("hit")){
                             auto hitinfo = make_shared<Meta>();
-                            hitinfo->set<int>("damage", 1);
+                            hitinfo->set<int>("damage", m_WeaponStash.active()->spec()->damage());
                             hitinfo->set<Player*>("owner", this);
                             player_hit = true;
                             n->event("hit", hitinfo);
@@ -718,9 +723,9 @@ void Player :: refresh_weapon()
 void Player :: die()
 {
     m_pViewModel->equip(false);
-    m_pPlayerMesh->config()->set<int>("hp", 0);
-    m_pPlayerMesh->config()->set<int>("deaths",
-        1 + m_pPlayerMesh->config()->at<int>("deaths")
+    m_pProfile->temp()->set<int>("hp", 0);
+    m_pProfile->temp()->set<int>("deaths",
+        1 + m_pProfile->temp()->at<int>("deaths")
     );
     Sound::play(m_pCamera.get(), "death.wav", m_pQor->resources());
 }
@@ -729,8 +734,8 @@ void Player :: reset()
 {
     if(m_pSpec->respawn(this)){
         m_pViewModel->equip(true);
-        m_pPlayerMesh->config()->set<int>("maxhp", 10); // this won't trigger
-        m_pPlayerMesh->config()->set<int>("hp", 10); // ...so do this 2nd
+        m_pProfile->temp()->set<int>("maxhp", 10); // this won't trigger
+        m_pProfile->temp()->set<int>("hp", 10); // ...so do this 2nd
         m_bEnter = false;
     }
 }
@@ -740,12 +745,12 @@ void Player :: hurt(int dmg)
     if(dead())
         return;
     
-    int hp = m_pPlayerMesh->config()->at<int>("hp");
+    int hp = m_pProfile->temp()->at<int>("hp");
     
-    auto maxhp = m_pPlayerMesh->config()->at<int>("maxhp");
+    auto maxhp = m_pProfile->temp()->at<int>("maxhp");
     
     hp = std::min(std::max(0, hp - dmg), maxhp);
-    m_pPlayerMesh->config()->set<int>("hp", hp);
+    m_pProfile->temp()->set<int>("hp", hp);
 
     if(not hp)
         die();
@@ -767,14 +772,14 @@ void Player :: hurt(int dmg)
 
 bool Player :: alive()
 {
-    int hp = m_pPlayerMesh->config()->at<int>("hp");
+    int hp = m_pProfile->temp()->at<int>("hp");
     assert(hp >= 0);
     return hp > 0;
 }
     
 bool Player :: dead()
 {
-    int hp = m_pPlayerMesh->config()->at<int>("hp");
+    int hp = m_pProfile->temp()->at<int>("hp");
     assert(hp >= 0);
     return hp == 0;
 }
@@ -832,8 +837,8 @@ void Player :: give(const shared_ptr<Meta>& item)
 
 void Player :: add_frags(Player* target, int f)
 {
-    int frags = m_pPlayerMesh->config()->at<int>("frags");
-    m_pPlayerMesh->config()->at<int>("frags", std::max(0,frags));
+    int frags = m_pProfile->temp()->at<int>("frags");
+    m_pProfile->temp()->at<int>("frags", std::max(0,frags));
     LOGf("%s fragged %s.", name() % target->name());
 }
 

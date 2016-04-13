@@ -74,10 +74,18 @@ for l in qmap:
         node["light"] = "point"
     elif l.startswith('\"classname\" \"misc_model\"'):
         node = {"type":"mesh"}
-    elif l.lower().startswith('\"classname\" \"spawn'):
+    # elif l.lower().startswith('\"classname\" \"spawn'):
+    #     node = {
+    #         "type": "empty",
+    #         "name": "spawn"
+    #     }
+    elif l.lower().startswith('\"classname\" '):
+        tokens = l.split(' ')[1:]
+        for i in range(0,len(tokens)):
+            tokens[i] = tokens[i].replace('\"','').replace("\n","")
         node = {
             "type": "empty",
-            "name": "spawn"
+            "name": tokens[0]
         }
     elif l.startswith('\"model\" '):
         fn = os.path.basename(l.split(' ')[1].replace('\"',''))

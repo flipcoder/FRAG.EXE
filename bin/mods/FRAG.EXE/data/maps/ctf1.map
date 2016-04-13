@@ -6685,3 +6685,13 @@ base/gun_mesh
 "origin" "-104.000000 -384.000000 160.000000"
 "light" "1024"
 }
+// entity 5
+{
+"classname" "blueflag"
+"origin" "352.000000 96.000000 72.000000"
+}
+// entity 6
+{
+"classname" "redflag"
+"origin" "-1120.000000 -2592.000000 72.000000"
+}

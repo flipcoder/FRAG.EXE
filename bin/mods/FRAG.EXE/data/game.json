@@ -81,7 +81,8 @@
             "ammo_type": "sniperbullets",
             "scope": true,
             "clip": 0,
-            "ammo": 10
+            "ammo": 10,
+            "damage": 10
         }
     },
     "items": {

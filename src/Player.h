@@ -53,7 +53,7 @@ class Player:
         bool dead();
         bool alive();
         void reset();
-        void crouch(bool b);
+        bool crouch(bool b);
         void jump();
         void give(const std::shared_ptr<Meta>& item);
         void update_hud();
@@ -61,7 +61,7 @@ class Player:
 
         bool local() const { return !!m_pController; }
 
-        std::string name() { return m_pPlayerMesh->config()->at<std::string>("name"); }
+        std::string name() { return m_pProfile->name(); }
         
     private:
         

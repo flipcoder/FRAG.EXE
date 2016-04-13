@@ -36,6 +36,7 @@ class WeaponSpecEntry
         int bias() const { return m_Bias; }
         int clip() const { return m_Clip; }
         int ammo() const { return m_Ammo; }
+        int damage() const { return m_Damage; }
         
     private:
         
@@ -57,6 +58,7 @@ class WeaponSpecEntry
         float m_Speed = 0.0f;
         int m_Ammo = 0;
         int m_Clip = 0;
+        int m_Damage = 1;
 };
 
 class WeaponSpec
