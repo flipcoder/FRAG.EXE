@@ -516,9 +516,13 @@ void Player :: logic(Freq::Time t)
                             blood->move(glm::normalize(
                                 m_pPlayerMesh->position(Space::WORLD) - blood->position(Space::WORLD)
                             ) * 0.25f);
-                            blood->velocity(glm::vec3(rand() % 100 / 100.0f, 0.0f, rand() % 100 / 100.0f));
+                            blood->velocity(glm::vec3(
+                                rand() % 100 / 100.0f,
+                                rand() % 100 / 100.0f,
+                                rand() % 100 / 100.0f));
                             blood->acceleration(glm::vec3(0.0f, -9.8f, 0.0f));
                             blood->scale(0.25f);
+                            blood->life(Freq::Time::seconds(0.5f));
                         }
                         else
                         {
