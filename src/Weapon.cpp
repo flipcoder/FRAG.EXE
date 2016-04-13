@@ -60,7 +60,7 @@ bool WeaponStash :: fill_all()
 {
     for(auto&& slot: m_Slots)
         for(auto&& wpn: slot)
-            wpn.fill();
+            wpn->fill();
     return true;
 }
 
@@ -94,25 +94,25 @@ bool WeaponStash :: give(std::string name)
 bool WeaponStash :: give(WeaponSpecEntry* spec, std::shared_ptr<Meta> config)
 {
     auto& slot = m_Slots[spec->slot()];
-    auto wpn = std::find_if(ENTIRE(slot), [spec](Weapon& w){
-        return w.spec()->name() == spec->name();
+    auto wpn = std::find_if(ENTIRE(slot), [spec](const shared_ptr<Weapon>& w){
+        return w->spec()->name() == spec->name();
     });
     if(wpn != slot.end())
     {
         // TODO: attempt to merge
         //return wpn->merge(config);
-        return wpn->fill();
+        return (*wpn)->fill();
     }
-    slot.emplace_back(spec, config);
+    slot.emplace_back(make_shared<Weapon>(spec, config));
     sort_slot(slot);
     
     return true;
 }
 
-void WeaponStash :: sort_slot(std::vector<Weapon>& slot)
+void WeaponStash :: sort_slot(std::vector<std::shared_ptr<Weapon>>& slot)
 {
-    std::sort(ENTIRE(slot), [](Weapon& a, Weapon& b){
-        return a.spec()->bias() < b.spec()->bias();
+    std::sort(ENTIRE(slot), [](shared_ptr<Weapon> a, shared_ptr<Weapon> b){
+        return a->spec()->bias() < b->spec()->bias();
     });
 }
 
@@ -133,7 +133,7 @@ bool WeaponStash :: next(int delta)
     {
         for(int i=0;i<10;++i)
             try{
-                m_pActive = &m_Slots[i].at(0);
+                m_pActive = m_Slots[i].at(0).get();
                 break;
             }catch(const out_of_range&){}
         delta = delta - kit::sign(delta); // this counts as one switch
@@ -166,9 +166,9 @@ bool WeaponStash :: next(int delta)
             
             // approach from what side?
             if(dir==1)
-                m_pActive = &m_Slots[active_slot][0];
+                m_pActive = m_Slots[active_slot][0].get();
             else
-                m_pActive = &m_Slots[active_slot][m_Slots[active_slot].size()-1];
+                m_pActive = m_Slots[active_slot][m_Slots[active_slot].size()-1].get();
             r = true;
         } else {
             m_pActive = next;
@@ -185,15 +185,15 @@ Weapon* WeaponStash :: next_in_slot(Weapon* active, int dir, bool wrap)
     auto&& slot = m_Slots[active->spec()->slot()];
     try{
         // find our active weapon in the list
-        auto itr = std::find_if(ENTIRE(slot), [active](const Weapon& w){
-            return &w == active;
+        auto itr = std::find_if(ENTIRE(slot), [active](const shared_ptr<Weapon>& w){
+            return w.get() == active;
         });
         unsigned idx = std::distance(slot.begin(), itr);
         // try to return the next weapon in the direction dir
         if(wrap)
-            return &slot.at((idx + dir) % slot.size());
+            return slot.at((idx + dir) % slot.size()).get();
         else
-            return &slot.at(idx + dir);
+            return slot.at(idx + dir).get();
     }catch(const std::out_of_range&){}
     // no more weapons in slot, return nullptr
     return nullptr;
@@ -210,9 +210,23 @@ bool WeaponStash :: slot(int num)
         return active && active != last_active;
     }
     try{
-        m_pActive = &m_Slots[num].at(0);
+        m_pActive = m_Slots[num].at(0).get();
         return true;
     }catch(const out_of_range&){}
+    return false;
+}
+
+bool WeaponStash :: slot(std::string s)
+{
+    for(auto&& slot: m_Slots)
+    {
+        for(auto&& wpn: slot){
+            if(wpn->spec()->name() == s){
+                m_pActive = wpn.get();
+                return true;
+            }
+        }
+    }
     return false;
 }
 
@@ -273,5 +287,16 @@ int Weapon :: fire()
         m_Clip = m_Clip - burst;
     }
     return burst;
+}
+
+WeaponSpecEntry* WeaponSpec :: weapon(std::string name)
+{
+    Weapon* w = nullptr;
+    for(auto&& wpn: m_Entries)
+    {
+        if(wpn.second.name() == name)
+            return &wpn.second;
+    }
+    return nullptr;
 }
 

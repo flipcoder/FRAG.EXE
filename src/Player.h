@@ -68,6 +68,7 @@ class Player:
         void scope(bool b);
         void decal(Node* n, glm::vec3 contact, glm::vec3 normal, glm::vec3 up, float offset);
         void refresh_weapon();
+        bool weapon_priority_cmp(std::string s1, std::string s2);
 
         GameState* m_pState;
         Node* m_pRoot;

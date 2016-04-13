@@ -65,6 +65,8 @@ class WeaponSpec
 {
     public:
         WeaponSpec(const std::shared_ptr<Meta>& cfg);
+
+        WeaponSpecEntry* weapon(std::string n);
         
         typedef typename kit::index<WeaponSpecEntry>::const_iterator
             const_iterator;
@@ -118,17 +120,18 @@ class WeaponStash
 
         bool next(int delta=1);
         bool slot(int num);
+        bool slot(std::string name);
         Weapon* next_in_slot(Weapon* active, int dir, bool wrap = false);
 
         Weapon* active() { return m_pActive; }
 
-        void sort_slot(std::vector<Weapon>& slot);
+        void sort_slot(std::vector<std::shared_ptr<Weapon>>& slot);
 
         unsigned weapon_count() const;
-
+        
     private:
         
-        std::vector<std::vector<Weapon>> m_Slots;
+        std::vector<std::vector<std::shared_ptr<Weapon>>> m_Slots;
         WeaponSpec* m_pSpec;
         Weapon* m_pActive = nullptr;
 };

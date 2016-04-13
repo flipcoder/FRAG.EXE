@@ -790,9 +790,15 @@ void Player :: give(const shared_ptr<Meta>& item)
     if(name.empty())
         return;
     
+    std::string cur = m_WeaponStash.active()->spec()->name();
     if(m_WeaponStash.give(item)){
         if(not local())
             return;
+        auto item_name = item->at<string>("name");
+        if(weapon_priority_cmp(item_name, cur)){
+            m_WeaponStash.slot(item_name);
+            refresh_weapon();
+        }
         LOGf("Picked up %s!",
             m_pSpec->config()->meta("weapons")->meta(name)->template at<string>("name", "???")
         );
@@ -840,5 +846,18 @@ void Player :: add_frags(Player* target, int f)
     int frags = m_pProfile->temp()->at<int>("frags");
     m_pProfile->temp()->at<int>("frags", std::max(0,frags));
     LOGf("%s fragged %s.", name() % target->name());
+}
+
+bool Player :: weapon_priority_cmp(string s1, string s2)
+{
+    for(auto&& e: *m_pProfile->config()->meta("weapon_priority"))
+    {
+        string s = e.as<string>();
+        if(s == s1)
+            return true;
+        if(s == s2)
+            return false;
+    }
+    return false;
 }
 

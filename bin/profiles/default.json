@@ -43,5 +43,13 @@
             "9": "slot9",
             "0": "slot0"
         }
-    }
+    },
+    "weapon_priority": [
+        "rocketrifle",
+        "shotgun",
+        "ump45",
+        "sniper",
+        "grenadelauncher",
+        "glock"
+    ]
 }
