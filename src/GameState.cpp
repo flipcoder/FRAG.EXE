@@ -129,6 +129,7 @@ void GameState :: preload()
         auto meshes = scene_root->hook_type<Mesh>();
         for(auto&& mesh: meshes)
             mesh->set_physics(Node::STATIC);
+        m_Fog = scene->fog();
     }
     
     if(m_pQor->exists(map +  ".obj")){
@@ -170,6 +171,8 @@ GameState :: ~GameState()
 
 void GameState :: enter()
 {
+    m_pPipeline->bg_color(m_Fog);
+        
     m_pNet = make_shared<Net>(m_pQor, m_bServer);
     m_pQor->session()->module("net", m_pNet);
     
@@ -210,8 +213,17 @@ void GameState :: enter()
     Audio::max_distance(20.0f);
     
     if(not Headless::enabled()){
-        m_pPipeline->shader(1)->use();
+        m_pPipeline->shader(0)->use();
+        int u = m_pPipeline->shader(0)->uniform("FogColor");
+        if(u >= 0)
+            m_pPipeline->shader(0)->uniform(u, m_Fog.vec4());
+
+        
         m_pPipeline->override_shader(PassType::NORMAL, m_Shader);
+        m_pPipeline->shader(1)->use();
+        u = m_pPipeline->shader(1)->uniform("FogColor");
+        if(u >= 0)
+            m_pPipeline->shader(1)->uniform(u, m_Fog.vec4());
     }
      
     //m_pCamera->perspective();
@@ -282,22 +294,37 @@ void GameState :: logic(Freq::Time t)
     m_pSkyboxRoot->logic(t);
     m_pRoot->logic(t);
     m_GameSpec.logic(t);
+
+    if(not Headless::enabled()){
+        m_pPipeline->override_shader(PassType::NORMAL, m_Shader);
+        m_pPipeline->shader(1)->use();
+        int u = m_pPipeline->shader(1)->uniform("FogColor");
+        if(u >= 0)
+            m_pPipeline->shader(1)->uniform(u, m_Fog.vec4());
+    }
+
     
     //LOGf("skybox: %s", Vector::to_string(m_pSkyboxCamera->position(Space::WORLD)));
 }
 
 void GameState :: render() const
-{
+{ 
     // render player view & skybox
-    m_pPipeline->override_shader(PassType::NORMAL, (unsigned)PassType::NONE);
-    m_pPipeline->winding(false);
-    m_pPipeline->blend(false);
-    m_pPipeline->render(
-        m_pSkyboxRoot.get(),
-        m_pSkyboxCamera.get(),
-        nullptr,
-        Pipeline::NO_DEPTH
-    );
+    bool clear = true;
+    
+    if(m_Fog.a() < K_EPSILON)
+    {
+        m_pPipeline->override_shader(PassType::NORMAL, (unsigned)PassType::NONE);
+        m_pPipeline->winding(false);
+        m_pPipeline->blend(false);
+        m_pPipeline->render(
+            m_pSkyboxRoot.get(),
+            m_pSkyboxCamera.get(),
+            nullptr,
+            Pipeline::NO_DEPTH
+        );
+        clear = false;
+    }
 
     auto camera = m_GameSpec.camera();
     if(camera)
@@ -309,7 +336,7 @@ void GameState :: render() const
             m_pRoot.get(),
             camera.get(),
             nullptr,
-            Pipeline::LIGHTS | Pipeline::NO_CLEAR
+            Pipeline::LIGHTS | (clear ? 0 : Pipeline::NO_CLEAR)
         );
     }
 

@@ -104,6 +104,7 @@ class GameState:
 
         Freq::Timeline m_GameTime;
         GameSpec m_GameSpec;
+        Color m_Fog = Color::clear();
 
         unsigned m_Shader = ~0u;
         unsigned m_ColorShader = ~0u;
