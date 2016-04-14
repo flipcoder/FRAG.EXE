@@ -518,10 +518,10 @@ void Player :: logic(Freq::Time t)
                             ) * 0.25f);
                             blood->velocity(glm::vec3(
                                 rand() % 100 / 100.0f,
-                                rand() % 100 / 100.0f,
+                                rand() % 100 / 100.0f * 2.0f,
                                 rand() % 100 / 100.0f));
                             blood->acceleration(glm::vec3(0.0f, -9.8f, 0.0f));
-                            blood->scale(0.25f);
+                            blood->scale(0.25f + rand()%10/10.0f*0.5f);
                             blood->life(Freq::Time::seconds(0.5f));
                         }
                         else
@@ -775,6 +775,8 @@ void Player :: hurt(int dmg)
             m_FlashAlarm.set(Freq::Time::seconds(2.0f * dmg*1.0f/10));
             Sound::play(m_pCamera.get(), "hurt.wav", m_pQor->resources());
         }
+        else
+            Sound::play(m_pCamera.get(), "grunt.wav", m_pQor->resources());
     }
     else if(dmg < 0)
     {
@@ -783,6 +785,8 @@ void Player :: hurt(int dmg)
             m_FlashAlarm.set(Freq::Time::seconds(0.5f));
             Sound::play(m_pCamera.get(), "health.wav", m_pQor->resources());
         }
+        else
+            Sound::play(m_pCamera.get(), "grunt.wav", m_pQor->resources());
     }
     
     update_hud();

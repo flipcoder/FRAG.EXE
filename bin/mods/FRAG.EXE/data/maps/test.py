@@ -110,3 +110,27 @@ btn.on_event("use", toggle)
 # qor.on_enter(enter)
 # qor.on_tick(logic)
 
+accum = 0.0
+ambient = 0.0
+def logic(t):
+    global accum
+    global ambient
+    accum += t
+    if accum >= 4.0:
+        accum -= 4.0
+        
+        thunder = qor.Sound("thunder.wav")
+        thunder.ambient(True)
+        qor.root().add(thunder)
+        thunder.detach_on_done()
+        thunder.play()
+
+        ambient = 1.0
+        qor.uniform("Ambient", 1.0)
+    
+    if ambient > 0.0:
+        ambient = max(0,ambient - t)
+        qor.uniform("Ambient", ambient)
+
+qor.on_tick(logic)
+
