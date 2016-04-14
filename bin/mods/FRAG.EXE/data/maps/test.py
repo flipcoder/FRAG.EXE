@@ -111,7 +111,7 @@ btn.on_event("use", toggle)
 # qor.on_tick(logic)
 
 accum = 0.0
-ambient = 0.0
+ambient = 0.1
 def logic(t):
     global accum
     global ambient
@@ -128,7 +128,7 @@ def logic(t):
         ambient = 1.0
         qor.uniform("Ambient", 1.0)
     
-    if ambient > 0.0:
+    if ambient > 0.1:
         ambient = max(0,ambient - t)
         qor.uniform("Ambient", ambient)
 

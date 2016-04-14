@@ -41,6 +41,11 @@ for l in obj:
         tokens[0] = str(-float(tokens[0]))
         l = "v " + " ".join(tokens) + "\n"
         obj_r.write(l)
+    elif l.startswith("vt "):
+        tokens = l.split(" ")[1:]
+        tokens[1] = str(1.0 - float(tokens[1]))
+        l = "vt " + " ".join(tokens) + "\n"
+        obj_r.write(l)
     elif l.startswith("f "):
         tokens = l.split(" ")[1:]
         for i in range(0,len(tokens)//2):
