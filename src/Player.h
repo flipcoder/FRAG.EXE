@@ -13,7 +13,7 @@
 
 class Qor;
 class HUD;
-class GameState;
+class Game;
 
 class Player:
     public IRealtime,
@@ -21,7 +21,7 @@ class Player:
 {
     public:
         Player(
-            GameState* state,
+            Game* state,
             Node* root,
             std::shared_ptr<Profile> profile,
             //std::shared_ptr<Controller> controller,
@@ -70,7 +70,7 @@ class Player:
         void refresh_weapon();
         bool weapon_priority_cmp(std::string s1, std::string s2);
 
-        GameState* m_pState;
+        Game* m_pState;
         Node* m_pRoot;
         std::shared_ptr<Node> m_pOrthoRoot;
         std::shared_ptr<Camera> m_pOrthoCamera;

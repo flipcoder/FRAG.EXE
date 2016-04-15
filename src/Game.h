@@ -20,13 +20,13 @@
 class Net;
 class Qor;
 
-class GameState:
+class Game:
     public State
 {
     public:
         
-        GameState(Qor* engine);
-        virtual ~GameState();
+        Game(Qor* engine);
+        virtual ~Game();
 
         virtual void enter() override;
         virtual void preload() override;

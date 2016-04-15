@@ -12,14 +12,14 @@
 
 class Qor;
 class HUD;
-class GameState;
+class Game;
 
 class Spectator:
     public IRealtime
 {
     public:
         Spectator(
-            GameState* state,
+            Game* state,
             Node* root,
             std::shared_ptr<Profile> profile,
             Cache<Resource, std::string>* cache,
@@ -41,7 +41,7 @@ class Spectator:
 
     private:
         
-        GameState* m_pState;
+        Game* m_pState;
         Node* m_pRoot;
         std::shared_ptr<Node> m_pSpectator;
         std::shared_ptr<Node> m_pOrthoRoot;

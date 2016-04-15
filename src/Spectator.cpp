@@ -5,13 +5,13 @@
 #include "Qor/Physics.h"
 #include "Qor/Particle.h"
 #include "Qor/Material.h"
-#include "GameState.h"
+#include "Game.h"
 #include "Qor/BasicPartitioner.h"
 using namespace std;
 using namespace glm;
 
 Spectator :: Spectator(
-    GameState* state,
+    Game* state,
     Node* root,
     shared_ptr<Profile> profile,
     Cache<Resource, string>* cache,

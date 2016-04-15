@@ -3,7 +3,7 @@
 #include "Player.h"
 #include "Spectator.h"
 #include "Qor/Qor.h"
-#include "GameState.h"
+#include "Game.h"
 #include <boost/regex.hpp>
 #include "Qor/Profile.h"
 using namespace std;
@@ -11,7 +11,7 @@ using namespace std;
 GameSpec :: GameSpec(std::string fn, Cache<Resource, std::string>* cache,
     Node* root, BasicPartitioner* part,
     shared_ptr<Profile> prof,
-    Qor* engine, GameState* state
+    Qor* engine, Game* state
 ):
     m_pConfig(make_shared<Meta>(cache->transform(fn))),
     m_pCache(cache),

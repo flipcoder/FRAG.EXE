@@ -1,4 +1,4 @@
-#include "GameState.h"
+#include "Game.h"
 #include "Qor/Input.h"
 #include "Qor/Qor.h"
 #include "Qor/TileMap.h"
@@ -21,7 +21,7 @@
 using namespace std;
 using namespace glm;
 
-GameState :: GameState(
+Game :: Game(
     Qor* engine
     //std::string fn
 ):
@@ -46,7 +46,7 @@ GameState :: GameState(
         m_bServer = true;
 }
 
-void GameState :: preload()
+void Game :: preload()
 {
     auto _this = this;
     
@@ -165,16 +165,17 @@ void GameState :: preload()
     m_pQor->make<Mesh>("player.obj");
 }
 
-GameState :: ~GameState()
+Game :: ~Game()
 {
 }
 
-void GameState :: enter()
+void Game :: enter()
 {
     m_pPipeline->bg_color(m_Fog);
         
-    m_pNet = make_shared<Net>(m_pQor, m_bServer);
-    m_pQor->session()->module("net", m_pNet);
+    //m_pNet = make_shared<Net>(m_pQor, m_bServer);
+    //m_pQor->session()->module("net", m_pNet);
+    m_pNet = static_pointer_cast<Net>(((Session::IModule*)m_pQor->session()->module("net"))->shared_from_this());
     
     if(not m_bServer)
         m_GameSpec.spawn_local_spectator();
@@ -276,7 +277,7 @@ void GameState :: enter()
     //));
 }
 
-void GameState :: logic(Freq::Time t)
+void Game :: logic(Freq::Time t)
 {
     m_pNet->logic(t);
     
@@ -307,7 +308,7 @@ void GameState :: logic(Freq::Time t)
     //LOGf("skybox: %s", Vector::to_string(m_pSkyboxCamera->position(Space::WORLD)));
 }
 
-void GameState :: render() const
+void Game :: render() const
 { 
     // render player view & skybox
     bool clear = true;

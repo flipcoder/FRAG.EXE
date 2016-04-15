@@ -5,7 +5,7 @@
 #include "Qor/Physics.h"
 #include "Qor/Particle.h"
 #include "Qor/Material.h"
-#include "GameState.h"
+#include "Game.h"
 #include "Qor/BasicPartitioner.h"
 #include "Qor/Profile.h"
 using namespace std;
@@ -14,7 +14,7 @@ using namespace glm;
 const unsigned Player :: MAX_DECALS = 32;
 
 Player :: Player(
-    GameState* state,
+    Game* state,
     Node* root,
     shared_ptr<Profile> profile,
     //shared_ptr<Controller> controller,

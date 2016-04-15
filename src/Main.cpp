@@ -4,7 +4,8 @@
 #include "Qor/kit/kit.h"
 #include "Qor/Qor.h"
 #include "Info.h"
-#include "GameState.h"
+#include "Game.h"
+#include "Pregame.h"
 
 #include "Qor/kit/log/log.h"
 #include "Qor/kit/async/async.h"
@@ -30,8 +31,9 @@ int main(int argc, const char** argv)
     try{
 #endif
         auto engine = kit::make_unique<Qor>(args);
-        engine->states().register_class<GameState>("game");
-        engine->run("game");
+        engine->states().register_class<Game>("game");
+        engine->states().register_class<Pregame>("pregame");
+        engine->run("pregame");
 #ifndef DEBUG
     }catch(const Error&){
         // already logged

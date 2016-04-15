@@ -12,7 +12,7 @@ class Node;
 class Player;
 class Qor;
 class Spectator;
-class GameState;
+class Game;
 class Profile;
 
 class GameSpec:
@@ -22,7 +22,7 @@ class GameSpec:
         GameSpec(std::string fn, Cache<Resource, std::string>* cache,
             Node* root, BasicPartitioner* part,
             std::shared_ptr<Profile> prof,
-            Qor* engine, GameState* state
+            Qor* engine, Game* state
         );
         WeaponSpec* weapons() { return &m_WeaponSpec; }
 
@@ -65,7 +65,7 @@ class GameSpec:
         BasicPartitioner* m_pPartitioner;
         Qor* m_pQor;
         Physics* m_pPhysics = nullptr;
-        GameState* m_pState;
+        Game* m_pState;
 
         std::vector<std::shared_ptr<Player>> m_Players;
         Player* m_pPlayer = nullptr; // local
