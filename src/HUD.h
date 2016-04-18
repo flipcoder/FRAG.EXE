@@ -33,6 +33,9 @@ class HUD:
         void fade(Color c);
         Color fade() const { return m_Fade; }
 
+        bool red_pulse(bool b) { m_bDirty=true;return m_RedPulse=b;}
+        bool blue_pulse(bool b) { m_bDirty=true;return m_BluePulse=b;}
+
     private:
         
         void redraw();
@@ -46,6 +49,11 @@ class HUD:
         //Pango::FontDescription m_FontDesc;
         float m_Border = 24.0f;
         Player* m_pPlayer;
+        
+        float m_RedPulse = 0.0f;
+        bool m_RedPulsing = false;
+        float m_BluePulse = 0.0f;
+        bool m_BluePulsing = false;
         
         bool m_bInput = false;
         bool m_bDirty = true;

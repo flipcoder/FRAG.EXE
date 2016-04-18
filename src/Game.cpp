@@ -39,7 +39,10 @@ Game :: Game(
         this
     )
 {
-    m_Shader = m_pPipeline->load_shaders({"lit"});
+    if(m_pQor->args().has('b',"bump"))
+        m_Shader = m_pPipeline->load_shaders({"detail"});
+    else
+        m_Shader = m_pPipeline->load_shaders({"lit"});
 
     if(m_pQor->args().has('d', "dedicated")||
        m_pQor->args().has('s', "server"))

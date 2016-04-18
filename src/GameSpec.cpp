@@ -43,7 +43,7 @@ void GameSpec :: deregister_player(Player* p)
 void GameSpec :: register_pickup_with_player(std::shared_ptr<Mesh> item, Player* player)
 {
     auto part = m_pPartitioner;
-    m_pPartitioner->on_touch(item, player->mesh(), [part, player](Node* a, Node* b){
+    m_pPartitioner->on_touch(item, player->shape(), [part, player](Node* a, Node* b){
         assert(a && b);
         if(not a->attached() && not a->detaching())
             return;
@@ -89,13 +89,13 @@ void GameSpec :: setup()
         auto spawns = m_pRoot->hook(item.key + string(".*"), Node::Hook::REGEX);
         for(auto&& spawn: spawns)
         {
-            auto mesh = make_shared<Mesh>(m_pCache->transform(model), m_pCache);
+            auto shape = make_shared<Mesh>(m_pCache->transform(model), m_pCache);
             auto re = m->at("skin", shared_ptr<Meta>());
             if(re)
             {
-                if(mesh->compositor())
+                if(shape->compositor())
                 {
-                    auto children = mesh->hook_type<Mesh>();
+                    auto children = shape->hook_type<Mesh>();
                     for(auto&& c: children)
                     {
                         string oldskin = c->material()->texture()->filename();
@@ -110,29 +110,29 @@ void GameSpec :: setup()
                         }
                     }
                 }else{
-                    string oldskin = mesh->material()->texture()->filename();
+                    string oldskin = shape->material()->texture()->filename();
                     string skin = boost::regex_replace(
                         oldskin,
                         boost::regex(re->at<string>(0), boost::regex_constants::extended),
                         re->at<string>(1)
                     );
                     if(oldskin != skin){
-                        mesh->fork();
-                        mesh->material(skin, m_pCache);
+                        shape->fork();
+                        shape->material(skin, m_pCache);
                     }
                 }
             }
             
-            mesh->name(item.key);
-            mesh->position(spawn->position(Space::WORLD) + glm::vec3(0.0f, 0.5f, 0.0f));
-            m_pRoot->add(mesh);
-            auto mp = mesh.get();
-            mesh->on_tick.connect([mp](Freq::Time t){
+            shape->name(item.key);
+            shape->position(spawn->position(Space::WORLD) + glm::vec3(0.0f, 0.5f, 0.0f));
+            m_pRoot->add(shape);
+            auto mp = shape.get();
+            shape->on_tick.connect([mp](Freq::Time t){
                 mp->rotate(t.s(), glm::vec3(0.0f, 1.0f, 0.0f));
             });
-            m_ItemPickups.push_back(mesh);
+            m_ItemPickups.push_back(shape);
             for(auto&& player: m_Players)
-                register_pickup_with_player(mesh, player.get());
+                register_pickup_with_player(shape, player.get());
         }
     }
 }
@@ -168,7 +168,7 @@ void GameSpec :: play(shared_ptr<Profile> prof)
     on_player_spawn(player.get());
     
     //register_player(player->shared_from_this());
-    m_pPhysics->generate(player->mesh().get());
+    m_pPhysics->generate(player->shape().get());
     
     //respawn(m_pPlayer);
 }
@@ -179,7 +179,7 @@ bool GameSpec :: respawn(Player* p)
     if(not spawns.empty())
     {
         auto spawn = spawns[rand() % spawns.size()];
-        p->mesh()->teleport(spawn->position(Space::WORLD) + glm::vec3(0.0f, 0.6f, 0.0f));
+        p->shape()->teleport(spawn->position(Space::WORLD) + glm::vec3(0.0f, 0.6f, 0.0f));
     }
     register_player(p->shared_from_this());
     return true;

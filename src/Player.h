@@ -45,7 +45,7 @@ class Player:
 
         bool can_jump() const;
 
-        std::shared_ptr<Mesh> mesh() { return m_pPlayerMesh; }
+        std::shared_ptr<Mesh> shape() { return m_pPlayerShape; }
         
         void die();
         void hurt(int dmg);
@@ -61,7 +61,7 @@ class Player:
 
         bool local() const { return !!m_pController; }
 
-        std::string name() { return m_pProfile->name(); }
+        std::string name() const { return m_pProfile->name(); }
         
     private:
         
@@ -74,7 +74,7 @@ class Player:
         Node* m_pRoot;
         std::shared_ptr<Node> m_pOrthoRoot;
         std::shared_ptr<Camera> m_pOrthoCamera;
-        std::shared_ptr<Mesh> m_pPlayerMesh;
+        std::shared_ptr<Mesh> m_pPlayerShape;
         std::shared_ptr<Camera> m_pCamera;
         std::shared_ptr<ViewModel> m_pViewModel;
         std::shared_ptr<Profile> m_pProfile;
@@ -106,6 +106,8 @@ class Player:
 
         Box m_StandBox;
         Box m_CrouchBox;
+
+        boost::signals2::scoped_connection m_HPChangeCon;
 
 };
 

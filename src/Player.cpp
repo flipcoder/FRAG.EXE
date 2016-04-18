@@ -46,12 +46,12 @@ Player :: Player(
     m_pOrthoRoot->add(m_pOrthoCamera);
     m_pHUD = make_shared<HUD>(this, window, m_pController ? m_pController->input() : nullptr, cache);
     m_pOrthoRoot->add(m_pHUD);
-    m_pPlayerMesh = make_shared<Mesh>();
+    m_pPlayerShape = make_shared<Mesh>();
     // forward mesh gifts to this object
-    //m_pPlayerMesh->event("give", [_this](std::shared_ptr<Meta> m){
+    //m_pPlayerShape->event("give", [_this](std::shared_ptr<Meta> m){
     //    _this->give(m);
     //});
-    m_pPlayerMesh->event("hit", [_this](std::shared_ptr<Meta> m){
+    m_pPlayerShape->event("hit", [_this](std::shared_ptr<Meta> m){
         if(_this->dead())
             return;
         _this->hurt(m->at<int>("damage"));
@@ -69,13 +69,13 @@ Player :: Player(
         vec3(-0.6f, -0.025f, -0.6f),
         vec3(0.6f, 0.025f, 0.6f)
     );
-    m_pPlayerMesh->set_box(m_StandBox);
-    m_pPlayerMesh->set_physics(Node::Physics::DYNAMIC);
-    m_pPlayerMesh->set_physics_shape(Node::CAPSULE);
-    m_pPlayerMesh->friction(0.0f);
-    m_pPlayerMesh->mass(80.0f);
-    m_pPlayerMesh->inertia(false);
-    m_pPlayerMesh->add_tag("player");
+    m_pPlayerShape->set_box(m_StandBox);
+    m_pPlayerShape->set_physics(Node::Physics::DYNAMIC);
+    m_pPlayerShape->set_physics_shape(Node::CAPSULE);
+    m_pPlayerShape->friction(0.0f);
+    m_pPlayerShape->mass(80.0f);
+    m_pPlayerShape->inertia(false);
+    m_pPlayerShape->add_tag("player");
     m_pProfile->temp()->set<string>("team", rand()%2?"red":"blue");
     m_pProfile->temp()->set<int>("frags", 0);
     m_pProfile->temp()->set<int>("deaths", 0);
@@ -86,16 +86,17 @@ Player :: Player(
     if(not local())
     {
         auto m = make_shared<Mesh>(m_pCache->transform("player.obj"), m_pCache);
-        m_pPlayerMesh->add(m);
+        m->position(vec3(0.0f, -m_pPlayerShape->box().size().y / 2.5f, 0.0f));
+        m_pPlayerShape->add(m);
         m->disable_physics();
     }
     
     m_pCamera = make_shared<Camera>(cache, window);
     m_fFOV = m_pCamera->fov();
     //m_pRoot->add(m_pCamera);
-    m_pPlayerMesh->add(m_pCamera);
-    m_pCamera->position(vec3(0.0f, m_pPlayerMesh->box().size().y / 2.5f, 0.0f));
-    m_pRoot->add(m_pPlayerMesh);
+    m_pPlayerShape->add(m_pCamera);
+    m_pCamera->position(vec3(0.0f, m_pPlayerShape->box().size().y / 2.5f, 0.0f));
+    m_pRoot->add(m_pPlayerShape);
      
     m_pDecal = cache->cache_cast<ITexture>("decal_bullethole1.png");
     m_pSpark = cache->cache_cast<ITexture>("spark.png");
@@ -113,13 +114,13 @@ Player :: Player(
     m_pProfile->temp()->ensure("hp",0); // these will be reset anyway
     m_pProfile->temp()->ensure("maxhp",0);
     m_pProfile->temp()->ensure("frags",0);
-    m_pProfile->temp()->on_change("hp",hp_change);
+    m_HPChangeCon = m_pProfile->temp()->on_change("hp",hp_change);
     
     if(m_pController) {
         m_pInterface = kit::init_shared<PlayerInterface3D>(
             m_pController,
             m_pCamera,
-            m_pPlayerMesh,
+            m_pPlayerShape,
             m_pQor->session()->profile(0)->config(),
             [_this]{
                 return (_this->m_LockIf && _this->m_LockIf()) || _this->dead();
@@ -128,8 +129,8 @@ Player :: Player(
         m_pInterface->speed(16.0f);
     }
     
-    //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
-    auto pmesh = m_pPlayerMesh.get();
+    //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerShape->body()->body();
+    auto pmesh = m_pPlayerShape.get();
     auto camera = m_pCamera.get();
     auto interface = m_pInterface.get();
     m_pPhysics->on_generate([_this, physics, pmesh,interface,cache,camera]{
@@ -153,13 +154,13 @@ Player :: Player(
 
         }
     });
-    m_pPlayerMesh->move(vec3(0.0f, 0.6f, 0.0f));
+    m_pPlayerShape->move(vec3(0.0f, 0.6f, 0.0f));
 
     m_pCamera->perspective();
     m_pCamera->listen();
     
     //m_pInterface->fly();
-    //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
+    //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerShape->body()->body();
 
     m_bScope = true;
     scope(false);
@@ -169,13 +170,13 @@ Player :: Player(
         hud->message(m->at<string>("message"), Color(m->at<string>("color", string("FFFFFF"))));
     });
 
-    state->partitioner()->register_object(m_pPlayerMesh, 0);
+    state->partitioner()->register_object(m_pPlayerShape, 0);
 }
 
 Player :: ~Player()
 {
     //m_pSpec->despawn(this);
-    m_pPlayerMesh->detach();
+    m_pPlayerShape->detach();
     m_pViewModel->detach();
     //m_pInterface->unplug();
 }
@@ -189,7 +190,7 @@ void Player :: jump()
     if(not can_jump())
         return;
     
-    auto pmesh_body = (btRigidBody*)m_pPlayerMesh->body()->body();
+    auto pmesh_body = (btRigidBody*)m_pPlayerShape->body()->body();
     pmesh_body->applyCentralImpulse(
         btVector3(0.0f, 1000.0f, 0.0f)
     );
@@ -200,10 +201,10 @@ bool Player :: crouch(bool b)
 {
     if(b == m_bCrouched)
         return false;
-    m_pPlayerMesh->clear_body();
-    m_pPlayerMesh->set_box(b ? m_CrouchBox : m_StandBox);
-    m_pCamera->position(vec3(0.0f, m_pPlayerMesh->box().size().y / 2.0f, 0.0f));
-    m_pPhysics->generate(m_pPlayerMesh.get());
+    m_pPlayerShape->clear_body();
+    m_pPlayerShape->set_box(b ? m_CrouchBox : m_StandBox);
+    m_pCamera->position(vec3(0.0f, m_pPlayerShape->box().size().y / 2.0f, 0.0f));
+    m_pPhysics->generate(m_pPlayerShape.get());
     m_bCrouched = b;
     return true;
 }
@@ -280,7 +281,7 @@ void Player :: logic(Freq::Time t)
     m_pOrthoRoot->logic(t);
    
     auto _this = this;
-    auto pmesh = m_pPlayerMesh.get();
+    auto pmesh = m_pPlayerShape.get();
     auto pmesh_body = (btRigidBody*)pmesh->body()->body();
     pmesh_body->applyCentralForce(
         Physics::toBulletVector(glm::vec3(0.0f, -31.0f * pmesh->mass(), 0.0f))
@@ -514,7 +515,7 @@ void Player :: logic(Freq::Time t)
                             m_pRoot->add(blood);
                             blood->move(std::get<1>(hit));
                             blood->move(glm::normalize(
-                                m_pPlayerMesh->position(Space::WORLD) - blood->position(Space::WORLD)
+                                m_pPlayerShape->position(Space::WORLD) - blood->position(Space::WORLD)
                             ) * 0.25f);
                             blood->velocity(glm::vec3(
                                 rand() % 100 / 100.0f,
@@ -605,7 +606,7 @@ void Player :: logic(Freq::Time t)
         
     }
 
-    //LOGf("pos: %s, %s", t.s() % m_pPlayerMesh->position().y);
+    //LOGf("pos: %s, %s", t.s() % m_pPlayerShape->position().y);
 
     //LOGf("children: %s", m_pRoot->num_subnodes());
 
@@ -697,7 +698,7 @@ bool Player :: can_jump() const
 {
     if(m_bCrouched)
         return false;
-    auto pos = m_pPlayerMesh->position(Space::WORLD);
+    auto pos = m_pPlayerShape->position(Space::WORLD);
     auto jump_hit = m_pPhysics->first_hit(
         pos,
         pos - glm::vec3(0.0f, 1.2f, 0.0f)
@@ -731,7 +732,7 @@ void Player :: refresh_weapon()
 
 //void Player :: stand(vec3 pos)
 //{
-//    m_pPlayerMesh->position(pos);
+//    m_pPlayerShape->position(pos);
 //}
 
 void Player :: die()
@@ -852,11 +853,13 @@ void Player :: give(const shared_ptr<Meta>& item)
         m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
             R"({"message": "RED FLAG TAKEN", "color": "FF0000"})"
         ));
+        m_pHUD->red_pulse(true);
     } else if (name == "blueflag") {
         Sound::play(m_pCamera.get(), "blueflagtaken.wav", m_pCache);
         m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
             R"({"message": "BLUE FLAG TAKEN", "color": "0000FF"})"
         ));
+        m_pHUD->blue_pulse(true);
     }
 
 

@@ -80,12 +80,12 @@ void HUD :: redraw()
 
     m_pCanvas->font("Audiowide",40);
     cairo->get_text_extents("1000", extents);
-    cairo->set_source_rgba(1.0f, 0.0f, 0.0f, 0.5f);
+    cairo->set_source_rgba(1.0f, 0.0f, 0.0f, m_RedPulse < 0.5f ? 0.5f : 1.0f);
     m_pCanvas->rectangle(
         win->center().x - extents.width, 0.0f,
         extents.width, extents.height
     ); m_pCanvas->context()->fill();
-    cairo->set_source_rgba(0.0f, 0.0f, 1.0f, 0.5f);
+    cairo->set_source_rgba(0.0f, 0.0f, 1.0f, m_BluePulse < 0.5f ? 0.5f : 1.0f);
     m_pCanvas->rectangle(
         win->center().x, 0.0f,
         extents.width, extents.height
@@ -128,6 +128,29 @@ void HUD :: logic_self(Freq::Time t)
         if(not m_MsgTime)
         {
             m_Msg = string();
+            m_bDirty = true;
+        }
+    }
+
+    if(m_RedPulsing){
+        float redpulse = m_RedPulse;
+        m_RedPulse = std::fmod(m_RedPulse+t.s()*2.0f, 1.0f);
+        if((redpulse < 0.5f && m_RedPulse > 0.5f) || (redpulse > 0.5f && m_RedPulse < 0.5f))
+            m_bDirty = true;
+    } else {
+        if(m_RedPulse != 0.0f){
+            m_RedPulse = 0.0f;
+            m_bDirty = true;
+        }
+    }
+    if(m_BluePulsing){
+        float bluepulse = m_BluePulse;
+        m_BluePulse = std::fmod(m_BluePulse+t.s()*2.0f, 1.0f);
+        if((bluepulse < 0.5f && m_BluePulse > 0.5f) || (bluepulse > 0.5f && m_BluePulse < 0.5f))
+            m_bDirty = true;
+    } else {
+        if(m_BluePulse != 0.0f){
+            m_BluePulse = 0.0f;
             m_bDirty = true;
         }
     }
