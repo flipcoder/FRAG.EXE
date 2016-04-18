@@ -1,4 +1,4 @@
-# Blender MTL File: 'player.blend'
+# Blender MTL File: 'None'
 # Material Count: 1
 
 newmtl Material
@@ -10,4 +10,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd player_blue.png
+map_Kd  D:\\Work\\qorAssets\\textures\\rust_chrome.png
