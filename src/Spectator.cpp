@@ -50,8 +50,8 @@ Spectator :: Spectator(
     m_pInterface->speed(12.0f);
     m_pInterface->fly();
     m_pCamera->perspective();
-    m_pCamera->listen();
     m_pSpectator->add(m_pCamera);
+    m_pCamera->listen();
 }
 
 Spectator :: ~Spectator()

@@ -39,10 +39,10 @@ Game :: Game(
         this
     )
 {
-    if(m_pQor->args().has('b',"bump"))
+    //if(m_pQor->args().has('b',"bump"))
         m_Shader = m_pPipeline->load_shaders({"detail"});
-    else
-        m_Shader = m_pPipeline->load_shaders({"lit"});
+    //else
+    //    m_Shader = m_pPipeline->load_shaders({"lit"});
 
     if(m_pQor->args().has('d', "dedicated")||
        m_pQor->args().has('s', "server"))
@@ -147,6 +147,10 @@ void Game :: preload()
             if(mesh->material()){
                 if(Filesystem::getFileName(mesh->material()->texture()->filename()) == "caulk.png")
                     mesh->detach();
+                else if(Filesystem::getFileName(mesh->material()->texture()->filename()) == "playerclip.png")
+                    mesh->each([](Node* n){
+                        n->self_visible(false);
+                    });
             }
         }
     }

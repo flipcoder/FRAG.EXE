@@ -469,16 +469,18 @@ void Player :: logic(Freq::Time t)
         bool player_hit = false;
         m_pViewModel->recoil(Freq::Time(50), m_WeaponStash.active()->spec()->delay(), 0.05f);
         if(m_WeaponStash.active()->spec()->projectile().empty())
-        {
-            //auto p = m_pQor->make<Particle>("muzzleflash1.png");
-            //m_pViewModel->add(p);
-            //p->move(vec3(0.0f, 0.0f, -1.0f));
-            //p->collapse(Space::WORLD);
-             
+        {    
             int burst = m_WeaponStash.active()->fire();
             update_hud();
             if(burst)
             {
+                //auto p = m_pQor->make<Particle>("muzzleflash1.png");
+                //m_pViewModel->add(p);
+                //p->move(vec3(0.0f, 0.0f, -0.4f));
+                //p->scale(0.1f);
+                //p->collapse(Space::WORLD);
+                //p->life(Freq::Time::seconds(0.01f));
+                
                 Sound::play(m_pCamera.get(), m_WeaponStash.active()->spec()->sound(), m_pQor->resources());
                 
                 for(int i=0; i<burst; ++i)
@@ -657,9 +659,10 @@ void Player :: decal(Node* n, glm::vec3 contact, glm::vec3 normal, glm::vec3 up,
     m->material(make_shared<MeshMaterial>(m_pDecal));
     auto right = glm::cross(normal, up);
     up = glm::cross(normal, right);
-    *m->matrix() = glm::mat4(glm::orthonormalize(glm::mat3(
+    mat4 decal_space = glm::mat4(glm::orthonormalize(glm::mat3(
         right, up, normal
     )));
+    *m->matrix() = decal_space;
     m->position(contact);
     m->move(normal * (0.001f + offset));
     m->pend();
@@ -671,7 +674,7 @@ void Player :: decal(Node* n, glm::vec3 contact, glm::vec3 normal, glm::vec3 up,
     }
     n->add(m);
     *m->matrix() = glm::inverse(*n->matrix(Space::WORLD)) * *m->matrix();
-    n->pend();
+    m->pend();
     
     // spark
     auto m2 = make_shared<Mesh>(make_shared<MeshGeometry>(Prefab::quad(
@@ -680,10 +683,13 @@ void Player :: decal(Node* n, glm::vec3 contact, glm::vec3 normal, glm::vec3 up,
     )));
     m2->add_modifier(make_shared<Wrap>(Prefab::quad_wrap()));
     m2->material(make_shared<MeshMaterial>(m_pSpark));
-    *m2->matrix() = *m->matrix();
+    *m2->matrix() = decal_space;
+    m2->position(contact);
     m2->move(normal * (0.01f + offset));
     m2->pend();
-    m_pRoot->add(m2);
+    n->add(m2);
+    *m2->matrix() = glm::inverse(*n->matrix(Space::WORLD)) * *m2->matrix();
+    m2->pend();
     
     auto timer = make_shared<Freq::Timeline>();
     auto m2p = m2.get();
