@@ -2,10 +2,12 @@
 
 First person shooter.
 Written in C++11 using my own engine (Qor).
-    
+
 Work in progress.
 
 Engine here: http://github.com/flipcoder/qor
+
+Resource repository: https://naos.node-3.net/gitbucket/flipcoder/FRAG.EXE_data
 
 ## Screenshots
 
