@@ -7,7 +7,7 @@ Work in progress.
 
 Engine here: http://github.com/flipcoder/qor
 
-Resource repository: https://naos.node-3.net/gitbucket/flipcoder/FRAG.EXE_data
+Resources (git submodule): https://naos.node-3.net/gitbucket/flipcoder/FRAG.EXE_data
 
 ## Screenshots
 
