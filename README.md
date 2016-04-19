@@ -1,4 +1,4 @@
-![FRAG.EXE](https://raw.githubusercontent.com/flipcoder/FRAG.EXE/master/bin/mods/FRAG.EXE/data/logo2.png)
+![FRAG.EXE](https://raw.githubusercontent.com/flipcoder/FRAG.EXE/master/logo.png)
 
 First person shooter.
 Written in C++11 using my own engine (Qor).
