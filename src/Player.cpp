@@ -85,8 +85,8 @@ Player :: Player(
     //    m_pProfile->temp()->set<string>("name", "Bot");
     if(not local())
     {
-        auto m = make_shared<Mesh>(m_pCache->transform("player.obj"), m_pCache);
-        m->position(vec3(0.0f, -m_pPlayerShape->box().size().y / 2.5f, 0.0f));
+        auto m = make_shared<Mesh>(m_pCache->transform("human.obj"), m_pCache);
+        m->position(vec3(0.0f, -m_pPlayerShape->box().size().y, 0.0f));
         m_pPlayerShape->add(m);
         m->disable_physics();
     }
@@ -320,6 +320,10 @@ void Player :: logic(Freq::Time t)
     
     if(m_pController->input()->key(SDLK_z).pressed_now()) {
         hurt(1);
+    }
+    if(m_pController->input()->key(SDLK_b).pressed_now()){
+        m_WeaponStash.give_all();
+        refresh_weapon();
     }
     
     if(m_pController->input()->key(SDLK_x).pressed_now()) {

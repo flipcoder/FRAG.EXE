@@ -40,8 +40,10 @@ Pregame :: ~Pregame()
 
 void Pregame :: enter()
 {
-    m_pNet = make_shared<Net>(m_pQor, m_bServer);
-    m_pQor->session()->module("net", m_pNet);
+    auto net = make_shared<NetSpec>(m_pQor, m_bServer);
+    m_pQor->session()->module("net", net);
+    m_pNet = net.get();
+    
     if(m_bServer || not m_pQor->args().has("ip"))
         m_pQor->change_state("game");
     

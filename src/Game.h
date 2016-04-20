@@ -16,6 +16,7 @@
 #include "Player.h"
 #include "Spectator.h"
 #include "GameSpec.h"
+#include "NetSpec.h"
 
 class Net;
 class Qor;
@@ -109,7 +110,7 @@ class Game:
         unsigned m_Shader = ~0u;
         unsigned m_ColorShader = ~0u;
 
-        std::shared_ptr<Net> m_pNet;
+        NetSpec* m_pNet;
 };
 
 #endif

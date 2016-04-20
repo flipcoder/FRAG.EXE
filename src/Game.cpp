@@ -17,7 +17,7 @@
 #include "Qor/kit/log/log.h"
 #include <glm/gtx/orthonormalize.hpp>
 #include "Qor/BasicPartitioner.h"
-#include "Net.h"
+#include "Qor/Net.h"
 using namespace std;
 using namespace glm;
 
@@ -169,7 +169,7 @@ void Game :: preload()
     m_GameSpec.setup();
 
     // cache
-    m_pQor->make<Mesh>("player.obj");
+    m_pQor->make<Mesh>("human.obj");
 }
 
 Game :: ~Game()
@@ -182,7 +182,8 @@ void Game :: enter()
         
     //m_pNet = make_shared<Net>(m_pQor, m_bServer);
     //m_pQor->session()->module("net", m_pNet);
-    m_pNet = static_pointer_cast<Net>(((Session::IModule*)m_pQor->session()->module("net"))->shared_from_this());
+    //m_pNet = static_pointer_cast<NetSpec>(((Session::IModule*)m_pQor->session()->module("net"))->shared_from_this());
+    m_pNet = m_pQor->session()->module<NetSpec>("net");
     
     if(not m_bServer)
         m_GameSpec.spawn_local_spectator();

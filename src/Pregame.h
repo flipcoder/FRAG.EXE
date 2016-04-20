@@ -8,7 +8,7 @@
 #include "Qor/Pipeline.h"
 #include "Qor/Mesh.h"
 #include "Qor/Console.h"
-#include "Net.h"
+#include "NetSpec.h"
 
 class Qor;
 
@@ -37,7 +37,7 @@ class Pregame:
         std::shared_ptr<Node> m_pRoot;
         std::shared_ptr<Console> m_pConsole;
         std::shared_ptr<Camera> m_pCamera;
-        std::shared_ptr<Net> m_pNet;
+        NetSpec* m_pNet;
 
         bool m_bServer = false;
 };
