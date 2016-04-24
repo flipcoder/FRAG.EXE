@@ -27,6 +27,7 @@ class Spectator:
             Window* window,
             Qor* engine,
             GameSpec* gamespec,
+            glm::vec3 pos,
             std::function<bool()> lock_if = std::function<bool()>()
         );
         ~Spectator();
@@ -39,6 +40,8 @@ class Spectator:
         const std::shared_ptr<Controller>& controller() { return m_pController; }
         const std::shared_ptr<Profile>& profile() { return m_pProfile; }
 
+        std::shared_ptr<Node> node() { return m_pSpectator; };
+        
     private:
         
         Game* m_pState;

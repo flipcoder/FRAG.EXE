@@ -11,7 +11,8 @@ using namespace std;
 GameSpec :: GameSpec(std::string fn, Cache<Resource, std::string>* cache,
     Node* root, BasicPartitioner* part,
     shared_ptr<Profile> prof,
-    Qor* engine, Game* state
+    Qor* engine, Game* state,
+    NetSpec* net
 ):
     m_pConfig(make_shared<Meta>(cache->transform(fn))),
     m_pCache(cache),
@@ -21,16 +22,20 @@ GameSpec :: GameSpec(std::string fn, Cache<Resource, std::string>* cache,
     m_pProfile(prof),
     m_pController(prof->controller()),
     m_pQor(engine),
-    m_pState(state)
+    m_pState(state),
+    m_pNet(net)
 {}
 
 void GameSpec :: register_player(shared_ptr<Player> p)
 {
     m_Players.push_back(p);
-    for(auto&& wpn: m_WeaponPickups)
-        register_pickup_with_player(wpn, p.get());
-    for(auto&& item: m_ItemPickups)
-        register_pickup_with_player(item, p.get());
+
+    if(not m_pNet->remote()){
+        for(auto&& wpn: m_WeaponPickups)
+            register_pickup_with_player(wpn, p.get());
+        for(auto&& item: m_ItemPickups)
+            register_pickup_with_player(item, p.get());
+    }
 }
 
 void GameSpec :: deregister_player(Player* p)
@@ -76,8 +81,9 @@ void GameSpec :: setup()
                 mp->rotate(t.s(), glm::vec3(0.0f, 1.0f, 0.0f));
             });
             m_WeaponPickups.push_back(m);
-            for(auto&& player: m_Players)
-                register_pickup_with_player(m, player.get());
+            if(not m_pNet->remote())
+                for(auto&& player: m_Players)
+                    register_pickup_with_player(m, player.get());
         }
     }
     for(auto&& item: *m_pConfig->meta("items"))
@@ -131,8 +137,9 @@ void GameSpec :: setup()
                 mp->rotate(t.s(), glm::vec3(0.0f, 1.0f, 0.0f));
             });
             m_ItemPickups.push_back(shape);
-            for(auto&& player: m_Players)
-                register_pickup_with_player(shape, player.get());
+            if(not m_pNet->remote())
+                for(auto&& player: m_Players)
+                    register_pickup_with_player(shape, player.get());
         }
     }
 }
@@ -152,6 +159,8 @@ void GameSpec :: play(shared_ptr<Profile> prof)
         m_pQor->window(),
         m_pQor,
         this,
+        m_pSpectator ? m_pSpectator->node()->position(Space::WORLD) : glm::vec3(),
+        m_pNet,
         m_LockIf
         //[console]{ return console->input();}
     );
@@ -201,6 +210,7 @@ void GameSpec :: spectate(shared_ptr<Profile> prof)
         m_pQor->window(),
         m_pQor,
         this,
+        m_pPlayer ? m_pPlayer->shape()->position(Space::WORLD) : glm::vec3(),
         m_LockIf
     );
     if(m_pPlayer){

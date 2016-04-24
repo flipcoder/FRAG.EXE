@@ -8,6 +8,7 @@
 #include "Game.h"
 #include "Qor/BasicPartitioner.h"
 #include "Qor/Profile.h"
+#include "NetSpec.h"
 using namespace std;
 using namespace glm;
 
@@ -23,6 +24,8 @@ Player :: Player(
     Window* window,
     Qor* engine,
     GameSpec* spec,
+    glm::vec3 pos, // position if no spawn point
+    NetSpec* net,
     std::function<bool()> lock_if
 ):
     m_pState(state),
@@ -37,7 +40,9 @@ Player :: Player(
     m_pSpec(spec),
     m_WeaponStash(spec->weapons()),
     m_FlashAlarm(state->timeline()),
-    m_LockIf(lock_if)
+    m_pNet(net),
+    m_LockIf(lock_if),
+    m_NetTransform(glm::mat4(1.0f))
 {
     auto _this = this;
     
@@ -47,6 +52,7 @@ Player :: Player(
     m_pHUD = make_shared<HUD>(this, window, m_pController ? m_pController->input() : nullptr, cache);
     m_pOrthoRoot->add(m_pHUD);
     m_pPlayerShape = make_shared<Mesh>();
+    m_pPlayerShape->position(pos);
     // forward mesh gifts to this object
     //m_pPlayerShape->event("give", [_this](std::shared_ptr<Meta> m){
     //    _this->give(m);
@@ -85,7 +91,7 @@ Player :: Player(
     //    m_pProfile->temp()->set<string>("name", "Bot");
     if(not local())
     {
-        auto m = make_shared<Mesh>(m_pCache->transform("human.obj"), m_pCache);
+        auto m = make_shared<Mesh>(m_pCache->transform("player.obj"), m_pCache);
         m->position(vec3(0.0f, -m_pPlayerShape->box().size().y, 0.0f));
         m_pPlayerShape->add(m);
         m->disable_physics();
@@ -372,7 +378,8 @@ void Player :: logic(Freq::Time t)
                 n = n->compositor();
             if(n->has_event("use")){
                 Sound::play(m_pCamera.get(), "switch.wav", m_pQor->resources());
-                n->event("use", make_shared<Meta>());
+                if(not m_pNet->remote())
+                    n->event("use", make_shared<Meta>());
             }
         }
     }

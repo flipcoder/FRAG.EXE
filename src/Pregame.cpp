@@ -43,8 +43,16 @@ void Pregame :: enter()
     auto net = make_shared<NetSpec>(m_pQor, m_bServer);
     m_pQor->session()->module("net", net);
     m_pNet = net.get();
-    
-    if(m_bServer || not m_pQor->args().has("ip"))
+
+    if(m_pNet->remote()){
+        // TODO: wait for game data?
+        auto qor = m_pQor;
+        m_pNet->net()->on_connect.connect([qor](RakNet::Packet*){
+            qor->change_state("game");
+        });
+    }
+
+    if(m_pNet->server() || m_pNet->local())
         m_pQor->change_state("game");
     
     m_pCamera->ortho();

@@ -19,13 +19,12 @@ using namespace kit;
 
 int main(int argc, const char** argv)
 {
-    
     Args args(argc, argv);
     args.set("mod","FRAG.EXE");
     args.set("title", "FRAG.EXE");
     args.set("no_loading_fade","true");
     
-    Texture::DEFAULT_FLAGS = Texture::TRANSPARENT | Texture::MIPMAP;
+    Texture::DEFAULT_FLAGS = Texture::TRANSPARENT | Texture::MIPMAP | Texture::FILTER;
     
 #ifndef DEBUG
     try{

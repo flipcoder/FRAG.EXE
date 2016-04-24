@@ -19,6 +19,7 @@ Spectator :: Spectator(
     Window* window,
     Qor* engine,
     GameSpec* spec,
+    glm::vec3 pos,
     std::function<bool()> lock_if
 ):
     m_pState(state),
@@ -36,6 +37,7 @@ Spectator :: Spectator(
 {
     auto _this = this;
     
+    m_pSpectator->position(pos);
     m_pRoot->add(m_pSpectator);
     m_pCamera = make_shared<Camera>(cache, window);
     m_pInterface = kit::init_shared<PlayerInterface3D>(

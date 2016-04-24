@@ -102,6 +102,7 @@ class Game:
         std::shared_ptr<Camera> m_pConsoleCamera;
         std::shared_ptr<Physics> m_pPhysics;
         std::shared_ptr<Scene> m_pScene;
+        NetSpec* m_pNet;
 
         Freq::Timeline m_GameTime;
         GameSpec m_GameSpec;
@@ -110,7 +111,6 @@ class Game:
         unsigned m_Shader = ~0u;
         unsigned m_ColorShader = ~0u;
 
-        NetSpec* m_pNet;
 };
 
 #endif

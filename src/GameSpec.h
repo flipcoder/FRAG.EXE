@@ -8,6 +8,7 @@
 #include "Qor/Resource.h"
 #include "Qor/BasicPartitioner.h"
 #include "Weapon.h"
+#include "NetSpec.h"
 class Node;
 class Player;
 class Qor;
@@ -22,7 +23,8 @@ class GameSpec:
         GameSpec(std::string fn, Cache<Resource, std::string>* cache,
             Node* root, BasicPartitioner* part,
             std::shared_ptr<Profile> prof,
-            Qor* engine, Game* state
+            Qor* engine, Game* state,
+            NetSpec* net
         );
         WeaponSpec* weapons() { return &m_WeaponSpec; }
 
@@ -53,6 +55,9 @@ class GameSpec:
 
         boost::signals2::signal<void(Player*)> on_player_spawn;
         boost::signals2::signal<void(Spectator*)> on_spectator_spawn;
+
+        //void net(NetSpec* net) { m_pNet = net; }
+        NetSpec* net() { return m_pNet; }
         
     private:
         
@@ -78,6 +83,8 @@ class GameSpec:
         // local player cameras
         std::shared_ptr<Camera> m_pCamera;
         std::shared_ptr<Camera> m_pOrthoCamera;
+
+        NetSpec* m_pNet = nullptr;
 
         std::function<bool()> m_LockIf;
 };

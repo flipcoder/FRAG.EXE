@@ -14,6 +14,7 @@
 class Qor;
 class HUD;
 class Game;
+class NetSpec;
 
 class Player:
     public IRealtime,
@@ -30,6 +31,8 @@ class Player:
             Window* window,
             Qor* engine,
             GameSpec* gamespec,
+            glm::vec3 pos, // position if no spawn point
+            NetSpec* net,
             std::function<bool()> lock_if = std::function<bool()>()
         );
         
@@ -109,6 +112,9 @@ class Player:
 
         boost::signals2::scoped_connection m_HPChangeCon;
 
+        NetSpec* m_pNet;
+
+        glm::mat4 m_NetTransform;
 };
 
 #endif

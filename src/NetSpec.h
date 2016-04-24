@@ -12,7 +12,14 @@ class NetSpec:
         virtual ~NetSpec();
         virtual void logic(Freq::Time t) override;
 
+        Net* net() { return m_pNet.get(); }
+
+        bool remote() { return m_pNet->remote(); }
+        bool local() { return m_pNet->local(); }
+        bool server() { return m_pNet->server(); }
+
     private:
+        
         std::shared_ptr<Net> m_pNet;
 };
 

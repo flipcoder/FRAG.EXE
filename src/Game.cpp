@@ -33,10 +33,11 @@ Game :: Game(
     m_pInterpreter(engine->interpreter()),
     m_pScript(make_shared<Interpreter::Context>(engine->interpreter())),
     m_pPipeline(engine->pipeline()),
+    m_pNet(m_pQor->session()->module<NetSpec>("net")),
     m_GameSpec(
         "game.json", engine->resources(), m_pRoot.get(), m_pPartitioner,
         engine->session()->active_profile(0), engine,
-        this
+        this, m_pNet
     )
 {
     //if(m_pQor->args().has('b',"bump"))
@@ -169,7 +170,7 @@ void Game :: preload()
     m_GameSpec.setup();
 
     // cache
-    m_pQor->make<Mesh>("human.obj");
+    m_pQor->make<Mesh>("player.obj");
 }
 
 Game :: ~Game()
@@ -183,7 +184,6 @@ void Game :: enter()
     //m_pNet = make_shared<Net>(m_pQor, m_bServer);
     //m_pQor->session()->module("net", m_pNet);
     //m_pNet = static_pointer_cast<NetSpec>(((Session::IModule*)m_pQor->session()->module("net"))->shared_from_this());
-    m_pNet = m_pQor->session()->module<NetSpec>("net");
     
     if(not m_bServer)
         m_GameSpec.spawn_local_spectator();
@@ -294,11 +294,6 @@ void Game :: logic(Freq::Time t)
     Actuation::logic(t);
     m_pPhysics->logic(t);
     
-    //if(m_pPlayer)
-    //    m_pPlayer->logic(t);
-    //if(m_pSpectator)
-    //    m_pSpectator->logic(t);
-    
     m_pConsoleRoot->logic(t);
     m_pSkyboxRoot->logic(t);
     m_pRoot->logic(t);
@@ -311,9 +306,6 @@ void Game :: logic(Freq::Time t)
         if(u >= 0)
             m_pPipeline->shader(1)->uniform(u, m_Fog.vec4());
     }
-
-    
-    //LOGf("skybox: %s", Vector::to_string(m_pSkyboxCamera->position(Space::WORLD)));
 }
 
 void Game :: render() const
