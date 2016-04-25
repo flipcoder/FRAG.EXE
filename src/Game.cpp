@@ -27,6 +27,7 @@ Game :: Game(
 ):
     m_pQor(engine),
     m_pInput(engine->input()),
+    m_pController(m_pQor->session()->active_profile(0)->controller().get()),
     m_pPartitioner(engine->pipeline()->partitioner()),
     m_pRoot(make_shared<Node>()),
     m_pSkyboxRoot(make_shared<Node>()),
@@ -77,12 +78,12 @@ void Game :: preload()
         m_pQor->interpreter(),
         m_pQor->window(),
         m_pInput,
-        m_pQor->session()->profile(0)->controller().get(),
+        m_pQor->session()->active_profile(0)->controller().get(),
         m_pQor->resources()
     );
     auto console = m_pConsole.get();
     
-    string name = m_pQor->session()->profile(0)->name();
+    string name = m_pQor->session()->active_profile(0)->name();
     m_pConsole->on_command.connect([name, console](string cmd){
         if(not boost::starts_with(cmd, "say "))
             return false;
@@ -311,6 +312,9 @@ void Game :: logic(Freq::Time t)
     m_pSkyboxRoot->logic(t);
     m_pRoot->logic(t);
     m_GameSpec.logic(t);
+
+    if(m_pController->button("chat").pressed_now())
+        m_pConsole->listen("say ");
 
     if(not Headless::enabled()){
         m_pPipeline->override_shader(PassType::NORMAL, m_Shader);

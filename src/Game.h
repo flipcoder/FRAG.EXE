@@ -88,6 +88,7 @@ class Game:
         
         Qor* m_pQor = nullptr;
         Input* m_pInput = nullptr;
+        Controller* m_pController = nullptr;
         BasicPartitioner* m_pPartitioner = nullptr;
         Pipeline* m_pPipeline = nullptr;
 
