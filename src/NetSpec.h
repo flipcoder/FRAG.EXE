@@ -29,9 +29,18 @@ class NetSpec:
         bool local() { return m_pNet->local(); }
         bool server() { return m_pNet->server(); }
 
+        void message(
+            std::string msg,
+            RakNet::RakNetGUID guid = RakNet::UNASSIGNED_RAKNET_GUID
+        );
+        void data(RakNet::Packet* packet);
+
+        RakNet::RakPeerInterface* socket() { return m_pNet->socket(); }
+        
     private:
         
         std::shared_ptr<Net> m_pNet;
+        boost::signals2::scoped_connection m_DataCon;
 };
 
 #endif

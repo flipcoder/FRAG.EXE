@@ -84,11 +84,13 @@ void Game :: preload()
     auto console = m_pConsole.get();
     
     string name = m_pQor->session()->active_profile(0)->name();
-    m_pConsole->on_command.connect([name, console](string cmd){
+    auto net = m_pNet;
+    m_pConsole->on_command.connect([net, name, console](string cmd){
         if(not boost::starts_with(cmd, "say "))
             return false;
         cmd = cmd.substr(strlen("say "));
         LOG(name + ": " + cmd);
+        net->message(cmd);
         return true;
     });
     m_pConsoleRoot->add(m_pConsole);

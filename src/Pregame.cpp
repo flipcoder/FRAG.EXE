@@ -23,7 +23,7 @@ void Pregame :: preload()
         m_pQor->interpreter(),
         m_pQor->window(),
         m_pQor->input(),
-        m_pQor->session()->profile(0)->controller().get(),
+        m_pQor->session()->active_profile(0)->controller().get(),
         m_pQor->resources()
     );
     m_pRoot->add(m_pCamera);
