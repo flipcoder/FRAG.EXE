@@ -8,6 +8,17 @@ class NetSpec:
     public Session::IModule
 {
     public:
+
+        enum PacketType
+        {
+            ID_INFO = ID_USER_PACKET_ENUM,
+            ID_MSG,
+            ID_SPAWN,
+            ID_DESPAWN,
+            ID_CHANGE,
+            ID_EVENT
+        };
+        
         NetSpec(Qor* engine, bool server, int connections = 8);
         virtual ~NetSpec();
         virtual void logic(Freq::Time t) override;

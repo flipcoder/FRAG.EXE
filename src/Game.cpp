@@ -74,10 +74,23 @@ void Game :: preload()
     m_pConsoleRoot = make_shared<Node>();
     m_pConsoleCamera->ortho(false);
     m_pConsole = make_shared<Console>(
-        m_pQor->interpreter(), m_pQor->window(), m_pInput, m_pQor->resources()
+        m_pQor->interpreter(),
+        m_pQor->window(),
+        m_pInput,
+        m_pQor->session()->profile(0)->controller().get(),
+        m_pQor->resources()
     );
-    m_pConsoleRoot->add(m_pConsole);
     auto console = m_pConsole.get();
+    
+    string name = m_pQor->session()->profile(0)->name();
+    m_pConsole->on_command.connect([name, console](string cmd){
+        if(not boost::starts_with(cmd, "say "))
+            return false;
+        cmd = cmd.substr(strlen("say "));
+        LOG(name + ": " + cmd);
+        return true;
+    });
+    m_pConsoleRoot->add(m_pConsole);
     m_GameSpec.set_lock([console]{ return console->input(); });
 
     //auto p = m_pQor->make<Particle>("particle.png");
