@@ -1,9 +1,7 @@
 {
     "video": {
         "windowed": false,
-        "vsync": false,
-        "AA": 4,
-        "anisotropy": 4
+        "vsync": false
     },
     "audio": {
         "volume": 100,
