@@ -20,6 +20,7 @@
 #include "Qor/Net.h"
 using namespace std;
 using namespace glm;
+using namespace RakNet;
 
 Game :: Game(
     Qor* engine
@@ -137,8 +138,9 @@ void Game :: preload()
     //    m_pCamera
     //);
     
-    //m_pRoot->add(m_pQor->make<Mesh>("apartment_scene.obj"));
-    string map = m_pQor->args().filenames(-1, "test");
+    string map = m_pQor->session()->meta()->at("map",string());
+    if(map.empty())
+        map = m_pQor->args().filenames(-1, "test");
     std::shared_ptr<Node> scene_root;
     
     //if(Filesystem::getExtension(map) == "json"){
@@ -187,6 +189,23 @@ void Game :: preload()
 
     // cache
     m_pQor->make<Mesh>("player.obj");
+
+    if(m_pNet->server()){
+        // Send server info to new clients
+        auto net = m_pNet;
+        m_pNet->on_info.connect([net,map](Packet* packet){
+            net->info(map);
+            //BitStream bs(packet->data, packet->length, true);
+            //bs.Write((unsigned char)NetSpec::ID_INFO);
+            //LOG(map);
+            //bs.Write(RakString(map.c_str()));
+            //net->socket()->Send(
+            //    &bs,
+            //    MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+            //);
+            LOG("sent info");
+        });
+    }
 }
 
 Game :: ~Game()
@@ -299,6 +318,9 @@ void Game :: enter()
     //event("message", make_shared<Meta>(
     //    MetaFormat::JSON, R"({"message": "RED TEAM SCORES", "color": "FF0000"})"
     //));
+    
+    if(m_pNet->server())
+        LOG("Server ready...");
 }
 
 void Game :: logic(Freq::Time t)

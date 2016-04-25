@@ -8,6 +8,7 @@
 #include <thread>
 using namespace std;
 using namespace glm;
+using namespace RakNet;
 
 Pregame :: Pregame(Qor* engine):
     m_pQor(engine),
@@ -48,7 +49,20 @@ void Pregame :: enter()
     if(m_pNet->remote()){
         // TODO: wait for game data?
         auto qor = m_pQor;
-        m_pNet->net()->on_connect.connect([qor](RakNet::Packet*){
+        auto net = m_pNet;
+        string name = m_pQor->session()->active_profile(0)->name();
+        m_pNet->net()->on_connect.connect([qor,net,name](RakNet::Packet*){
+            net->info(name);
+        });
+        m_pNet->on_info.connect([qor](RakNet::Packet* p){
+            BitStream bs(p->data, p->length, false);
+            RakString rs;
+            unsigned char id;
+            bs.Read(id);
+            bs.Read(rs);
+            std::string map = rs.C_String();
+            qor->session()->meta()->set("map",map);
+            LOGf("map: %s", map);
             qor->change_state("game");
         });
     }
