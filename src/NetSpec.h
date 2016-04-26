@@ -35,19 +35,30 @@ class NetSpec:
             std::string msg,
             RakNet::RakNetGUID guid = RakNet::UNASSIGNED_RAKNET_GUID
         );
-        void info(std::string name);
+        void info(std::string name, uint32_t object_id = 0);
         void data(RakNet::Packet* packet);
         void disconnect(RakNet::Packet* packet);
         std::string client_name(RakNet::RakNetGUID guid) const;
 
+        void reserve(unsigned id);
+
         RakNet::RakPeerInterface* socket() { return m_pNet->socket(); }
 
-        kit::shared_index<Node> nodes;
-        std::map<RakNet::RakNetGUID, std::shared_ptr<Profile>> profiles;
-
         boost::signals2::signal<void(RakNet::Packet*)> on_info;
+        boost::signals2::signal<void(RakNet::Packet*)> on_spawn;
+        
+        unsigned get_object_id_for(RakNet::RakNetGUID id) const {
+            return m_Profiles.at(id)->temp()->at("id");
+        }
+        
+        std::shared_ptr<Profile> profile(RakNet::RakNetGUID guid) {
+            return m_Profiles.at(guid);
+        }
         
     private:
+        
+        kit::shared_index<shared_ptr<Node>> m_Nodes;
+        std::map<RakNet::RakNetGUID, std::shared_ptr<Profile>> m_Profiles;
         
         std::shared_ptr<Net> m_pNet;
         boost::signals2::scoped_connection m_DataCon;

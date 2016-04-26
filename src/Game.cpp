@@ -191,19 +191,29 @@ void Game :: preload()
     m_pQor->make<Mesh>("player.obj");
 
     if(m_pNet->server()){
-        // Send server info to new clients
+        // Send server info to new clients when they give us their info
         auto net = m_pNet;
         m_pNet->on_info.connect([net,map](Packet* packet){
-            net->info(map);
-            //BitStream bs(packet->data, packet->length, true);
-            //bs.Write((unsigned char)NetSpec::ID_INFO);
-            //LOG(map);
-            //bs.Write(RakString(map.c_str()));
-            //net->socket()->Send(
-            //    &bs,
-            //    MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
-            //);
-            LOG("sent info");
+            net->info(map, net->get_object_id_for(packet->guid));
+        });
+    }
+    
+    if(m_pNet->server())
+    {
+        auto gamespec = &m_GameSpec;
+        auto net = m_pNet;
+        m_pNet->on_spawn.connect([gamespec,net](Packet* packet){
+            // TODO: check with gamespec if its alright for player to spawn
+            gamespec->play(net->profile(packet->guid));
+            // TODO: send spawn information to everyone
+            //BitStream bs;
+            //bs.Write(net->get_object_id_for(packet->guid));
+        });
+    }
+    else
+    {
+        m_pNet->on_spawn.connect([](Packet* packet){
+            
         });
     }
 }

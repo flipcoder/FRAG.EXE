@@ -60,8 +60,12 @@ void Pregame :: enter()
             unsigned char id;
             bs.Read(id);
             bs.Read(rs);
+            int32_t self_id;
+            bs.Read(self_id);
+            m_pNet->reserve(self_id); // reserve object id for self
             std::string map = rs.C_String();
             qor->session()->meta()->set("map",map);
+            qor->session()->meta()->set("self",(int)self_id);
             LOGf("map: %s", map);
             qor->change_state("game");
         });

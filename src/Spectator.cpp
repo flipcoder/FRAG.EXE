@@ -73,7 +73,10 @@ void Spectator :: logic(Freq::Time t)
         m_pController->button("fire").pressed_now() ||
         m_pController->button("use").pressed_now()
     ){
-        m_pSpec->play();
+        if(m_pNet->local())
+            m_pSpec->play();
+        else
+            m_pNet->request_spawn();
         return;
     }
 }
