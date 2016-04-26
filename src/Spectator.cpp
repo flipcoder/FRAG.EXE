@@ -46,7 +46,7 @@ Spectator :: Spectator(
         m_pController,
         m_pCamera,
         m_pSpectator,
-        m_pQor->session()->profile(0)->config(),
+        m_pProfile->config(),
         [_this]{
             return (_this->m_LockIf && _this->m_LockIf());
         }
