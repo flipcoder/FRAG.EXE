@@ -40,6 +40,9 @@ class Pregame:
         NetSpec* m_pNet;
 
         bool m_bServer = false;
+
+        boost::signals2::scoped_connection m_InfoCon;
+        boost::signals2::scoped_connection m_ConnectCon;
 };
 
 #endif

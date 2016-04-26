@@ -31,8 +31,8 @@ class Player:
             Window* window,
             Qor* engine,
             GameSpec* gamespec,
-            glm::vec3 pos, // position if no spawn point
             NetSpec* net,
+            glm::vec3 pos, // position if no spawn point
             std::function<bool()> lock_if = std::function<bool()>()
         );
         

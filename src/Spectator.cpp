@@ -19,6 +19,7 @@ Spectator :: Spectator(
     Window* window,
     Qor* engine,
     GameSpec* spec,
+    NetSpec* net,
     glm::vec3 pos,
     std::function<bool()> lock_if
 ):
@@ -33,6 +34,7 @@ Spectator :: Spectator(
     m_pWindow(window),
     m_pQor(engine),
     m_pSpec(spec),
+    m_pNet(net),
     m_LockIf(lock_if)
 {
     auto _this = this;
@@ -75,8 +77,8 @@ void Spectator :: logic(Freq::Time t)
     ){
         if(m_pNet->local())
             m_pSpec->play();
-        else
-            m_pNet->request_spawn();
+        //else
+        //    m_pNet->spawn();
         return;
     }
 }

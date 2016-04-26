@@ -5,6 +5,8 @@
 #include "Qor/Session.h"
 #include "Qor/Profile.h"
 #include "Qor/Net.h"
+#include "Qor/Node.h"
+#include "raknet/MessageIdentifiers.h"
 
 class NetSpec:
     public Session::IModule
@@ -35,7 +37,7 @@ class NetSpec:
             std::string msg,
             RakNet::RakNetGUID guid = RakNet::UNASSIGNED_RAKNET_GUID
         );
-        void info(std::string name, uint32_t object_id = 0);
+        void info(std::string info, uint32_t object_id = 0, std::string name = "");
         void data(RakNet::Packet* packet);
         void disconnect(RakNet::Packet* packet);
         std::string client_name(RakNet::RakNetGUID guid) const;
@@ -46,18 +48,20 @@ class NetSpec:
 
         boost::signals2::signal<void(RakNet::Packet*)> on_info;
         boost::signals2::signal<void(RakNet::Packet*)> on_spawn;
+        boost::signals2::signal<void(RakNet::Packet*)> on_despawn;
+        boost::signals2::signal<void(RakNet::Packet*)> on_change;
         
         unsigned get_object_id_for(RakNet::RakNetGUID id) const {
-            return m_Profiles.at(id)->temp()->at("id");
+            return m_Profiles.at(id)->temp()->at<int>("id");
         }
         
         std::shared_ptr<Profile> profile(RakNet::RakNetGUID guid) {
-            return m_Profiles.at(guid);
+            return m_Profiles[guid];
         }
         
     private:
         
-        kit::shared_index<shared_ptr<Node>> m_Nodes;
+        kit::shared_index<Node> m_Nodes;
         std::map<RakNet::RakNetGUID, std::shared_ptr<Profile>> m_Profiles;
         
         std::shared_ptr<Net> m_pNet;

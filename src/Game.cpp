@@ -194,7 +194,11 @@ void Game :: preload()
         // Send server info to new clients when they give us their info
         auto net = m_pNet;
         m_pNet->on_info.connect([net,map](Packet* packet){
-            net->info(map, net->get_object_id_for(packet->guid));
+            net->info(
+                map,
+                net->get_object_id_for(packet->guid),
+                net->profile(packet->guid)->name()
+            );
         });
     }
     
@@ -206,8 +210,14 @@ void Game :: preload()
             // TODO: check with gamespec if its alright for player to spawn
             gamespec->play(net->profile(packet->guid));
             // TODO: send spawn information to everyone
-            //BitStream bs;
-            //bs.Write(net->get_object_id_for(packet->guid));
+            BitStream bs;
+            bs.Write((unsigned char)NetSpec::ID_SPAWN);
+            bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
+            bs.Write(net->get_object_id_for(packet->guid));
+            m_pNet->socket()->Send(
+                &bs,
+                MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+            );
         });
     }
     else

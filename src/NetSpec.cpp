@@ -28,25 +28,31 @@ void NetSpec :: logic(Freq::Time t)
 void NetSpec :: disconnect(Packet* packet)
 {
     //auto guid = RakNetGUID::ToUint32(packet->guid);
-    BitStream bs(packet->data, packet->length, false);
+    //BitStream bs(packet->data, packet->length, false);
     try{
-        LOGf("%s disconnected.", profiles.at(packet->guid)->name());
+        LOGf("%s disconnected.", m_Profiles.at(packet->guid)->name());
     }catch(const std::out_of_range&){}
 }
 
-void NetSpec :: info(std::string info, uint32_t object_id)
+void NetSpec :: info(std::string info, uint32_t object_id, std::string name)
 {
     // for server:
     //   string - map name
     //   uint32_t - client id
+    //   string - actual client name (might be different)
     // client:
     //   string - client name
     
     BitStream bs;
     bs.Write((unsigned char)ID_INFO);
     bs.Write(RakString(info.c_str()));
+    
     if(server())
+    {
         bs.Write(object_id);
+        bs.Write(RakString(name));
+    }
+    
     m_pNet->socket()->Send(
         &bs,
         MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
@@ -56,6 +62,8 @@ void NetSpec :: info(std::string info, uint32_t object_id)
 void NetSpec :: message(std::string msg, RakNetGUID guid)
 {
     // string - message
+    
+    LOG(msg);
     
     if(not local())
     {
@@ -81,28 +89,17 @@ void NetSpec :: data(Packet* packet)
     if(id == ID_CHANGE)
     {
         // change the state of an object
+        on_change(packet);
         return;
     }
     else if(id == ID_DESPAWN)
     {
-        // despawn an object
-        if(remote())
-        {
-        }
+        on_despawn(packet);
         return;
     }
     else if(id == ID_SPAWN)
     {
-        if(server())
-        {
-            // client is requesting spawn of self or object
-            on_spawn(packet);
-        }
-        else if(remote())
-        {
-            // server is spawning something 
-            on_spawn(packet);
-        }
+        on_spawn(packet);
         return;
     }
     else if(id == ID_MSG)
@@ -124,22 +121,41 @@ void NetSpec :: data(Packet* packet)
         {
             LOG("recv info");
             bs.Read(rs);
-            std::string name = rs.C_String();
+            name = rs.C_String();
             bool name_used = false;
+            
+            // name not set?
             if(client_name(packet->guid).empty()){
+                // name unused?
+                while(true){
+                    for(auto&& p: m_Profiles)
+                        if(name == p.second->name()){
+                            name_used = true;
+                            break;
+                        }
+                    if(not name_used){
+                        auto prof = m_Profiles[packet->guid] = m_pSession->dummy_profile(name);
+                        prof->temp()->set<int>("id", m_Nodes.reserve_next());
+                        break;
+                    }
+                    name += "_";
+                }
+            }else{
+                // change name
+                auto prof = m_Profiles[packet->guid];
                 for(auto&& p: m_Profiles)
                     if(name == p.second->name()){
                         name_used = true;
                         break;
                     }
+
                 if(not name_used){
-                    auto prof = m_Profiles[packet->guid] = m_pSession->dummy_profile(name);
-                    prof->temp()->set<int>("id", m_Nodes.reserve_next());
+                    string old_name = prof->name();
+                    prof->name(name);
+                    message(old_name + " is now known as " + name);
                 }
-            }else{
-                // change name
-                m_Profiles[packet->guid]->name(name);
             }
+            message(name + " connected.");
         }
         on_info(packet);
         return;
@@ -149,7 +165,7 @@ void NetSpec :: data(Packet* packet)
 string NetSpec :: client_name(RakNetGUID guid) const
 {
     try{
-        return profiles.at(guid)->name();
+        return m_Profiles.at(guid)->name();
     }catch(...){
         return string();
     }

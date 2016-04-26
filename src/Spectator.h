@@ -27,6 +27,7 @@ class Spectator:
             Window* window,
             Qor* engine,
             GameSpec* gamespec,
+            NetSpec* net,
             glm::vec3 pos,
             std::function<bool()> lock_if = std::function<bool()>()
         );
@@ -60,6 +61,7 @@ class Spectator:
         std::function<bool()> m_LockIf;
         
         GameSpec* m_pSpec;
+        NetSpec* m_pNet;
 
 };
 

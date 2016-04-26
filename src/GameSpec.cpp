@@ -159,6 +159,7 @@ void GameSpec :: play(shared_ptr<Profile> prof)
         m_pQor->window(),
         m_pQor,
         this,
+        m_pNet,
         m_pSpectator ? m_pSpectator->node()->position(Space::WORLD) : glm::vec3(),
         m_pNet,
         m_LockIf
@@ -210,6 +211,7 @@ void GameSpec :: spectate(shared_ptr<Profile> prof)
         m_pQor->window(),
         m_pQor,
         this,
+        m_pNet,
         m_pPlayer ? m_pPlayer->shape()->position(Space::WORLD) : glm::vec3(),
         m_LockIf
     );
