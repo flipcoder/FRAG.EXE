@@ -54,7 +54,7 @@ void Pregame :: enter()
         m_ConnectCon = m_pNet->net()->on_connect.connect([qor,net,name](RakNet::Packet*){
             net->info(name);
         });
-        m_InfoCon = m_pNet->on_info.connect([qor](RakNet::Packet* p){
+        m_InfoCon = m_pNet->on_info.connect([qor,net](RakNet::Packet* p){
             BitStream bs(p->data, p->length, false);
             RakString rs;
             unsigned char id;
@@ -62,13 +62,13 @@ void Pregame :: enter()
             bs.Read(rs);
             uint32_t self_id;
             bs.Read(self_id);
-            m_pNet->reserve(self_id); // reserve object id for self
+            net->reserve(self_id); // reserve object id for self
             std::string map = rs.C_String();
             bs.Read(rs);
             std::string new_name = rs.C_String();
             qor->session()->meta()->set("map",map);
             qor->session()->meta()->set("self",(uint32_t)self_id);
-            m_pQor->session()->active_profile(0)->name(new_name);
+            qor->session()->active_profile(0)->name(new_name);
             LOGf("map: %s", map);
             qor->change_state("game");
         });

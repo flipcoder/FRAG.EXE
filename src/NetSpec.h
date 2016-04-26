@@ -22,6 +22,12 @@ class NetSpec:
             ID_CHANGE,
             ID_EVENT
         };
+
+        enum ObjectType
+        {
+            OBJ_EMPTY,
+            OBJ_PLAYER
+        };
         
         NetSpec(Qor* engine, bool server, int connections = 8);
         virtual ~NetSpec();

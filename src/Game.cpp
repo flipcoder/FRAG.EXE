@@ -214,9 +214,9 @@ void Game :: preload()
             bs.Write((unsigned char)NetSpec::ID_SPAWN);
             bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
             bs.Write(net->get_object_id_for(packet->guid));
-            m_pNet->socket()->Send(
+            net->socket()->Send(
                 &bs,
-                MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+                MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, packet->guid, true
             );
         });
     }

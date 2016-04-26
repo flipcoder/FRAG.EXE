@@ -161,7 +161,6 @@ void GameSpec :: play(shared_ptr<Profile> prof)
         this,
         m_pNet,
         m_pSpectator ? m_pSpectator->node()->position(Space::WORLD) : glm::vec3(),
-        m_pNet,
         m_LockIf
         //[console]{ return console->input();}
     );

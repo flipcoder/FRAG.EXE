@@ -17,7 +17,7 @@ NetSpec :: ~NetSpec() {}
 void NetSpec :: logic(Freq::Time t)
 {
     m_pNet->logic(t);
-    nodes.optimize();
+    m_Nodes.optimize();
 }
 
 //void NetSpec :: send(Bistream* bs)
@@ -50,7 +50,7 @@ void NetSpec :: info(std::string info, uint32_t object_id, std::string name)
     if(server())
     {
         bs.Write(object_id);
-        bs.Write(RakString(name));
+        bs.Write(RakString(name.c_str()));
     }
     
     m_pNet->socket()->Send(
@@ -121,7 +121,7 @@ void NetSpec :: data(Packet* packet)
         {
             LOG("recv info");
             bs.Read(rs);
-            name = rs.C_String();
+            std::string name = rs.C_String();
             bool name_used = false;
             
             // name not set?
