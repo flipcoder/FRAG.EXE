@@ -58,16 +58,19 @@ void Pregame :: enter()
             BitStream bs(p->data, p->length, false);
             RakString rs;
             unsigned char id;
-            bs.Read(id);
-            bs.Read(rs);
-            uint32_t self_id;
-            bs.Read(self_id);
+            bs.Read(id); // id (ID_INFO)
+            bs.Read(rs); // map name
+            uint32_t self_id, self_guid;
+            bs.Read(self_id); // self object id
+            LOGf("self id %s", to_string(self_id));
             net->reserve(self_id); // reserve object id for self
             std::string map = rs.C_String();
-            bs.Read(rs);
+            //bs.Read(self_guid);
+            bs.Read(rs); // new name
             std::string new_name = rs.C_String();
             qor->session()->meta()->set("map",map);
-            qor->session()->meta()->set("self",(uint32_t)self_id);
+            qor->session()->meta()->set<int>("id",self_id);
+            qor->session()->meta()->set<int>("guid",self_guid);
             qor->session()->active_profile(0)->name(new_name);
             LOGf("map: %s", map);
             qor->change_state("game");

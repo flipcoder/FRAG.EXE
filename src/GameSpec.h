@@ -35,7 +35,7 @@ class GameSpec:
         void deregister_player(Player* p);
         std::shared_ptr<Meta> config() { return m_pConfig; };
         
-        void play(std::shared_ptr<Profile> prof = nullptr);
+        Player* play(std::shared_ptr<Profile> prof = nullptr);
         bool respawn(Player* p);
         void despawn(Player* p);
         void spectate(std::shared_ptr<Profile> prof = nullptr);
@@ -58,6 +58,9 @@ class GameSpec:
 
         //void net(NetSpec* net) { m_pNet = net; }
         NetSpec* net() { return m_pNet; }
+        
+        // spawn something according to packet data
+        void spawn(RakNet::Packet* packet);
         
     private:
         

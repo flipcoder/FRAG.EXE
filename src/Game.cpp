@@ -42,14 +42,14 @@ Game :: Game(
         this, m_pNet
     )
 {
-    //if(m_pQor->args().has('b',"bump"))
-        m_Shader = m_pPipeline->load_shaders({"detail"});
-    //else
-    //    m_Shader = m_pPipeline->load_shaders({"lit"});
-
     if(m_pQor->args().has('d', "dedicated")||
        m_pQor->args().has('s', "server"))
         m_bServer = true;
+    
+    if(m_bServer || m_pQor->args().has("--low"))
+        m_Shader = m_pPipeline->load_shaders({"lit"});
+    else
+        m_Shader = m_pPipeline->load_shaders({"detail"});
 }
 
 void Game :: preload()
@@ -143,7 +143,7 @@ void Game :: preload()
         map = m_pQor->args().filenames(-1, "test");
     std::shared_ptr<Node> scene_root;
     
-    //if(Filesystem::getExtension(map) == "json"){
+    // load .json for current map name
     if(m_pQor->exists(map +  ".json")){
         auto scene = m_pQor->make<Scene>(map + ".json");
         auto scene_root = scene->root();
@@ -154,6 +154,7 @@ void Game :: preload()
         m_Fog = scene->fog();
     }
     
+    // load .obj for current map name
     if(m_pQor->exists(map +  ".obj")){
         auto scene_root = m_pQor->make<Mesh>(map + ".obj");
         m_pRoot->add(scene_root);
@@ -174,6 +175,7 @@ void Game :: preload()
         }
     }
     
+    // generate physics recursively for the entire world
     m_pPhysics->generate(m_pRoot.get(), Physics::GEN_RECURSIVE);
     m_pPhysics->world()->setGravity(btVector3(0.0, -9.8, 0.0));
 
@@ -182,22 +184,26 @@ void Game :: preload()
     //    l->detach();
     
     // TODO: ensure filename contains only valid filename chars
+    // execute script for map
     if(not map.empty())
         m_pScript->execute_file("mods/FRAG.EXE/data/maps/"+ map +".py");
 
+    // gamespec deals with players, items, weapons, anything that can differ based on game rules
     m_GameSpec.setup();
 
-    // cache
+    // cache player model now so we don't lag when it spawns the first time
     m_pQor->make<Mesh>("player.obj");
 
     if(m_pNet->server()){
         // Send server info to new clients when they give us their info
         auto net = m_pNet;
         m_pNet->on_info.connect([net,map](Packet* packet){
+            LOGf("player obj id = %s", net->get_object_id_for(packet->guid));
             net->info(
                 map,
                 net->get_object_id_for(packet->guid),
-                net->profile(packet->guid)->name()
+                net->profile(packet->guid)->name(),
+                packet->guid
             );
         });
     }
@@ -206,25 +212,33 @@ void Game :: preload()
     {
         auto gamespec = &m_GameSpec;
         auto net = m_pNet;
-        m_pNet->on_spawn.connect([gamespec,net](Packet* packet){
-            // TODO: check with gamespec if its alright for player to spawn
-            gamespec->play(net->profile(packet->guid));
-            // TODO: send spawn information to everyone
-            BitStream bs;
-            bs.Write((unsigned char)NetSpec::ID_SPAWN);
-            bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
-            bs.Write(net->get_object_id_for(packet->guid));
-            net->socket()->Send(
-                &bs,
-                MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, packet->guid, true
-            );
+        m_SpawnCon = m_pNet->on_spawn.connect([gamespec,net](Packet* packet){
+            auto prof = net->profile(packet->guid);
+            uint32_t obj_id = net->get_object_id_for(packet->guid);
+
+            // do player spawn / gamespec should return null if player can't spawn
+            Player* p = gamespec->play(prof);
+            if(p)
+            {
+                net->add_object(obj_id, p->shape());
+                p->shape()->config()->set<int>("id", obj_id);
+                prof->temp()->set<int>("id", obj_id);
+
+                net->spawn(packet->guid); // broadcast spawn
+            }
+        });
+        m_UpdateCon = m_pNet->on_update.connect([gamespec,net](Packet* packet){
         });
     }
     else
     {
-        m_pNet->on_spawn.connect([](Packet* packet){
-            
+        auto gamespec = &m_GameSpec;
+        m_SpawnCon = m_pNet->on_spawn.connect([gamespec](Packet* packet){
+            gamespec->spawn(packet);
         });
+        m_UpdateCon = m_pNet->on_update.connect([gamespec,net](Packet* packet){
+        });
+
     }
 }
 

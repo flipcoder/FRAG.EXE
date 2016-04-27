@@ -7,6 +7,7 @@
 #include <boost/regex.hpp>
 #include "Qor/Profile.h"
 using namespace std;
+using namespace RakNet;
 
 GameSpec :: GameSpec(std::string fn, Cache<Resource, std::string>* cache,
     Node* root, BasicPartitioner* part,
@@ -144,9 +145,10 @@ void GameSpec :: setup()
     }
 }
 
-void GameSpec :: play(shared_ptr<Profile> prof)
+Player* GameSpec :: play(shared_ptr<Profile> prof)
 {
-    prof = m_pSpectator ? m_pSpectator->profile() : prof;
+    if(not prof || not prof->dummy())
+        prof = m_pSpectator ? m_pSpectator->profile() : prof;
            
     auto win = m_pQor->window();
     //auto console = m_pConsole.get();
@@ -180,6 +182,7 @@ void GameSpec :: play(shared_ptr<Profile> prof)
     m_pPhysics->generate(player->shape().get());
     
     //respawn(m_pPlayer);
+    return player.get();
 }
 
 bool GameSpec :: respawn(Player* p)
@@ -255,6 +258,48 @@ std::shared_ptr<Node> GameSpec :: ortho_root() const
         return m_pPlayer->ortho_root();
     else{
         return nullptr;
+    }
+}
+
+void GameSpec :: spawn(Packet* packet)
+{
+    LOG("spawn(packet)");
+    BitStream bs(packet->data, packet->length, false);
+    unsigned char id;
+    bs.Read(id); // we already know this is ID_SPAWN
+    bs.Read(id);
+    if(id == NetSpec::OBJ_PLAYER)
+    {
+        // was this player just spawned, or am i only now hearing about it?
+        bool spawn_now;
+        bs.Read(spawn_now);
+        
+        uint32_t obj_id;
+        bs.Read(obj_id);
+        m_pNet->reserve(obj_id);
+
+        LOG(to_string(obj_id));
+        LOG(to_string(m_pProfile->session()->meta()->template at<int>("id")));
+        if(obj_id == m_pProfile->session()->meta()->template at<int>("id")){
+            // spawn player?
+            LOG("spawn player");
+            Player* p = play(m_pProfile);
+            m_pNet->add_object(obj_id, p->shape());
+            p->shape()->config()->set("id", obj_id);
+            m_pProfile->temp()->set("id", obj_id);
+            
+        }else{
+            // make dummy to mark remote player
+            RakString s;
+            bs.Read(s);
+            string player_name = s.C_String();
+            
+            auto prof = m_pProfile->session()->dummy_profile(player_name);
+            Player* p = play(prof);
+            m_pNet->add_object(obj_id, p->shape());
+            p->shape()->config()->set("id", obj_id);
+            prof->temp()->set("id", obj_id);
+        }
     }
 }
 

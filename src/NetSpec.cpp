@@ -1,5 +1,6 @@
 #include "Qor/Qor.h"
 #include "NetSpec.h"
+#include "Qor/Session.h"
 #include <functional>
 using namespace std;
 using namespace RakNet;
@@ -34,8 +35,10 @@ void NetSpec :: disconnect(Packet* packet)
     }catch(const std::out_of_range&){}
 }
 
-void NetSpec :: info(std::string info, uint32_t object_id, std::string name)
-{
+void NetSpec :: info(
+    std::string info, uint32_t object_id, std::string name,
+    RakNet::RakNetGUID guid
+){
     // for server:
     //   string - map name
     //   uint32_t - client id
@@ -45,11 +48,15 @@ void NetSpec :: info(std::string info, uint32_t object_id, std::string name)
     
     BitStream bs;
     bs.Write((unsigned char)ID_INFO);
-    bs.Write(RakString(info.c_str()));
+    bs.Write(RakString(info.c_str())); // client name or server map name
     
     if(server())
     {
+        // give client info about self
+        LOGf("object id! : %s", object_id);
         bs.Write(object_id);
+        //bs.Write(RakNetGUID::ToUint32(guid));
+        // client name may have changed (if duplicate), so we'll send it
         bs.Write(RakString(name.c_str()));
     }
     
@@ -86,10 +93,10 @@ void NetSpec :: data(Packet* packet)
     unsigned char id;
     bs.Read(id);
 
-    if(id == ID_CHANGE)
+    if(id == ID_UPDATE)
     {
-        // change the state of an object
-        on_change(packet);
+        // update the state of an object
+        on_update(packet);
         return;
     }
     else if(id == ID_DESPAWN)
@@ -162,6 +169,25 @@ void NetSpec :: data(Packet* packet)
     }
 }
 
+void NetSpec :: spawn(RakNet::RakNetGUID guid)
+{
+    // client - request to spawn
+    // server - report spawning of something
+    LOG("requesting to spawn");
+    BitStream bs;
+    bs.Write((unsigned char)ID_SPAWN);
+    bs.Write((unsigned char)OBJ_PLAYER);
+    if(server()){
+        bs.Write(true);
+        bs.Write((uint32_t)get_object_id_for(guid));
+        bs.Write(RakString(profile(guid)->name().c_str()));
+    }
+    m_pNet->socket()->Send(
+        &bs,
+        IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+    );
+}
+
 string NetSpec :: client_name(RakNetGUID guid) const
 {
     try{
@@ -174,5 +200,16 @@ string NetSpec :: client_name(RakNetGUID guid) const
 void NetSpec :: reserve(unsigned id)
 {
     m_Nodes.reserve(id);
+}
+
+void NetSpec :: add_object(unsigned id, std::shared_ptr<Node> node)
+{
+    assert(m_Nodes.is_reserved(id));
+    m_Nodes.add(id, node);
+}
+
+void NetSpec :: remove_object(unsigned id)
+{
+    m_Nodes.erase(id);
 }
 

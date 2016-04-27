@@ -112,6 +112,9 @@ class Game:
         unsigned m_Shader = ~0u;
         unsigned m_ColorShader = ~0u;
 
+        boost::signals2::scoped_connection m_SpawnCon;
+        boost::signals2::scoped_connection m_UpdateCon;
+
 };
 
 #endif

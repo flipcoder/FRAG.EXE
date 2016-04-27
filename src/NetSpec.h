@@ -19,7 +19,7 @@ class NetSpec:
             ID_MSG,
             ID_SPAWN,
             ID_DESPAWN,
-            ID_CHANGE,
+            ID_UPDATE,
             ID_EVENT
         };
 
@@ -43,19 +43,27 @@ class NetSpec:
             std::string msg,
             RakNet::RakNetGUID guid = RakNet::UNASSIGNED_RAKNET_GUID
         );
-        void info(std::string info, uint32_t object_id = 0, std::string name = "");
+        void info(
+            std::string info, uint32_t object_id = 0,
+            std::string name = "",
+            RakNet::RakNetGUID guid = RakNet::UNASSIGNED_RAKNET_GUID
+        );
         void data(RakNet::Packet* packet);
         void disconnect(RakNet::Packet* packet);
+        void spawn(RakNet::RakNetGUID guid = RakNet::UNASSIGNED_RAKNET_GUID);
+        
         std::string client_name(RakNet::RakNetGUID guid) const;
 
         void reserve(unsigned id);
+        void add_object(unsigned id, std::shared_ptr<Node> node);
+        void remove_object(unsigned id);
 
         RakNet::RakPeerInterface* socket() { return m_pNet->socket(); }
 
         boost::signals2::signal<void(RakNet::Packet*)> on_info;
         boost::signals2::signal<void(RakNet::Packet*)> on_spawn;
         boost::signals2::signal<void(RakNet::Packet*)> on_despawn;
-        boost::signals2::signal<void(RakNet::Packet*)> on_change;
+        boost::signals2::signal<void(RakNet::Packet*)> on_update;
         
         unsigned get_object_id_for(RakNet::RakNetGUID id) const {
             return m_Profiles.at(id)->temp()->at<int>("id");
