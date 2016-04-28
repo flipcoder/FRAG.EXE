@@ -82,6 +82,7 @@ Player :: Player(
     m_pPlayerShape->mass(80.0f);
     m_pPlayerShape->inertia(false);
     m_pPlayerShape->add_tag("player");
+    m_pPlayerShape->config()->set("player", (void*)this);
     m_pProfile->temp()->set<string>("team", rand()%2?"red":"blue");
     m_pProfile->temp()->set<int>("frags", 0);
     m_pProfile->temp()->set<int>("deaths", 0);
@@ -764,12 +765,12 @@ void Player :: die()
 
 void Player :: reset()
 {
-    if(m_pSpec->respawn(this)){
+    //if(m_pSpec->respawn(this)){
         m_pViewModel->equip(true);
         m_pProfile->temp()->set<int>("maxhp", 10); // this won't trigger
         m_pProfile->temp()->set<int>("hp", 10); // ...so do this 2nd
         m_bEnter = false;
-    }
+    //}
 }
 
 void Player :: hurt(int dmg)

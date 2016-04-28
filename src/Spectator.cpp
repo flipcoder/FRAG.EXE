@@ -73,7 +73,8 @@ void Spectator :: logic(Freq::Time t)
     
     if(
         m_pController->button("fire").pressed_now() ||
-        m_pController->button("use").pressed_now()
+        m_pController->button("use").pressed_now() ||
+        Headless::enabled() // TODO: for testing only
     ){
         if(m_pNet->local())
             m_pSpec->play();

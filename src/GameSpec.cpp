@@ -147,6 +147,11 @@ void GameSpec :: setup()
 
 Player* GameSpec :: play(shared_ptr<Profile> prof)
 {
+    // does profile already have a player?
+    for(auto&& p: m_Players) 
+        if(p->profile() == prof)
+            return nullptr;
+    
     if(not prof || not prof->dummy())
         prof = m_pSpectator ? m_pSpectator->profile() : prof;
            
@@ -166,7 +171,12 @@ Player* GameSpec :: play(shared_ptr<Profile> prof)
         m_LockIf
         //[console]{ return console->input();}
     );
+    if(not teleport_to_spawn(player.get()))
+        return nullptr;
+    
     player->reset();
+    
+    register_player(player->shared_from_this());
     
     // local?
     if(not prof->dummy()) {
@@ -181,19 +191,21 @@ Player* GameSpec :: play(shared_ptr<Profile> prof)
     //register_player(player->shared_from_this());
     m_pPhysics->generate(player->shape().get());
     
-    //respawn(m_pPlayer);
     return player.get();
 }
 
-bool GameSpec :: respawn(Player* p)
+bool GameSpec :: teleport_to_spawn(Player* p)
 {
     auto spawns = m_pRoot->hook(R"([Ss]pawn.*)", Node::Hook::REGEX);
     if(not spawns.empty())
     {
         auto spawn = spawns[rand() % spawns.size()];
         p->shape()->teleport(spawn->position(Space::WORLD) + glm::vec3(0.0f, 0.6f, 0.0f));
+        return true;
     }
-    register_player(p->shared_from_this());
+    
+    // TODO: shouldn't spawn w/o spawn point,
+    //       but spawning at origin is fine for testing
     return true;
 }
 
