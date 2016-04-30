@@ -81,6 +81,7 @@ class NetSpec:
         std::shared_ptr<Net> m_pNet;
         boost::signals2::scoped_connection m_DataCon;
         boost::signals2::scoped_connection m_DisconnectCon;
+        boost::signals2::scoped_connection m_TimeoutCon;
         Session* m_pSession;
 };
 

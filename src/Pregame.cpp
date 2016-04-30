@@ -55,6 +55,7 @@ void Pregame :: enter()
             net->info(name);
         });
         m_InfoCon = m_pNet->on_info.connect([qor,net](RakNet::Packet* p){
+            LOG("info");
             BitStream bs(p->data, p->length, false);
             RakString rs;
             unsigned char id;

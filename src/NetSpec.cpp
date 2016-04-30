@@ -11,6 +11,10 @@ NetSpec :: NetSpec(Qor* engine, bool server, int connections):
 {
     m_DataCon = m_pNet->on_data.connect(std::bind(&NetSpec::data, this, placeholders::_1));
     m_DisconnectCon = m_pNet->on_disconnect.connect(std::bind(&NetSpec::disconnect, this, placeholders::_1));
+    auto _this = this;
+    m_TimeoutCon = m_pNet->on_connection_lost.connect([_this](Packet* packet){
+        LOGf("%s timed out.", _this->profile(packet->guid)->name());
+    });
 }
 
 NetSpec :: ~NetSpec() {}
@@ -134,7 +138,9 @@ void NetSpec :: data(Packet* packet)
             // name not set?
             if(client_name(packet->guid).empty()){
                 // name unused?
+                LOG("1");
                 while(true){
+                    name_used = false;
                     for(auto&& p: m_Profiles)
                         if(name == p.second->name()){
                             name_used = true;
@@ -149,6 +155,7 @@ void NetSpec :: data(Packet* packet)
                 }
             }else{
                 // change name
+                LOG("2");
                 auto prof = m_Profiles[packet->guid];
                 for(auto&& p: m_Profiles)
                     if(name == p.second->name()){
