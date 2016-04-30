@@ -66,6 +66,10 @@ class Player:
 
         std::string name() const { return m_pProfile->name(); }
         
+        boost::signals2::signal<void()> on_death;
+        
+        std::string death_msg() const { return m_DeathMsg; }
+        
     private:
         
         void scope(bool b);
@@ -115,6 +119,8 @@ class Player:
         NetSpec* m_pNet;
 
         glm::mat4 m_NetTransform;
+        
+        std::string m_DeathMsg;
 };
 
 #endif

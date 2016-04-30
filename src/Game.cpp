@@ -138,14 +138,14 @@ void Game :: preload()
     //    m_pCamera
     //);
     
-    string map = m_pQor->session()->meta()->at("map",string());
-    if(map.empty())
-        map = m_pQor->args().filenames(-1, "test");
+    m_Map = m_pQor->session()->meta()->at("m_Map",string());
+    if(m_Map.empty())
+        m_Map = m_pQor->args().filenames(-1, "test");
     std::shared_ptr<Node> scene_root;
     
-    // load .json for current map name
-    if(m_pQor->exists(map +  ".json")){
-        auto scene = m_pQor->make<Scene>(map + ".json");
+    // load .json for current m_Map name
+    if(m_pQor->exists(m_Map +  ".json")){
+        auto scene = m_pQor->make<Scene>(m_Map + ".json");
         auto scene_root = scene->root();
         m_pRoot->add(scene->root());
         auto meshes = scene_root->hook_type<Mesh>();
@@ -154,9 +154,9 @@ void Game :: preload()
         m_Fog = scene->fog();
     }
     
-    // load .obj for current map name
-    if(m_pQor->exists(map +  ".obj")){
-        auto scene_root = m_pQor->make<Mesh>(map + ".obj");
+    // load .obj for current m_Map name
+    if(m_pQor->exists(m_Map +  ".obj")){
+        auto scene_root = m_pQor->make<Mesh>(m_Map + ".obj");
         m_pRoot->add(scene_root);
         auto meshes = scene_root->hook_type<Mesh>();
         for(auto&& mesh: meshes) {
@@ -174,6 +174,7 @@ void Game :: preload()
             }
         }
     }
+    m_GameSpec.map(m_Map);
     
     // generate physics recursively for the entire world
     m_pPhysics->generate(m_pRoot.get(), Physics::GEN_RECURSIVE);
@@ -185,61 +186,14 @@ void Game :: preload()
     
     // TODO: ensure filename contains only valid filename chars
     // execute script for map
-    if(not map.empty())
-        m_pScript->execute_file("mods/FRAG.EXE/data/maps/"+ map +".py");
+    if(not m_Map.empty())
+        m_pScript->execute_file("mods/FRAG.EXE/data/maps/"+ m_Map +".py");
 
     // gamespec deals with players, items, weapons, anything that can differ based on game rules
     m_GameSpec.setup();
 
     // cache player model now so we don't lag when it spawns the first time
     m_pQor->make<Mesh>("player.obj");
-
-    if(m_pNet->server()){
-        // Send server info to new clients when they give us their info
-        auto net = m_pNet;
-        m_pNet->on_info.connect([net,map](Packet* packet){
-            LOGf("player obj id = %s", net->get_object_id_for(packet->guid));
-            net->info(
-                map,
-                net->get_object_id_for(packet->guid),
-                net->profile(packet->guid)->name(),
-                packet->guid
-            );
-        });
-    }
-    
-    if(m_pNet->server())
-    {
-        auto gamespec = &m_GameSpec;
-        auto net = m_pNet;
-        m_SpawnCon = m_pNet->on_spawn.connect([gamespec,net](Packet* packet){
-            auto prof = net->profile(packet->guid);
-            uint32_t obj_id = net->get_object_id_for(packet->guid);
-
-            // do player spawn / gamespec should return null if player can't spawn
-            Player* p = gamespec->play(prof);
-            if(p)
-            {
-                net->add_object(obj_id, p->shape());
-                p->shape()->config()->set<int>("id", obj_id);
-                prof->temp()->set<int>("id", obj_id);
-
-                net->spawn(packet->guid); // broadcast spawn
-            }
-        });
-        m_UpdateCon = m_pNet->on_update.connect([gamespec,net](Packet* packet){
-        });
-    }
-    else
-    {
-        auto gamespec = &m_GameSpec;
-        m_SpawnCon = m_pNet->on_spawn.connect([gamespec](Packet* packet){
-            gamespec->spawn(packet);
-        });
-        m_UpdateCon = m_pNet->on_update.connect([gamespec,net](Packet* packet){
-        });
-
-    }
 }
 
 Game :: ~Game()

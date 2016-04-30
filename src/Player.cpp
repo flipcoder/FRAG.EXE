@@ -761,6 +761,8 @@ void Player :: die()
         1 + m_pProfile->temp()->at<int>("deaths")
     );
     Sound::play(m_pCamera.get(), "death.wav", m_pQor->resources());
+    m_DeathMsg = m_pProfile->name() + " was fragged.";
+    on_death();
 }
 
 void Player :: reset()

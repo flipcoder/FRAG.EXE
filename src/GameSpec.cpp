@@ -37,6 +37,11 @@ void GameSpec :: register_player(shared_ptr<Player> p)
         for(auto&& item: m_ItemPickups)
             register_pickup_with_player(item, p.get());
     }
+
+    if(m_pNet->server()){
+        p->on_death.connect(bind(&GameSpec::server_despawn, this, p.get()));
+        //p->shape()->on_move(bind(&GameSpec::server_update, this, p->shape().get()));
+    }
 }
 
 void GameSpec :: deregister_player(Player* p)
@@ -142,6 +147,54 @@ void GameSpec :: setup()
                 for(auto&& player: m_Players)
                     register_pickup_with_player(shape, player.get());
         }
+    }
+    
+    if(m_pNet->server()){
+        // Send server info to new clients when they give us their info
+        auto net = m_pNet;
+        string mapname = m_Map;
+        m_pNet->on_info.connect([net,mapname](Packet* packet){
+            LOGf("player obj id = %s", net->get_object_id_for(packet->guid));
+            net->info(
+                mapname,
+                net->get_object_id_for(packet->guid),
+                net->profile(packet->guid)->name(),
+                packet->guid
+            );
+        });
+    }
+    
+    if(m_pNet->server())
+    {
+        auto gamespec = this;
+        auto net = m_pNet;
+        m_SpawnCon = m_pNet->on_spawn.connect([gamespec,net](Packet* packet){
+            auto prof = net->profile(packet->guid);
+            uint32_t obj_id = net->get_object_id_for(packet->guid);
+
+            // do player spawn / gamespec should return null if player can't spawn
+            Player* p = gamespec->play(prof);
+            if(p)
+            {
+                net->add_object(obj_id, p->shape());
+                p->shape()->config()->set<int>("id", obj_id);
+                prof->temp()->set<int>("id", obj_id);
+
+                net->spawn(packet->guid); // broadcast spawn
+            }
+        });
+        m_UpdateCon = m_pNet->on_update.connect([gamespec,net](Packet* packet){
+        });
+    }
+    else
+    {
+        auto gamespec = this;
+        auto net = m_pNet;
+        m_SpawnCon = m_pNet->on_spawn.connect(bind(&GameSpec::client_spawn, this, std::placeholders::_1));
+        m_DespawnCon = m_pNet->on_spawn.connect(bind(&GameSpec::client_despawn, this, std::placeholders::_1));
+        m_UpdateCon = m_pNet->on_update.connect([gamespec,net](Packet* packet){
+        });
+
     }
 }
 
@@ -273,7 +326,7 @@ std::shared_ptr<Node> GameSpec :: ortho_root() const
     }
 }
 
-void GameSpec :: spawn(Packet* packet)
+void GameSpec :: client_spawn(Packet* packet)
 {
     LOG("spawn(packet)");
     BitStream bs(packet->data, packet->length, false);
@@ -313,5 +366,77 @@ void GameSpec :: spawn(Packet* packet)
             prof->temp()->set("id", obj_id);
         }
     }
+}
+
+void GameSpec :: client_despawn(Packet* packet)
+{
+    LOG("despawn(packet)");
+    BitStream bs(packet->data, packet->length, false);
+    unsigned char id;
+    bs.Read(id); // we already know this is ID_DESPAWN
+    bs.Read(id);
+    if(id == NetSpec::OBJ_PLAYER)
+    {
+        bool kill;
+        bs.Read(kill);
+        // kill?
+        
+        if(kill)
+        {
+            try{
+                auto obj = m_pNet->object(id);
+                auto player = (Player*)obj->config()->at<void*>("player",nullptr);
+                if(not player){
+                    LOGf("id %s is not a player", id);
+                    return;
+                }
+                player->die();
+            }catch(const std::out_of_range){
+                LOGf("no object of id %s", id);
+                return;
+            }
+            m_pNet->remove_object(id);
+        }
+        else
+        {
+            try{
+                auto obj = m_pNet->object(id);
+            }catch(const std::out_of_range){
+                LOGf("no object of id %s", id);
+                return;
+            }
+            m_pNet->remove_object(id);
+        }
+        
+        RakString rs;
+        bs.Read(rs);
+        string s = rs.C_String();
+        if(not s.empty()){
+            LOG(s); // kill message, if any?
+        }
+    }
+    else{
+        auto obj = m_pNet->object(id);
+        obj->detach();
+        m_pNet->remove_object(id);
+    }
+}
+
+void GameSpec :: server_despawn(Player* p)
+{
+    LOG("despawn()");
+    BitStream bs;
+    bs.Write((unsigned char)NetSpec::ID_DESPAWN);
+    bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
+    bool killed = true;
+    bs.Write(killed);
+    bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
+    RakString rs(p->death_msg().c_str());
+    bs.Write(rs);
+   
+    m_pNet->socket()->Send(
+        &bs,
+        HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+    );
 }
 

@@ -20,7 +20,8 @@ class NetSpec:
             ID_SPAWN,
             ID_DESPAWN,
             ID_UPDATE,
-            ID_EVENT
+            ID_EVENT,
+            ID_GIVE
         };
 
         enum ObjectType
@@ -72,7 +73,11 @@ class NetSpec:
         std::shared_ptr<Profile> profile(RakNet::RakNetGUID guid) {
             return m_Profiles[guid];
         }
-        
+
+        std::shared_ptr<Node> object(unsigned id) {
+            return m_Nodes.at(id);
+        }
+
     private:
         
         kit::shared_index<Node> m_Nodes;

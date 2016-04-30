@@ -103,6 +103,12 @@ void NetSpec :: data(Packet* packet)
         on_update(packet);
         return;
     }
+    else if(id == ID_GIVE)
+    {
+    }
+    else if(id == ID_EVENT)
+    {
+    }
     else if(id == ID_DESPAWN)
     {
         on_despawn(packet);

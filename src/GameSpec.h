@@ -43,6 +43,7 @@ class GameSpec:
         void spawn_local_player();
         void spawn_local_spectator();
         void set_lock(std::function<bool()> func) { m_LockIf = func; }
+        void map(std::string map) { m_Map = map; }
 
         Player* local_player() { return m_pPlayer; }
         Spectator* local_spectator() { return m_pSpectator.get(); }
@@ -60,7 +61,9 @@ class GameSpec:
         NetSpec* net() { return m_pNet; }
         
         // spawn something according to packet data
-        void spawn(RakNet::Packet* packet);
+        void client_spawn(RakNet::Packet* packet);
+        void client_despawn(RakNet::Packet* packet);
+        void server_despawn(Player* p);
         
     private:
         
@@ -82,6 +85,7 @@ class GameSpec:
         std::vector<std::shared_ptr<Mesh>> m_ItemPickups;
         std::shared_ptr<Profile> m_pProfile;
         std::shared_ptr<Controller> m_pController;
+        std::string m_Map;
         
         // local player cameras
         std::shared_ptr<Camera> m_pCamera;
@@ -90,6 +94,10 @@ class GameSpec:
         NetSpec* m_pNet = nullptr;
 
         std::function<bool()> m_LockIf;
+        
+        boost::signals2::scoped_connection m_SpawnCon;
+        boost::signals2::scoped_connection m_DespawnCon;
+        boost::signals2::scoped_connection m_UpdateCon;
 };
 
 #endif
