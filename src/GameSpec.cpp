@@ -246,6 +246,14 @@ Player* GameSpec :: play(shared_ptr<Profile> prof)
     return player.get();
 }
 
+void GameSpec :: respawn(Player* player)
+{
+    if(not teleport_to_spawn(player))
+        return;
+    
+    player->reset();
+}
+
 bool GameSpec :: teleport_to_spawn(Player* p)
 {
     auto spawns = m_pRoot->hook(R"([Ss]pawn.*)", Node::Hook::REGEX);

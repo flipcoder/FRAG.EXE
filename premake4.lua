@@ -42,7 +42,8 @@ solution("FRAG")
             "BulletCollision",
             "LinearMath",
             "z",
-            "RakNetDLL"
+            "assimp",
+            "RakNetDLL",
         }
         files {
             "src/**.h",

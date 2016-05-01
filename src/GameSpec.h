@@ -36,6 +36,7 @@ class GameSpec:
         std::shared_ptr<Meta> config() { return m_pConfig; };
         
         Player* play(std::shared_ptr<Profile> prof = nullptr);
+        void respawn(Player* player);
         bool teleport_to_spawn(Player* p);
         void despawn(Player* p);
         void spectate(std::shared_ptr<Profile> prof = nullptr);
