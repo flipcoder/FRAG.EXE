@@ -304,13 +304,15 @@ void Player :: logic(Freq::Time t)
     if(not hp)
     {
         if(not local()){
-            reset();
+            m_pSpec->respawn(this);
+            //reset();
             return;
         }else if(
             m_pController->button("fire").pressed_now() ||
             m_pController->button("use").pressed_now()
         ){
-            reset();
+            m_pSpec->respawn(this);
+            //reset();
         }
         return;
     }
@@ -889,8 +891,13 @@ void Player :: give(const shared_ptr<Meta>& item)
 void Player :: add_frags(Player* target, int f)
 {
     int frags = m_pProfile->temp()->at<int>("frags");
-    m_pProfile->temp()->at<int>("frags", std::max(0,frags));
+    m_pProfile->temp()->at<int>("frags", frags + 1);
     LOGf("%s fragged %s.", name() % target->name());
+    m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
+        R"({"message": "YOU FRAGGED )" +
+            boost::to_upper_copy(target->name()) +
+            R"(", "color": "FFFFFF"})"
+    ));
 }
 
 bool Player :: weapon_priority_cmp(string s1, string s2)
