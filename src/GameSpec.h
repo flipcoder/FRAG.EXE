@@ -64,6 +64,8 @@ class GameSpec:
         void client_spawn(RakNet::Packet* packet);
         void client_despawn(RakNet::Packet* packet);
         void server_despawn(Player* p);
+        void server_update(Player* p);
+        void client_update(RakNet::Packet* p);
         
     private:
         

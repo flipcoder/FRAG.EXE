@@ -304,13 +304,13 @@ void Player :: logic(Freq::Time t)
     if(not hp)
     {
         if(not local()){
-            reset();
+            //reset();
             return;
         }else if(
             m_pController->button("fire").pressed_now() ||
             m_pController->button("use").pressed_now()
         ){
-            reset();
+            //reset();
         }
         return;
     }

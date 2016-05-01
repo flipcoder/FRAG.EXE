@@ -7,6 +7,7 @@
 #include <boost/regex.hpp>
 #include "Qor/Profile.h"
 using namespace std;
+using namespace glm;
 using namespace RakNet;
 
 GameSpec :: GameSpec(std::string fn, Cache<Resource, std::string>* cache,
@@ -40,7 +41,7 @@ void GameSpec :: register_player(shared_ptr<Player> p)
 
     if(m_pNet->server()){
         p->on_death.connect(bind(&GameSpec::server_despawn, this, p.get()));
-        //p->shape()->on_move(bind(&GameSpec::server_update, this, p->shape().get()));
+        p->shape()->on_move.connect(bind(&GameSpec::server_update, this, p.get()));
     }
 }
 
@@ -191,10 +192,8 @@ void GameSpec :: setup()
         auto gamespec = this;
         auto net = m_pNet;
         m_SpawnCon = m_pNet->on_spawn.connect(bind(&GameSpec::client_spawn, this, std::placeholders::_1));
-        m_DespawnCon = m_pNet->on_spawn.connect(bind(&GameSpec::client_despawn, this, std::placeholders::_1));
-        m_UpdateCon = m_pNet->on_update.connect([gamespec,net](Packet* packet){
-        });
-
+        m_DespawnCon = m_pNet->on_despawn.connect(bind(&GameSpec::client_despawn, this, std::placeholders::_1));
+        m_UpdateCon = m_pNet->on_update.connect(bind(&GameSpec::client_update, this, std::placeholders::_1));
     }
 }
 
@@ -380,31 +379,26 @@ void GameSpec :: client_despawn(Packet* packet)
         bool kill;
         bs.Read(kill);
         // kill?
+        shared_ptr<Node> obj;
+        try{
+            obj = m_pNet->object(id);
+        }catch(const std::out_of_range){
+            LOGf("no object of id %s", id);
+            return;
+        }
         
         if(kill)
         {
-            try{
-                auto obj = m_pNet->object(id);
-                auto player = (Player*)obj->config()->at<void*>("player",nullptr);
-                if(not player){
-                    LOGf("id %s is not a player", id);
-                    return;
-                }
-                player->die();
-            }catch(const std::out_of_range){
-                LOGf("no object of id %s", id);
+            auto player = (Player*)obj->config()->at<void*>("player",nullptr);
+            if(not player){
+                LOGf("id %s is not a player", id);
                 return;
             }
+            player->die();
             m_pNet->remove_object(id);
         }
         else
         {
-            try{
-                auto obj = m_pNet->object(id);
-            }catch(const std::out_of_range){
-                LOGf("no object of id %s", id);
-                return;
-            }
             m_pNet->remove_object(id);
         }
         
@@ -428,15 +422,59 @@ void GameSpec :: server_despawn(Player* p)
     BitStream bs;
     bs.Write((unsigned char)NetSpec::ID_DESPAWN);
     bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
+    bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
     bool killed = true;
     bs.Write(killed);
-    bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
     RakString rs(p->death_msg().c_str());
     bs.Write(rs);
    
     m_pNet->socket()->Send(
         &bs,
         HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+    );
+}
+
+void GameSpec :: client_update(Packet* p)
+{
+    LOG("update()");
+    BitStream bs;
+    unsigned char c;
+    bs.Read(c); // ID_UPDATE
+    bs.Read(c); //OBJ_PLAYER
+    uint32_t id;
+    bs.Read(id);
+    
+    shared_ptr<Node> obj;
+    try{
+        obj = m_pNet->object(id);
+    }catch(const std::out_of_range&){
+        LOGf("no object of id %s", id);
+        return;
+    }
+    
+    mat4 m;
+    for(int i=0;i<16;++i)
+        bs.Read(m[i]);
+
+    // TODO: if the player we're updating is local, this shouldn't hardset
+    //  but instead set the net transform inside the player class
+    *obj->matrix() = m;
+    obj->pend();
+}
+
+void GameSpec :: server_update(Player* p)
+{
+    LOG("update()");
+    BitStream bs;
+    bs.Write((unsigned char)NetSpec::ID_UPDATE);
+    bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
+    bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
+    mat4 m(*p->shape()->matrix());
+    for(int i=0;i<16;++i)
+        bs.Write(m[i]);
+    m_pNet->socket()->Send(
+        &bs,
+        HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0, UNASSIGNED_RAKNET_GUID, true
     );
 }
 
