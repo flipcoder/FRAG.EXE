@@ -12,13 +12,18 @@ NetSpec :: NetSpec(Qor* engine, bool server, int connections):
     m_DataCon = m_pNet->on_data.connect(std::bind(&NetSpec::data, this, placeholders::_1));
     m_DisconnectCon = m_pNet->on_disconnect.connect(std::bind(&NetSpec::disconnect, this, placeholders::_1));
     auto _this = this;
-    m_TimeoutCon = m_pNet->on_connection_lost.connect([_this](Packet* packet){
-        try{
-            LOGf("%s timed out.", _this->profile(packet->guid)->name());
-        }catch(...){
-            LOG("Client timed out.");
-        }
-    });
+    if(server)
+        m_TimeoutCon = m_pNet->on_connection_lost.connect([_this](Packet* packet){
+            try{
+                LOGf("%s timed out.", _this->profile(packet->guid)->name());
+            }catch(...){
+                LOG("Client timed out.");
+            }
+        });
+    else
+        m_TimeoutCon = m_pNet->on_connection_lost.connect([_this](Packet* packet){
+            LOG("Server timed out.");
+        });
 }
 
 NetSpec :: ~NetSpec() {}
@@ -123,6 +128,11 @@ void NetSpec :: data(Packet* packet)
         on_spawn(packet);
         return;
     }
+    else if(id == ID_DONE_LOADING)
+    {
+        on_done_loading(packet);
+        return;
+    }
     else if(id == ID_MSG)
     {
         bs.Read(rs);
@@ -190,14 +200,18 @@ void NetSpec :: spawn(RakNet::RakNetGUID guid)
 {
     // client - request to spawn
     // server - report spawning of something
-    LOG("requesting to spawn");
     BitStream bs;
     bs.Write((unsigned char)ID_SPAWN);
     bs.Write((unsigned char)OBJ_PLAYER);
     if(server()){
-        bs.Write(true);
+        LOG("notifying players of spawn");
+        bs.Write(true); // just now spawned
         bs.Write((uint32_t)get_object_id_for(guid));
         bs.Write(RakString(profile(guid)->name().c_str()));
+    }
+    else
+    {
+        LOG("requesting spawn");
     }
     m_pNet->socket()->Send(
         &bs,

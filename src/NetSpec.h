@@ -21,7 +21,8 @@ class NetSpec:
             ID_DESPAWN,
             ID_UPDATE,
             ID_EVENT,
-            ID_GIVE
+            ID_GIVE,
+            ID_DONE_LOADING
         };
 
         enum ObjectType
@@ -58,6 +59,7 @@ class NetSpec:
         void reserve(unsigned id);
         void add_object(unsigned id, std::shared_ptr<Node> node);
         void remove_object(unsigned id);
+        bool has_object(unsigned id) { return m_Nodes.has(id); }
 
         RakNet::RakPeerInterface* socket() { return m_pNet->socket(); }
 
@@ -65,6 +67,7 @@ class NetSpec:
         boost::signals2::signal<void(RakNet::Packet*)> on_spawn;
         boost::signals2::signal<void(RakNet::Packet*)> on_despawn;
         boost::signals2::signal<void(RakNet::Packet*)> on_update;
+        boost::signals2::signal<void(RakNet::Packet*)> on_done_loading;
         
         unsigned get_object_id_for(RakNet::RakNetGUID id) const {
             return m_Profiles.at(id)->temp()->at<int>("id");
@@ -78,6 +81,14 @@ class NetSpec:
             return m_Nodes.at(id);
         }
 
+        std::map<RakNet::RakNetGUID, std::shared_ptr<Profile>>& profiles() {
+            return m_Profiles;
+        }
+        
+        kit::shared_index<Node>& nodes() {
+            return m_Nodes;
+        }
+        
     private:
         
         kit::shared_index<Node> m_Nodes;

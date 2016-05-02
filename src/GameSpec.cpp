@@ -158,14 +158,13 @@ void GameSpec :: setup()
         auto net = m_pNet;
         string mapname = m_Map;
         m_pNet->on_info.connect([net,mapname](Packet* packet){
-            LOGf("player obj id = %s", net->get_object_id_for(packet->guid));
             net->info(
                 mapname,
                 net->get_object_id_for(packet->guid),
                 net->profile(packet->guid)->name(),
                 packet->guid
             );
-        });
+        }); 
     }
     
     if(m_pNet->server())
@@ -174,7 +173,13 @@ void GameSpec :: setup()
         auto net = m_pNet;
         m_SpawnCon = m_pNet->on_spawn.connect([gamespec,net](Packet* packet){
             auto prof = net->profile(packet->guid);
-            uint32_t obj_id = net->get_object_id_for(packet->guid);
+            uint32_t obj_id;
+            try{
+                obj_id = net->get_object_id_for(packet->guid);
+            }catch(...){
+                LOG("no object ID")
+                return;
+            }
 
             // do player spawn / gamespec should return null if player can't spawn
             Player* p = gamespec->play(prof);
@@ -186,16 +191,25 @@ void GameSpec :: setup()
 
                 net->spawn(packet->guid); // broadcast spawn
             }
+            else
+            {
+                LOG("no player to spawn");
+            }
         });
         m_UpdateCon = m_pNet->on_update.connect(bind(&GameSpec::recv_update, this, std::placeholders::_1));
+        m_DoneLoadingCon = m_pNet->on_done_loading.connect(bind(
+            &GameSpec::server_notify_spawn, this, std::placeholders::_1, false
+        ));
     }
-    else
+    else if(m_pNet->remote())
     {
         auto gamespec = this;
         auto net = m_pNet;
         m_SpawnCon = m_pNet->on_spawn.connect(bind(&GameSpec::client_spawn, this, std::placeholders::_1));
         m_DespawnCon = m_pNet->on_despawn.connect(bind(&GameSpec::client_despawn, this, std::placeholders::_1));
         m_UpdateCon = m_pNet->on_update.connect(bind(&GameSpec::recv_update, this, std::placeholders::_1));
+
+        client_done_loading();
     }
 }
 
@@ -203,8 +217,9 @@ Player* GameSpec :: play(shared_ptr<Profile> prof)
 {
     // does profile already have a player?
     for(auto&& p: m_Players) 
-        if(p->profile() == prof)
+        if(p->profile() == prof){
             return nullptr;
+        }
     
     if(not prof || not prof->dummy())
         prof = m_pSpectator ? m_pSpectator->profile() : prof;
@@ -337,49 +352,90 @@ std::shared_ptr<Node> GameSpec :: ortho_root() const
 
 void GameSpec :: client_spawn(Packet* packet)
 {
-    LOG("spawn(packet)");
+    //LOG("client_spawn(packet)");
     BitStream bs(packet->data, packet->length, false);
-    unsigned char id;
-    bs.Read(id); // we already know this is ID_SPAWN
-    bs.Read(id);
-    if(id == NetSpec::OBJ_PLAYER)
+    unsigned char c;
+    bs.Read(c); // we already know this is ID_SPAWN
+    bs.Read(c);
+    if(c == NetSpec::OBJ_PLAYER)
     {
         // was this player just spawned, or am i only now hearing about it?
-        bool spawn_now;
-        bs.Read(spawn_now);
+        bool now;
+        bs.Read(now);
         
         uint32_t obj_id;
         bs.Read(obj_id);
         m_pNet->reserve(obj_id);
 
-        LOG(to_string(obj_id));
-        LOG(to_string(m_pProfile->session()->meta()->template at<int>("id")));
-        if(obj_id == m_pProfile->session()->meta()->template at<int>("id")){
-            // spawn player?
-            LOG("spawn player");
+        auto id = m_pProfile->session()->meta()->template at<int>("id");
+        if(obj_id == id){
             Player* p = play(m_pProfile);
-            m_pNet->add_object(obj_id, p->shape());
-            p->shape()->config()->set<int>("id", obj_id);
-            m_pProfile->temp()->set<int>("id", obj_id);
+            if(p)
+            {
+                //LOGf("my id is %s, and I'm spawning %s", id % obj_id);
+                m_pNet->add_object(obj_id, p->shape());
+                p->shape()->config()->set<int>("id", obj_id);
+                m_pProfile->temp()->set<int>("id", obj_id);
+            }
             
         }else{
             // make dummy to mark remote player
-            RakString s;
-            bs.Read(s);
-            string player_name = s.C_String();
-            
-            auto prof = m_pProfile->session()->dummy_profile(player_name);
-            Player* p = play(prof);
-            m_pNet->add_object(obj_id, p->shape());
-            p->shape()->config()->set<int>("id", obj_id);
-            prof->temp()->set<int>("id", obj_id);
+            LOG("trying to spawn dummy");
+            if(not m_pNet->has_object(obj_id))
+            {
+                LOG("spawn dummy");
+                //LOG(to_string(m_pProfile->session()->meta()->template at<int>("id")));
+                RakString s;
+                bs.Read(s);
+                string player_name = s.C_String();
+                
+                auto prof = m_pProfile->session()->dummy_profile(player_name);
+                Player* p = play(prof);
+                if(not p){
+                    LOG("unable to spawn player");
+                    return;
+                }
+                m_pNet->add_object(obj_id, p->shape());
+                p->shape()->config()->set<int>("id", obj_id);
+                prof->temp()->set<int>("id", obj_id);
+            }
         }
     }
 }
 
+// Tell packet's player about all existing players
+void GameSpec :: server_notify_spawn(Packet* p, bool now)
+{
+    LOG("server_notify_spawn(packet)");
+    
+    // TODO: notify new player of other players
+    auto client_id = m_pNet->get_object_id_for(p->guid);
+    for(auto&& obj: m_pNet->nodes())
+    {
+        LOGf("object id: %s", obj.first);
+        //Player* p = obj.second->config()->at<void*>("player", nullptr);
+        //if(not p)
+        //    return;
+        //uint32_t obj_id = p->profile()->temp()->at<int>("id");
+        uint32_t obj_id = obj.first;
+        if(client_id != obj_id) { // player not matching recver
+            BitStream bs;
+            bs.Write((unsigned char)NetSpec::ID_SPAWN);
+            bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
+            bs.Write(now);
+            bs.Write((uint32_t)obj_id);
+            bs.Write(RakString(m_pNet->profile(p->guid)->name().c_str()));
+            m_pNet->socket()->Send(
+                &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, p->guid, true
+            );
+        }
+    }
+}
+
+
 void GameSpec :: client_despawn(Packet* packet)
 {
-    LOG("despawn(packet)");
+    //LOG("client_despawn(packet)");
     BitStream bs(packet->data, packet->length, false);
     unsigned char id;
     bs.Read(id); // we already know this is ID_DESPAWN
@@ -428,7 +484,7 @@ void GameSpec :: client_despawn(Packet* packet)
 
 void GameSpec :: server_despawn(Player* p)
 {
-    LOG("despawn()");
+    //LOG("server_despawn()");
     BitStream bs;
     bs.Write((unsigned char)NetSpec::ID_DESPAWN);
     bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
@@ -457,26 +513,30 @@ void GameSpec :: recv_update(Packet* p)
     try{
         obj = m_pNet->object(id);
     }catch(const std::out_of_range&){
-        LOGf("no object of id %s", id);
+        //LOGf("no object of id %s", id); // TODO: BUG
         return;
     }
 
     if(c == NetSpec::OBJ_PLAYER)
     {
-        auto player = (Player*)obj->config()->at<void*>("player", nullptr);
-        if(not player)
+        auto player = (Player*)obj->config()->at<void*>("player",nullptr);
+        if(not player){
+            LOG("obj has no attribute player")
             return;
-        if(player->local())
+        }
+        if(player->local()){
+            //LOG("net transform")
             return; // TODO: set net transform
+        }
         
+        //if(m_pNet->remote())
+        //    LOG("moving player");
         mat4 m;
         float* mp = glm::value_ptr(m);
         for(int i=0;i<16;++i)
             bs.Read(mp[i]);
 
-        *obj->matrix() = m;
-        obj->pend();
-        obj->Node::on_move(); // notify clients
+        obj->teleport(m);
     }
 }
 
@@ -485,7 +545,9 @@ void GameSpec :: send_update(Player* p)
     BitStream bs;
     bs.Write((unsigned char)NetSpec::ID_UPDATE);
     bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
-    bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
+    auto id = (uint32_t)p->shape()->config()->at<int>("id");
+    bs.Write(id);
+    //LOGf("send_update for player %s", id);
     mat4 m(*p->shape()->matrix());
     float* mp = glm::value_ptr(m);
     for(int i=0;i<16;++i)
@@ -493,6 +555,16 @@ void GameSpec :: send_update(Player* p)
     m_pNet->socket()->Send(
         &bs,
         HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0, UNASSIGNED_RAKNET_GUID, true
+    );
+}
+
+void GameSpec :: client_done_loading()
+{
+    //LOG("client_done_loading")
+    BitStream bs;
+    bs.Write((unsigned char)NetSpec::ID_DONE_LOADING);
+    m_pNet->socket()->Send(
+        &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
     );
 }
 

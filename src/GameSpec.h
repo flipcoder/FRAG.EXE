@@ -63,10 +63,12 @@ class GameSpec:
         
         // spawn something according to packet data
         void client_spawn(RakNet::Packet* packet);
+        void server_notify_spawn(RakNet::Packet* p, bool prior);
         void client_despawn(RakNet::Packet* packet);
         void server_despawn(Player* p);
         void send_update(Player* p);
         void recv_update(RakNet::Packet* p);
+        void client_done_loading();
         
     private:
         
@@ -101,6 +103,7 @@ class GameSpec:
         boost::signals2::scoped_connection m_SpawnCon;
         boost::signals2::scoped_connection m_DespawnCon;
         boost::signals2::scoped_connection m_UpdateCon;
+        boost::signals2::scoped_connection m_DoneLoadingCon;
 };
 
 #endif
