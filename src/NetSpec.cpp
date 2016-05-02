@@ -13,7 +13,11 @@ NetSpec :: NetSpec(Qor* engine, bool server, int connections):
     m_DisconnectCon = m_pNet->on_disconnect.connect(std::bind(&NetSpec::disconnect, this, placeholders::_1));
     auto _this = this;
     m_TimeoutCon = m_pNet->on_connection_lost.connect([_this](Packet* packet){
-        LOGf("%s timed out.", _this->profile(packet->guid)->name());
+        try{
+            LOGf("%s timed out.", _this->profile(packet->guid)->name());
+        }catch(...){
+            LOG("Client timed out.");
+        }
     });
 }
 

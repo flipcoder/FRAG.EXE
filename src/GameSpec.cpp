@@ -39,10 +39,13 @@ void GameSpec :: register_player(shared_ptr<Player> p)
             register_pickup_with_player(item, p.get());
     }
 
-    if(m_pNet->server()){
+    if(m_pNet->server())
+    {
         p->on_death.connect(bind(&GameSpec::server_despawn, this, p.get()));
-        p->shape()->on_move.connect(bind(&GameSpec::server_update, this, p.get()));
+        p->shape()->on_move.connect(bind(&GameSpec::send_update, this, p.get()));
     }
+    else if(m_pNet->remote() && p->local())
+        p->shape()->on_move.connect(bind(&GameSpec::send_update, this, p.get()));
 }
 
 void GameSpec :: deregister_player(Player* p)
@@ -184,8 +187,7 @@ void GameSpec :: setup()
                 net->spawn(packet->guid); // broadcast spawn
             }
         });
-        m_UpdateCon = m_pNet->on_update.connect([gamespec,net](Packet* packet){
-        });
+        m_UpdateCon = m_pNet->on_update.connect(bind(&GameSpec::recv_update, this, std::placeholders::_1));
     }
     else
     {
@@ -193,7 +195,7 @@ void GameSpec :: setup()
         auto net = m_pNet;
         m_SpawnCon = m_pNet->on_spawn.connect(bind(&GameSpec::client_spawn, this, std::placeholders::_1));
         m_DespawnCon = m_pNet->on_despawn.connect(bind(&GameSpec::client_despawn, this, std::placeholders::_1));
-        m_UpdateCon = m_pNet->on_update.connect(bind(&GameSpec::client_update, this, std::placeholders::_1));
+        m_UpdateCon = m_pNet->on_update.connect(bind(&GameSpec::recv_update, this, std::placeholders::_1));
     }
 }
 
@@ -357,8 +359,8 @@ void GameSpec :: client_spawn(Packet* packet)
             LOG("spawn player");
             Player* p = play(m_pProfile);
             m_pNet->add_object(obj_id, p->shape());
-            p->shape()->config()->set("id", obj_id);
-            m_pProfile->temp()->set("id", obj_id);
+            p->shape()->config()->set<int>("id", obj_id);
+            m_pProfile->temp()->set<int>("id", obj_id);
             
         }else{
             // make dummy to mark remote player
@@ -369,8 +371,8 @@ void GameSpec :: client_spawn(Packet* packet)
             auto prof = m_pProfile->session()->dummy_profile(player_name);
             Player* p = play(prof);
             m_pNet->add_object(obj_id, p->shape());
-            p->shape()->config()->set("id", obj_id);
-            prof->temp()->set("id", obj_id);
+            p->shape()->config()->set<int>("id", obj_id);
+            prof->temp()->set<int>("id", obj_id);
         }
     }
 }
@@ -442,10 +444,9 @@ void GameSpec :: server_despawn(Player* p)
     );
 }
 
-void GameSpec :: client_update(Packet* p)
+void GameSpec :: recv_update(Packet* p)
 {
-    LOG("update()");
-    BitStream bs;
+    BitStream bs(p->data, p->length, false);
     unsigned char c;
     bs.Read(c); // ID_UPDATE
     bs.Read(c); //OBJ_PLAYER
@@ -459,27 +460,36 @@ void GameSpec :: client_update(Packet* p)
         LOGf("no object of id %s", id);
         return;
     }
-    
-    mat4 m;
-    for(int i=0;i<16;++i)
-        bs.Read(m[i]);
 
-    // TODO: if the player we're updating is local, this shouldn't hardset
-    //  but instead set the net transform inside the player class
-    *obj->matrix() = m;
-    obj->pend();
+    if(c == NetSpec::OBJ_PLAYER)
+    {
+        auto player = (Player*)obj->config()->at<void*>("player", nullptr);
+        if(not player)
+            return;
+        if(player->local())
+            return; // TODO: set net transform
+        
+        mat4 m;
+        float* mp = glm::value_ptr(m);
+        for(int i=0;i<16;++i)
+            bs.Read(mp[i]);
+
+        *obj->matrix() = m;
+        obj->pend();
+        obj->Node::on_move(); // notify clients
+    }
 }
 
-void GameSpec :: server_update(Player* p)
+void GameSpec :: send_update(Player* p)
 {
-    LOG("update()");
     BitStream bs;
     bs.Write((unsigned char)NetSpec::ID_UPDATE);
     bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
     bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
     mat4 m(*p->shape()->matrix());
+    float* mp = glm::value_ptr(m);
     for(int i=0;i<16;++i)
-        bs.Write(m[i]);
+        bs.Write(mp[i]);
     m_pNet->socket()->Send(
         &bs,
         HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0, UNASSIGNED_RAKNET_GUID, true

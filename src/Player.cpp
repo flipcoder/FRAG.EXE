@@ -766,10 +766,11 @@ void Player :: die()
 void Player :: reset()
 {
     //if(m_pSpec->respawn(this)){
-        m_pViewModel->equip(true);
-        m_pProfile->temp()->set<int>("maxhp", 10); // this won't trigger
-        m_pProfile->temp()->set<int>("hp", 10); // ...so do this 2nd
-        m_bEnter = false;
+    m_pViewModel->equip(true);
+    
+    m_pProfile->temp()->set<int>("maxhp", 10); // this won't trigger
+    m_pProfile->temp()->set<int>("hp", 10); // ...so do this 2nd
+    m_bEnter = false;
     //}
 }
 
