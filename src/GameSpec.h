@@ -30,6 +30,7 @@ class GameSpec:
 
         void set_physics(Physics* p) { m_pPhysics = p; }
 
+        void enter();
         void setup();
         void register_player(std::shared_ptr<Player> p);
         void deregister_player(Player* p);

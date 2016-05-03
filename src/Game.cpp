@@ -202,6 +202,7 @@ Game :: ~Game()
 
 void Game :: enter()
 {
+    m_GameSpec.enter();
     m_pPipeline->bg_color(m_Fog);
         
     //m_pNet = make_shared<Net>(m_pQor, m_bServer);
