@@ -154,9 +154,9 @@ void Game :: preload()
         m_Fog = scene->fog();
     }
     
-    // load .obj for current m_Map name
-    if(m_pQor->exists(m_Map +  ".obj")){
-        auto scene_root = m_pQor->make<Mesh>(m_Map + ".obj");
+    // load .ase for current m_Map name
+    if(m_pQor->exists(m_Map +  ".ase")){
+        auto scene_root = m_pQor->make<Mesh>(m_Map + ".ase");
         m_pRoot->add(scene_root);
         auto meshes = scene_root->hook_type<Mesh>();
         for(auto&& mesh: meshes) {

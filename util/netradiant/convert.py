@@ -7,53 +7,54 @@ import json
 SCALE = 0.025
 
 m = os.path.splitext(sys.argv[1])[0]
-old_obj_fn = m+".obj"
-old_mtl_fn = m+".mtl"
-obj_fn = "new_"+m+".obj"
-mtl_fn = "new_"+m+".mtl"
+
+# old_obj_fn = m+".obj"
+# old_mtl_fn = m+".mtl"
+# obj_fn = "new_"+m+".obj"
+# mtl_fn = "new_"+m+".mtl"
 old_map_fn = m+".map"
 
-if not os.path.exists(old_obj_fn) or not os.path.exists(old_mtl_fn):
-    print "must exist"
-    sys.exit(1)
+# if not os.path.exists(old_obj_fn) or not os.path.exists(old_mtl_fn):
+#     print "must exist"
+#     sys.exit(1)
 
-shutil.copyfile(old_obj_fn, obj_fn)
-shutil.copyfile(old_mtl_fn, mtl_fn)
+# shutil.copyfile(old_obj_fn, obj_fn)
+# shutil.copyfile(old_mtl_fn, mtl_fn)
 
-mtl = open(old_mtl_fn,'r')
-mtl_r = open(mtl_fn,'w')
-for l in mtl:
-    if l.startswith("newmtl "):
-        tokens = l.split(' ')
-        mtl_r.write(tokens[0] + " " + os.path.basename(tokens[1]))
-        mtl_r.write("map_Kd " + os.path.basename(l.split()[1]) + ".png\n\n")
+# mtl = open(old_mtl_fn,'r')
+# mtl_r = open(mtl_fn,'w')
+# for l in mtl:
+#     if l.startswith("newmtl "):
+#         tokens = l.split(' ')
+#         mtl_r.write(tokens[0] + " " + os.path.basename(tokens[1]))
+#         mtl_r.write("map_Kd " + os.path.basename(l.split()[1]) + ".png\n\n")
 
-obj = open(old_obj_fn,'r')
-obj_r = open(obj_fn,'w')
-for l in obj:
-    if l.startswith("usemtl "):
-        tokens = l.split(' ')
-        obj_r.write(tokens[0] + " " + os.path.basename(tokens[1]))
-    elif l.startswith("v "):
-        tokens = l.split(" ")[1:]
-        for i in range(0,len(tokens)):
-            tokens[i] = str(float(tokens[i]) * SCALE)
-        tokens[0] = str(-float(tokens[0]))
-        l = "v " + " ".join(tokens) + "\n"
-        obj_r.write(l)
-    elif l.startswith("vt "):
-        tokens = l.split(" ")[1:]
-        tokens[1] = str(1.0 - float(tokens[1]))
-        l = "vt " + " ".join(tokens) + "\n"
-        obj_r.write(l)
-    elif l.startswith("f "):
-        tokens = l.split(" ")[1:]
-        for i in range(0,len(tokens)//2):
-            tokens[i], tokens[len(tokens)-2-i] = tokens[len(tokens)-2-i], tokens[i]
-        l = "f " + " ".join(tokens) + "\n"
-        obj_r.write(l)
-    else:
-        obj_r.write(l)
+# obj = open(old_obj_fn,'r')
+# obj_r = open(obj_fn,'w')
+# for l in obj:
+#     if l.startswith("usemtl "):
+#         tokens = l.split(' ')
+#         obj_r.write(tokens[0] + " " + os.path.basename(tokens[1]))
+#     elif l.startswith("v "):
+#         tokens = l.split(" ")[1:]
+#         for i in range(0,len(tokens)):
+#             tokens[i] = str(float(tokens[i]) * SCALE)
+#         tokens[0] = str(-float(tokens[0]))
+#         l = "v " + " ".join(tokens) + "\n"
+#         obj_r.write(l)
+#     elif l.startswith("vt "):
+#         tokens = l.split(" ")[1:]
+#         tokens[1] = str(1.0 - float(tokens[1]))
+#         l = "vt " + " ".join(tokens) + "\n"
+#         obj_r.write(l)
+#     elif l.startswith("f "):
+#         tokens = l.split(" ")[1:]
+#         for i in range(0,len(tokens)//2):
+#             tokens[i], tokens[len(tokens)-2-i] = tokens[len(tokens)-2-i], tokens[i]
+#         l = "f " + " ".join(tokens) + "\n"
+#         obj_r.write(l)
+#     else:
+#         obj_r.write(l)
 
 qmap = open(old_map_fn,'r')
 jsonmap = {"nodes":[]}
