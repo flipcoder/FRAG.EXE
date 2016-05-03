@@ -70,6 +70,8 @@ class Player:
         
         std::string death_msg() const { return m_DeathMsg; }
         
+        void extract_transform(glm::mat4 m);
+        
     private:
         
         void scope(bool b);
@@ -82,6 +84,7 @@ class Player:
         std::shared_ptr<Node> m_pOrthoRoot;
         std::shared_ptr<Camera> m_pOrthoCamera;
         std::shared_ptr<Mesh> m_pPlayerShape;
+        std::shared_ptr<Mesh> m_pPlayerModel;
         std::shared_ptr<Camera> m_pCamera;
         std::shared_ptr<ViewModel> m_pViewModel;
         std::shared_ptr<Profile> m_pProfile;

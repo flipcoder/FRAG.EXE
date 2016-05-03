@@ -543,7 +543,8 @@ void GameSpec :: recv_update(Packet* p)
         for(int i=0;i<16;++i)
             bs.Read(mp[i]);
 
-        obj->teleport(m);
+        //obj->teleport(m);
+        player->extract_transform(m);
     }
 }
 

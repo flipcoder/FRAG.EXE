@@ -9,6 +9,8 @@
 #include "Qor/BasicPartitioner.h"
 #include "Qor/Profile.h"
 #include "NetSpec.h"
+#include <glm/gtx/matrix_interpolation.hpp>
+#include <glm/gtx/orthonormalize.hpp>
 using namespace std;
 using namespace glm;
 
@@ -92,10 +94,10 @@ Player :: Player(
     //    m_pProfile->temp()->set<string>("name", "Bot");
     if(not local())
     {
-        auto m = make_shared<Mesh>(m_pCache->transform("player.obj"), m_pCache);
-        m->position(vec3(0.0f, -m_pPlayerShape->box().size().y, 0.0f));
-        m_pPlayerShape->add(m);
-        m->disable_physics();
+        m_pPlayerModel = make_shared<Mesh>(m_pCache->transform("player.obj"), m_pCache);
+        m_pPlayerModel ->position(vec3(0.0f, -m_pPlayerShape->box().size().y, 0.0f));
+        m_pPlayerShape->add(m_pPlayerModel);
+        m_pPlayerModel ->disable_physics();
     }
     
     m_pCamera = make_shared<Camera>(cache, window);
@@ -910,5 +912,13 @@ bool Player :: weapon_priority_cmp(string s1, string s2)
             return false;
     }
     return false;
+}
+
+void Player :: extract_transform(mat4 m)
+{
+    // orient the model, and translate the shape
+    auto r = mat4(glm::extractMatrixRotation(m));
+    m_pPlayerModel->set_matrix(r);
+    m_pPlayerShape->teleport(Matrix::translation(m));
 }
 
