@@ -267,7 +267,7 @@ Player* GameSpec :: play(shared_ptr<Profile> prof)
     //register_player(player->shared_from_this());
     m_pPhysics->generate(player->shape().get());
     
-    LOG("player spawned");
+    //LOG("player spawned");
     return player.get();
 }
 
@@ -360,7 +360,7 @@ std::shared_ptr<Node> GameSpec :: ortho_root() const
 
 void GameSpec :: client_spawn(Packet* packet)
 {
-    LOG("client_spawn(packet)");
+    //LOG("client_spawn(packet)");
     BitStream bs(packet->data, packet->length, false);
     unsigned char c;
     bs.Read(c); // we already know this is ID_SPAWN
@@ -380,7 +380,7 @@ void GameSpec :: client_spawn(Packet* packet)
             Player* p = play(m_pProfile);
             if(p)
             {
-                LOGf("my id is %s, and I'm spawning %s", id % obj_id);
+                //LOGf("my id is %s, and I'm spawning %s", id % obj_id);
                 m_pNet->add_object(obj_id, p->shape());
                 p->shape()->config()->set<int>("id", obj_id);
                 m_pProfile->temp()->set<int>("id", obj_id);
@@ -390,7 +390,7 @@ void GameSpec :: client_spawn(Packet* packet)
             // make dummy to mark remote player
             if(not m_pNet->has_object(obj_id))
             {
-                LOGf("my id is %s, and I'm spawning %s", id % obj_id);
+                //LOGf("my id is %s, and I'm spawning %s", id % obj_id);
                 //LOG(to_string(m_pProfile->session()->meta()->template at<int>("id")));
                 RakString s;
                 bs.Read(s);
@@ -413,7 +413,7 @@ void GameSpec :: client_spawn(Packet* packet)
 // Tell packet's player about all existing players
 void GameSpec :: server_notify_spawn(Packet* p, bool now)
 {
-    LOG("server_notify_spawn(packet)");
+    //LOG("server_notify_spawn(packet)");
     
     // TODO: notify new player of other players
     auto client_id = m_pNet->get_object_id_for(p->guid);
@@ -433,7 +433,7 @@ void GameSpec :: server_notify_spawn(Packet* p, bool now)
             bs.Write((uint32_t)obj_id);
             bs.Write(RakString(m_pNet->profile(p->guid)->name().c_str()));
             m_pNet->socket()->Send(
-                &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, p->guid, true
+                &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, p->guid, false
             );
         }
     }
@@ -567,7 +567,7 @@ void GameSpec :: send_update(Player* p)
 
 void GameSpec :: client_done_loading()
 {
-    LOG("client_done_loading")
+    //LOG("client_done_loading")
     BitStream bs;
     bs.Write((unsigned char)NetSpec::ID_DONE_LOADING);
     m_pNet->socket()->Send(
