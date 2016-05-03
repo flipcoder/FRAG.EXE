@@ -194,7 +194,7 @@ void GameSpec :: setup()
             }
             else
             {
-                LOG("no player to spawn");
+                //LOG("no player to spawn");
             }
         });
         m_UpdateCon = m_pNet->on_update.connect(bind(&GameSpec::recv_update, this, std::placeholders::_1));
@@ -221,7 +221,7 @@ void GameSpec :: enter()
 Player* GameSpec :: play(shared_ptr<Profile> prof)
 {
     // does profile already have a player?
-    LOG("player spawning...");
+    //LOG("player spawning...");
     
     for(auto&& p: m_Players) 
         if(p->profile() == prof){
