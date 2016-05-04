@@ -536,8 +536,6 @@ void GameSpec :: recv_update(Packet* p)
             return; // TODO: set net transform
         }
         
-        //if(m_pNet->remote())
-        //    LOG("moving player");
         mat4 m;
         float* mp = glm::value_ptr(m);
         for(int i=0;i<16;++i)
@@ -555,9 +553,7 @@ void GameSpec :: send_update(Player* p)
     bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
     auto id = (uint32_t)p->shape()->config()->at<int>("id");
     bs.Write(id);
-    //LOGf("send_update for player %s", id);
     mat4 m(p->pack_transform());
-    //mat4 m(*p->shape()->matrix());
     float* mp = glm::value_ptr(m);
     for(int i=0;i<16;++i)
         bs.Write(mp[i]);

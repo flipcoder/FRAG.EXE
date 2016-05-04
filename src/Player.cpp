@@ -78,7 +78,10 @@ Player :: Player(
         vec3(0.6f, 0.025f, 0.6f)
     );
     m_pPlayerShape->set_box(m_StandBox);
-    m_pPlayerShape->set_physics(Node::Physics::DYNAMIC);
+    //if(m_pNet->server() || local())
+        m_pPlayerShape->set_physics(Node::Physics::DYNAMIC);
+    //else
+    //    m_pPlayerShape->set_physics(Node::Physics::KINEMATIC);
     m_pPlayerShape->set_physics_shape(Node::CAPSULE);
     m_pPlayerShape->friction(0.0f);
     m_pPlayerShape->mass(80.0f);
@@ -99,7 +102,7 @@ Player :: Player(
         m_pPlayerModel = make_shared<Mesh>(m_pCache->transform("player.obj"), m_pCache);
         m_pPlayerModel->position(vec3(0.0f, -m_pPlayerShape->box().size().y, 0.0f));
         m_pPlayerModel->disable_physics();
-        m_pCamera->add(m_pPlayerModel);
+        m_pPlayerShape->add(m_pPlayerModel);
     }
     
     m_fFOV = m_pCamera->fov();
@@ -917,17 +920,28 @@ bool Player :: weapon_priority_cmp(string s1, string s2)
 
 void Player :: unpack_transform(mat4 m)
 {
-    auto r = mat4(glm::extractMatrixRotation(m));
-    m_pCamera->set_matrix(r);
-    m_pPlayerShape->teleport(glm::translate(Matrix::translation(m)));
-    m_pPlayerShape->pend();
-    m_pPlayerShape->Node::on_move();
+    auto r = glm::extractMatrixRotation(m);
+    //LOGf("recv %s", Matrix::to_string(m));
+    m_pPlayerModel->set_matrix(r);
+    m_pPlayerShape->teleport(Matrix::translation(m));
 }
 
 glm::mat4 Player :: pack_transform()
 {
-    auto r = mat4(glm::extractMatrixRotation(*m_pCamera->matrix()));
+    
+    mat4 r;
+    if(local())
+        r = *m_pCamera->matrix();
+    else
+        r = *m_pPlayerModel->matrix();
+    //if(glm::extractMatrixRotation(r) != glm::mat4(1.0f)){
+    //}else{
+    //    static int i = 0;
+    //    if(++i > 100)
+    //        assert(false);
+    //}
     Matrix::translation(r, m_pPlayerShape->position());
+    //LOGf("send %s", Matrix::to_string(r));
     return r;
 }
 
