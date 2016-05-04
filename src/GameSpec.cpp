@@ -544,7 +544,7 @@ void GameSpec :: recv_update(Packet* p)
             bs.Read(mp[i]);
 
         //obj->teleport(m);
-        player->extract_transform(m);
+        player->unpack_transform(m);
     }
 }
 
@@ -556,7 +556,8 @@ void GameSpec :: send_update(Player* p)
     auto id = (uint32_t)p->shape()->config()->at<int>("id");
     bs.Write(id);
     //LOGf("send_update for player %s", id);
-    mat4 m(*p->shape()->matrix());
+    mat4 m(p->pack_transform());
+    //mat4 m(*p->shape()->matrix());
     float* mp = glm::value_ptr(m);
     for(int i=0;i<16;++i)
         bs.Write(mp[i]);

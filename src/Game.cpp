@@ -154,9 +154,9 @@ void Game :: preload()
         m_Fog = scene->fog();
     }
     
-    // load .ase for current m_Map name
-    if(m_pQor->exists(m_Map +  ".ase")){
-        auto scene_root = m_pQor->make<Mesh>(m_Map + ".ase");
+    // load .pk3 for current m_Map name
+    if(m_pQor->exists(m_Map +  ".pk3")){
+        auto scene_root = m_pQor->make<Mesh>(m_Map + ".pk3");
         m_pRoot->add(scene_root);
         auto meshes = scene_root->hook_type<Mesh>();
         for(auto&& mesh: meshes) {
@@ -165,12 +165,14 @@ void Game :: preload()
                 mesh->set_physics(Node::STATIC);
 
             if(mesh->material()){
-                if(Filesystem::getFileName(mesh->material()->texture()->filename()) == "caulk.png")
-                    mesh->detach();
-                else if(Filesystem::getFileName(mesh->material()->texture()->filename()) == "playerclip.png")
-                    mesh->each([](Node* n){
-                        n->self_visible(false);
-                    });
+                if(mesh && mesh->material() && mesh->material()->texture()){
+                    if(Filesystem::getFileName(mesh->material()->texture()->filename()) == "caulk.png")
+                        mesh->detach();
+                    else if(Filesystem::getFileName(mesh->material()->texture()->filename()) == "playerclip.png")
+                        mesh->each([](Node* n){
+                            n->self_visible(false);
+                        });
+                }
             }
         }
     }
@@ -189,7 +191,7 @@ void Game :: preload()
     if(not m_Map.empty())
         m_pScript->execute_file("mods/FRAG.EXE/data/maps/"+ m_Map +".py");
 
-    // gamespec deals with players, items, weapons, anything that can differ based on game rules
+    // gamespec deals with players, items, weapons, anything that can differ bpk3d on game rules
     m_GameSpec.setup();
 
     // cache player model now so we don't lag when it spawns the first time

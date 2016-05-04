@@ -70,7 +70,8 @@ class Player:
         
         std::string death_msg() const { return m_DeathMsg; }
         
-        void extract_transform(glm::mat4 m);
+        void unpack_transform(glm::mat4 m);
+        glm::mat4 pack_transform();
         
     private:
         

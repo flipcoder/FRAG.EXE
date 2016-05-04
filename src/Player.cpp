@@ -92,15 +92,16 @@ Player :: Player(
     //    m_pProfile->temp()->set<string>("name", m_pProfile->name());
     //else
     //    m_pProfile->temp()->set<string>("name", "Bot");
+    m_pCamera = make_shared<Camera>(cache, window);
+    
     if(not local())
     {
         m_pPlayerModel = make_shared<Mesh>(m_pCache->transform("player.obj"), m_pCache);
-        m_pPlayerModel ->position(vec3(0.0f, -m_pPlayerShape->box().size().y, 0.0f));
-        m_pPlayerShape->add(m_pPlayerModel);
-        m_pPlayerModel ->disable_physics();
+        m_pPlayerModel->position(vec3(0.0f, -m_pPlayerShape->box().size().y, 0.0f));
+        m_pPlayerModel->disable_physics();
+        m_pCamera->add(m_pPlayerModel);
     }
     
-    m_pCamera = make_shared<Camera>(cache, window);
     m_fFOV = m_pCamera->fov();
     //m_pRoot->add(m_pCamera);
     m_pPlayerShape->add(m_pCamera);
@@ -914,11 +915,19 @@ bool Player :: weapon_priority_cmp(string s1, string s2)
     return false;
 }
 
-void Player :: extract_transform(mat4 m)
+void Player :: unpack_transform(mat4 m)
 {
-    // orient the model, and translate the shape
     auto r = mat4(glm::extractMatrixRotation(m));
-    m_pPlayerModel->set_matrix(r);
-    m_pPlayerShape->teleport(Matrix::translation(m));
+    m_pCamera->set_matrix(r);
+    m_pPlayerShape->teleport(glm::translate(Matrix::translation(m)));
+    m_pPlayerShape->pend();
+    m_pPlayerShape->Node::on_move();
+}
+
+glm::mat4 Player :: pack_transform()
+{
+    auto r = mat4(glm::extractMatrixRotation(*m_pCamera->matrix()));
+    Matrix::translation(r, m_pPlayerShape->position());
+    return r;
 }
 
