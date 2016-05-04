@@ -921,9 +921,10 @@ bool Player :: weapon_priority_cmp(string s1, string s2)
 void Player :: unpack_transform(mat4 m)
 {
     auto r = glm::extractMatrixRotation(m);
-    //LOGf("recv %s", Matrix::to_string(m));
+    LOGf("unpack_transform: recv %s", Matrix::to_string(m));
     m_pPlayerModel->set_matrix(r);
-    m_pPlayerShape->teleport(Matrix::translation(m));
+    m_pPlayerShape->teleport(glm::translate(glm::mat4(), Matrix::translation(m)));
+    m_pPlayerShape->pend();
 }
 
 glm::mat4 Player :: pack_transform()
@@ -934,6 +935,7 @@ glm::mat4 Player :: pack_transform()
         r = *m_pCamera->matrix();
     else
         r = *m_pPlayerModel->matrix();
+    
     //if(glm::extractMatrixRotation(r) != glm::mat4(1.0f)){
     //}else{
     //    static int i = 0;
@@ -941,7 +943,6 @@ glm::mat4 Player :: pack_transform()
     //        assert(false);
     //}
     Matrix::translation(r, m_pPlayerShape->position());
-    //LOGf("send %s", Matrix::to_string(r));
     return r;
 }
 
