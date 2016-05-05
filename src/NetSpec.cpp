@@ -114,9 +114,11 @@ void NetSpec :: data(Packet* packet)
     }
     else if(id == ID_GIVE)
     {
+        //on_give(packet);
     }
-    else if(id == ID_EVENT)
+    else if(id == ID_PLAYER_EVENT)
     {
+        on_player_event(packet);
     }
     else if(id == ID_DESPAWN)
     {

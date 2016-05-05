@@ -20,7 +20,8 @@ class NetSpec:
             ID_SPAWN,
             ID_DESPAWN,
             ID_UPDATE,
-            ID_EVENT,
+            ID_PLAYER_EVENT,
+            ID_STATE_EVENT,
             ID_GIVE,
             ID_DONE_LOADING
         };
@@ -68,6 +69,7 @@ class NetSpec:
         boost::signals2::signal<void(RakNet::Packet*)> on_despawn;
         boost::signals2::signal<void(RakNet::Packet*)> on_update;
         boost::signals2::signal<void(RakNet::Packet*)> on_done_loading;
+        boost::signals2::signal<void(RakNet::Packet*)> on_player_event;
         
         unsigned get_object_id_for(RakNet::RakNetGUID id) const {
             return m_Profiles.at(id)->temp()->at<int>("id");

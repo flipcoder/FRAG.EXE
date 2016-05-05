@@ -81,7 +81,7 @@ Player :: Player(
     //if(m_pNet->server() || local())
         m_pPlayerShape->set_physics(Node::Physics::DYNAMIC);
     //else
-    //    m_pPlayerShape->set_physics(Node::Physics::KINEMATIC);
+        //m_pPlayerShape->set_physics(Node::Physics::KINEMATIC);
     m_pPlayerShape->set_physics_shape(Node::CAPSULE);
     m_pPlayerShape->friction(0.0f);
     m_pPlayerShape->mass(80.0f);
@@ -114,7 +114,8 @@ Player :: Player(
     m_pDecal = cache->cache_cast<ITexture>("decal_bullethole1.png");
     m_pSpark = cache->cache_cast<ITexture>("spark.png");
 
-    m_WeaponStash.give("glock");
+    //m_WeaponStash.give("glock");
+    m_WeaponStash.give_all();
     m_WeaponStash.slot(2);
     refresh_weapon();
     update_hud();
@@ -396,234 +397,30 @@ void Player :: logic(Freq::Time t)
     {
         if(not m_pViewModel->equipping()){
             if(m_pController->button(string("slot")+to_string(i))){
-                if(m_WeaponStash.slot(i)){
-                    Sound::play(m_pCamera.get(), "swap.wav", m_pQor->resources());
-                    scope(false);
-                    m_pViewModel->fast_zoom(false);
-                    auto vm = m_pViewModel.get();
-                    m_pViewModel->equip(false,[_this]{
-                        _this->refresh_weapon();
-                    });
+                if(slot(i))
                     break;
-                }
             }
         }
     }
     
     if(m_pController->button("next").pressed_now()){
-        if(m_pViewModel->idle()){
-            if(m_WeaponStash.next()){
-                Sound::play(m_pCamera.get(), "swap.wav", m_pQor->resources());
-                scope(false);
-                m_pViewModel->fast_zoom(false);
-                auto vm = m_pViewModel.get();
-                m_pViewModel->equip(false,[_this]{
-                    _this->refresh_weapon();
-                });
-            }
-        }
+        next_weapon();
     }
     
     if(m_pController->button("previous").pressed_now()){
-        if(m_pViewModel->idle()){
-            if(m_WeaponStash.next(-1)){
-                Sound::play(m_pCamera.get(), "swap.wav", m_pQor->resources());
-                scope(false);
-                m_pViewModel->fast_zoom(false);
-                auto vm = m_pViewModel.get();
-                m_pViewModel->equip(false,[_this]{
-                    _this->refresh_weapon();
-                });
-            }
-        }
+        prev_weapon();
     }
     
     if(m_pController->button("reload").pressed_now())
     {
-        if(m_pViewModel->idle() && m_pViewModel->equipped()){
-            //auto cache = m_pQor->resources();
-            //auto camera = m_pCamera.get();
-            if(m_WeaponStash.active()->can_reload()){
-                scope(false);
-                m_pViewModel->fast_zoom(false);
-                auto vm = m_pViewModel.get();
-                m_pViewModel->equip_time(Freq::Time(250));
-                Sound::play(m_pCamera.get(), "reload.wav", m_pQor->resources());
-                auto* weapon_stash = &m_WeaponStash;
-                m_pViewModel->equip(false, [_this, vm, weapon_stash]{
-                    weapon_stash->active()->reload();
-                    vm->equip(true);
-                    _this->update_hud();
-                });
-            }
-        }
+        reload();
     }
 
     if(m_pController->button("fire") &&
        m_pViewModel->idle() &&
        m_pViewModel->equipped()
     ){
-        //Sound::play(m_pCamera.get(), "shotgun.wav", m_pQor->resources());
-        if(m_WeaponStash.active()->spec()->scope()){
-            scope(false);
-            m_pViewModel->zoom(false);
-        }
-        
-        //Sound::play(m_pCamera.get(), "pump.wav", m_pQor->resources());
-        //auto snd = m_pQor->make<Sound>("pump.wav");
-        //auto time = make_shared<Freq::Time>();
-        //auto sndptr = snd.get();
-        //snd->on_tick.connect([sndptr,time](Freq::Time t){
-        //    if(*time >= Freq::Time(250)) {
-        //        if(not sndptr->played()){
-        //            sndptr->detach_on_done();
-        //            sndptr->play();
-        //        }
-        //    }else{
-        //        *time += t;
-        //    }
-        //});
-        //m_pCamera->add(snd);
-        bool player_hit = false;
-        m_pViewModel->recoil(Freq::Time(50), m_WeaponStash.active()->spec()->delay(), 0.05f);
-        if(m_WeaponStash.active()->spec()->projectile().empty())
-        {    
-            int burst = m_WeaponStash.active()->fire();
-            update_hud();
-            if(burst)
-            {
-                //auto p = m_pQor->make<Particle>("muzzleflash1.png");
-                //m_pViewModel->add(p);
-                //p->move(vec3(0.0f, 0.0f, -0.4f));
-                //p->scale(0.1f);
-                //p->collapse(Space::WORLD);
-                //p->life(Freq::Time::seconds(0.01f));
-                
-                Sound::play(m_pCamera.get(), m_WeaponStash.active()->spec()->sound(), m_pQor->resources());
-                
-                for(int i=0; i<burst; ++i)
-                {
-                    auto mag_var = (rand() % 1000) * 0.001f * m_WeaponStash.active()->spec()->spread();
-                    auto ang_var = (rand() % 1000) * 0.001f;
-                    vec3 dir = glm::vec3(
-                        cos(K_TAU * ang_var) * mag_var,
-                        sin(K_TAU * ang_var) * mag_var,
-                        -1.0f
-                    );
-                    dir = glm::normalize(dir);
-                    
-                    auto hit = m_pPhysics->first_hit(
-                        m_pCamera->position(Space::WORLD),
-                        m_pCamera->position(Space::WORLD) +
-                            m_pCamera->orient_to_world(dir) * 100.0f
-                    );
-                    Node* n = std::get<0>(hit);
-                    if(n)
-                    {
-                        //if(not n->hook("#player",Node::Hook::REVERSE).empty())
-                        if(n->compositor())
-                            n = n->compositor();
-                        
-                        if(n->has_event("hit")){
-                            auto hitinfo = make_shared<Meta>();
-                            hitinfo->set<int>("damage", m_WeaponStash.active()->spec()->damage());
-                            hitinfo->set<Player*>("owner", this);
-                            player_hit = true;
-                            n->event("hit", hitinfo);
-                            
-                            auto blood = make_shared<Particle>("blood.png", m_pCache);
-                            m_pRoot->add(blood);
-                            blood->move(std::get<1>(hit));
-                            blood->move(glm::normalize(
-                                m_pPlayerShape->position(Space::WORLD) - blood->position(Space::WORLD)
-                            ) * 0.25f);
-                            blood->velocity(glm::vec3(
-                                rand() % 100 / 100.0f,
-                                rand() % 100 / 100.0f * 2.0f,
-                                rand() % 100 / 100.0f));
-                            blood->acceleration(glm::vec3(0.0f, -9.8f, 0.0f));
-                            blood->scale(0.25f + rand()%10/10.0f*0.5f);
-                            blood->life(Freq::Time::seconds(0.5f));
-                        }
-                        else
-                        {
-                            decal(n,
-                                std::get<1>(hit),
-                                std::get<2>(hit),
-                                Matrix::up(*m_pCamera->matrix(Space::WORLD)),
-                                i * 0.0001
-                            );
-                        }
-                    }
-                }
-            } else {
-                Sound::play(m_pCamera.get(), "empty.wav", m_pQor->resources());
-            }
-            if(player_hit)
-                Sound::play(m_pCamera.get(), "hit.wav", m_pQor->resources());
-        }
-        else
-        {
-            int burst = m_WeaponStash.active()->fire();
-            update_hud();
-            if(burst)
-            {
-                Sound::play(m_pCamera.get(), m_WeaponStash.active()->spec()->sound(), m_pQor->resources());
-                
-                // projectile
-                auto m = m_pQor->make<Mesh>(m_WeaponStash.active()->spec()->projectile());
-                m->set_physics(Node::DYNAMIC);
-                m->set_physics_shape(Node::HULL);
-                m->mass(1.0f);
-                m_pViewModel->node()->add(m);
-                m->move(glm::vec3(0.0f, 0.0f, -1.0f));
-                m->collapse(Space::WORLD);
-                auto dir = Matrix::heading(*m->matrix(Space::WORLD));
-                m_pPhysics->generate(m.get());
-                auto body = ((btRigidBody*)m->body()->body());
-                body->applyCentralImpulse(Physics::toBulletVector(dir *
-                    m_WeaponStash.active()->spec()->speed()
-                ));
-                auto vel = m->velocity();
-                
-                auto mp = m.get();
-                auto cache = m_pCache;
-                
-                if(not m_WeaponStash.active()->spec()->gravity()) {
-                    body->setGravity(btVector3(0.0f, 0.0f, 0.0f));
-                    mp->inertia(false);
-                    //body->setAngularFactor(btVector3(0.0f, 1.0f, 0.0f));
-                    //m->on_tick.connect([mp,vel,cache](Freq::Time){
-                    //    auto body = ((btRigidBody*)mp->body()->body());
-                    //    if(glm::dot(mp->velocity(),vel) < 1.0f - K_EPSILON ||
-                    //        glm::length(mp->velocity()) != glm::length(vel))
-                    //    {
-                    //        auto snd = make_shared<Sound>(
-                    //            cache->transform("explosion.wav"), cache
-                    //        );
-                    //        mp->stick(snd);
-                    //        snd->detach_on_done();
-                    //        snd->play();
-                    //        mp->detach();
-                    //    }
-                    //});
-                    m_pPhysics->on_collision(m.get(), [mp,cache](Node*,Node*,vec3,vec3,vec3){
-                        if(mp->detaching())
-                            return;
-                        auto snd = make_shared<Sound>(
-                            cache->transform("explosion.wav"), cache
-                        );
-                        mp->stick(snd);
-                        snd->detach_on_done();
-                        snd->play();
-                        mp->safe_detach();
-                    });
-                }
-            }else{
-                Sound::play(m_pCamera.get(), "empty.wav", m_pQor->resources());
-            }
-        }
-        
+        fire_weapon();
     }
 
     //LOGf("pos: %s, %s", t.s() % m_pPlayerShape->position().y);
@@ -663,6 +460,197 @@ void Player :: logic(Freq::Time t)
         // pull up an f12 lawn chair
         m_pSpec->spectate();
         return;
+    }
+}
+
+void Player :: reload()
+{
+    auto _this = this;
+    if(m_pViewModel->idle() && m_pViewModel->equipped()){
+        //auto cache = m_pQor->resources();
+        //auto camera = m_pCamera.get();
+        if(m_WeaponStash.active()->can_reload()){
+            on_event(PE_RELOAD);
+            scope(false);
+            m_pViewModel->fast_zoom(false);
+            auto vm = m_pViewModel.get();
+            m_pViewModel->equip_time(Freq::Time(250));
+            Sound::play(m_pCamera.get(), "reload.wav", m_pQor->resources());
+            auto* weapon_stash = &m_WeaponStash;
+            m_pViewModel->equip(false, [_this, vm, weapon_stash]{
+                weapon_stash->active()->reload();
+                vm->equip(true);
+                _this->update_hud();
+            });
+        }
+    }
+}
+
+void Player :: fire_weapon()
+{
+
+    //Sound::play(m_pCamera.get(), "shotgun.wav", m_pQor->resources());
+    if(m_WeaponStash.active()->spec()->scope()){
+        scope(false);
+        m_pViewModel->zoom(false);
+    }
+    
+    //Sound::play(m_pCamera.get(), "pump.wav", m_pQor->resources());
+    //auto snd = m_pQor->make<Sound>("pump.wav");
+    //auto time = make_shared<Freq::Time>();
+    //auto sndptr = snd.get();
+    //snd->on_tick.connect([sndptr,time](Freq::Time t){
+    //    if(*time >= Freq::Time(250)) {
+    //        if(not sndptr->played()){
+    //            sndptr->detach_on_done();
+    //            sndptr->play();
+    //        }
+    //    }else{
+    //        *time += t;
+    //    }
+    //});
+    //m_pCamera->add(snd);
+    bool player_hit = false;
+    m_pViewModel->recoil(Freq::Time(50), m_WeaponStash.active()->spec()->delay(), 0.05f);
+    if(m_WeaponStash.active()->spec()->projectile().empty())
+    {    
+        int burst = m_WeaponStash.active()->fire();
+        update_hud();
+        if(burst)
+        {
+            on_event(PE_FIRE);
+            //auto p = m_pQor->make<Particle>("muzzleflash1.png");
+            //m_pViewModel->add(p);
+            //p->move(vec3(0.0f, 0.0f, -0.4f));
+            //p->scale(0.1f);
+            //p->collapse(Space::WORLD);
+            //p->life(Freq::Time::seconds(0.01f));
+            
+            Sound::play(m_pCamera.get(), m_WeaponStash.active()->spec()->sound(), m_pQor->resources());
+            
+            for(int i=0; i<burst; ++i)
+            {
+                auto mag_var = (rand() % 1000) * 0.001f * m_WeaponStash.active()->spec()->spread();
+                auto ang_var = (rand() % 1000) * 0.001f;
+                vec3 dir = glm::vec3(
+                    cos(K_TAU * ang_var) * mag_var,
+                    sin(K_TAU * ang_var) * mag_var,
+                    -1.0f
+                );
+                dir = glm::normalize(dir);
+                
+                auto hit = m_pPhysics->first_hit(
+                    m_pCamera->position(Space::WORLD),
+                    m_pCamera->position(Space::WORLD) +
+                        m_pCamera->orient_to_world(dir) * 100.0f
+                );
+                Node* n = std::get<0>(hit);
+                if(n)
+                {
+                    //if(not n->hook("#player",Node::Hook::REVERSE).empty())
+                    if(n->compositor())
+                        n = n->compositor();
+                    
+                    if(n->has_event("hit")){
+                        auto hitinfo = make_shared<Meta>();
+                        hitinfo->set<int>("damage", m_WeaponStash.active()->spec()->damage());
+                        hitinfo->set<Player*>("owner", this);
+                        player_hit = true;
+                        n->event("hit", hitinfo);
+                        
+                        auto blood = make_shared<Particle>("blood.png", m_pCache);
+                        m_pRoot->add(blood);
+                        blood->move(std::get<1>(hit));
+                        blood->move(glm::normalize(
+                            m_pPlayerShape->position(Space::WORLD) - blood->position(Space::WORLD)
+                        ) * 0.25f);
+                        blood->velocity(glm::vec3(
+                            rand() % 100 / 100.0f,
+                            rand() % 100 / 100.0f * 2.0f,
+                            rand() % 100 / 100.0f));
+                        blood->acceleration(glm::vec3(0.0f, -9.8f, 0.0f));
+                        blood->scale(0.25f + rand()%10/10.0f*0.5f);
+                        blood->life(Freq::Time::seconds(0.5f));
+                    }
+                    else
+                    {
+                        decal(n,
+                            std::get<1>(hit),
+                            std::get<2>(hit),
+                            Matrix::up(*m_pCamera->matrix(Space::WORLD)),
+                            i * 0.0001
+                        );
+                    }
+                }
+            }
+        } else {
+            Sound::play(m_pCamera.get(), "empty.wav", m_pQor->resources());
+        }
+        if(player_hit)
+            Sound::play(m_pCamera.get(), "hit.wav", m_pQor->resources());
+    }
+    else
+    {
+        int burst = m_WeaponStash.active()->fire();
+        update_hud();
+        if(burst)
+        {
+            on_event(PE_FIRE);
+            
+            Sound::play(m_pCamera.get(), m_WeaponStash.active()->spec()->sound(), m_pQor->resources());
+            
+            // projectile
+            auto m = m_pQor->make<Mesh>(m_WeaponStash.active()->spec()->projectile());
+            m->set_physics(Node::DYNAMIC);
+            m->set_physics_shape(Node::HULL);
+            m->mass(1.0f);
+            m_pViewModel->node()->add(m);
+            m->move(glm::vec3(0.0f, 0.0f, -1.0f));
+            m->collapse(Space::WORLD);
+            auto dir = Matrix::heading(*m->matrix(Space::WORLD));
+            m_pPhysics->generate(m.get());
+            auto body = ((btRigidBody*)m->body()->body());
+            body->applyCentralImpulse(Physics::toBulletVector(dir *
+                m_WeaponStash.active()->spec()->speed()
+            ));
+            auto vel = m->velocity();
+            
+            auto mp = m.get();
+            auto cache = m_pCache;
+            
+            if(not m_WeaponStash.active()->spec()->gravity()) {
+                body->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+                mp->inertia(false);
+                //body->setAngularFactor(btVector3(0.0f, 1.0f, 0.0f));
+                //m->on_tick.connect([mp,vel,cache](Freq::Time){
+                //    auto body = ((btRigidBody*)mp->body()->body());
+                //    if(glm::dot(mp->velocity(),vel) < 1.0f - K_EPSILON ||
+                //        glm::length(mp->velocity()) != glm::length(vel))
+                //    {
+                //        auto snd = make_shared<Sound>(
+                //            cache->transform("explosion.wav"), cache
+                //        );
+                //        mp->stick(snd);
+                //        snd->detach_on_done();
+                //        snd->play();
+                //        mp->detach();
+                //    }
+                //});
+                m_pPhysics->on_collision(m.get(), [mp,cache](Node*,Node*,vec3,vec3,vec3){
+                    if(mp->detaching())
+                        return;
+                    auto snd = make_shared<Sound>(
+                        cache->transform("explosion.wav"), cache
+                    );
+                    mp->stick(snd);
+                    snd->detach_on_done();
+                    snd->play();
+                    mp->safe_detach();
+                });
+            }
+        }else{
+            Sound::play(m_pCamera.get(), "empty.wav", m_pQor->resources());
+        }
     }
 }
 
@@ -897,7 +885,12 @@ void Player :: add_frags(Player* target, int f)
 {
     int frags = m_pProfile->temp()->at<int>("frags");
     m_pProfile->temp()->at<int>("frags", frags + 1);
-    LOGf("%s fragged %s.", name() % target->name());
+    auto msg = (boost::format("%s fragged %s.") % name() % target->name()).str();
+    if(not m_pNet->remote()){ // server or local player
+        LOG(msg);
+    }else{
+        m_pNet->message(msg);
+    }
     m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
         R"({"message": "YOU FRAGGED )" +
             boost::to_upper_copy(target->name()) +
@@ -921,7 +914,6 @@ bool Player :: weapon_priority_cmp(string s1, string s2)
 void Player :: unpack_transform(mat4 m)
 {
     auto r = glm::extractMatrixRotation(m);
-    LOGf("unpack_transform: recv %s", Matrix::to_string(m));
     m_pPlayerModel->set_matrix(r);
     m_pPlayerShape->teleport(glm::translate(glm::mat4(), Matrix::translation(m)));
     m_pPlayerShape->pend();
@@ -929,7 +921,6 @@ void Player :: unpack_transform(mat4 m)
 
 glm::mat4 Player :: pack_transform()
 {
-    
     mat4 r;
     if(local())
         r = *m_pCamera->matrix();
@@ -944,5 +935,69 @@ glm::mat4 Player :: pack_transform()
     //}
     Matrix::translation(r, m_pPlayerShape->position());
     return r;
+}
+
+void Player :: next_weapon()
+{
+    auto _this = this;
+    if(m_pViewModel->idle()){
+        if(m_WeaponStash.next()){
+            on_event(PE_NEXT);
+            Sound::play(m_pCamera.get(), "swap.wav", m_pQor->resources());
+            scope(false);
+            m_pViewModel->fast_zoom(false);
+            auto vm = m_pViewModel.get();
+            m_pViewModel->equip(false,[_this]{
+                _this->refresh_weapon();
+            });
+        }
+    }
+}
+
+void Player :: prev_weapon()
+{
+    auto _this = this;
+    if(m_pViewModel->idle()){
+        if(m_WeaponStash.next(-1)){
+            on_event(PE_PREV);
+            Sound::play(m_pCamera.get(), "swap.wav", m_pQor->resources());
+            scope(false);
+            m_pViewModel->fast_zoom(false);
+            auto vm = m_pViewModel.get();
+            m_pViewModel->equip(false,[_this]{
+                _this->refresh_weapon();
+            });
+        }
+    }
+}
+
+void Player :: do_event(unsigned char ev)
+{
+    if(ev == PE_FIRE)
+        fire_weapon();
+    else if(ev == PE_RELOAD)
+        reload();
+    else if(ev == PE_NEXT)
+        next_weapon();
+    else if(ev == PE_PREV)
+        prev_weapon();
+}
+
+bool Player :: slot(unsigned i)
+{
+    auto _this = this;
+    if(m_WeaponStash.slot(i)){
+        on_slot(i);
+        
+        Sound::play(m_pCamera.get(), "swap.wav", m_pQor->resources());
+        scope(false);
+        m_pViewModel->fast_zoom(false);
+        auto vm = m_pViewModel.get();
+        m_pViewModel->equip(false,[_this]{
+            _this->refresh_weapon();
+        });
+        return true;
+    }
+    return false;
 }
 

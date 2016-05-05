@@ -70,6 +70,10 @@ class GameSpec:
         void send_update(Player* p);
         void recv_update(RakNet::Packet* p);
         void client_done_loading();
+        void recv_player_event(RakNet::Packet* p);
+        void send_player_event(Player* p, unsigned char ev);
+        
+        void weapon_pickup(Player* p, Node* item);
         
     private:
         
@@ -105,6 +109,7 @@ class GameSpec:
         boost::signals2::scoped_connection m_DespawnCon;
         boost::signals2::scoped_connection m_UpdateCon;
         boost::signals2::scoped_connection m_DoneLoadingCon;
+        boost::signals2::scoped_connection m_PlayerEventCon;
 };
 
 #endif

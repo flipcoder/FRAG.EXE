@@ -40,12 +40,13 @@ void GameSpec :: register_player(shared_ptr<Player> p)
     }
 
     if(m_pNet->server())
-    {
         p->on_death.connect(bind(&GameSpec::server_despawn, this, p.get()));
+    
+    // if server or this client's own player 
+    if(m_pNet->server() || (m_pNet->remote() && p->local())){
         p->shape()->on_move.connect(bind(&GameSpec::send_update, this, p.get()));
+        p->on_event.connect(bind(&GameSpec::send_player_event, this, p.get(), placeholders::_1));
     }
-    else if(m_pNet->remote() && p->local())
-        p->shape()->on_move.connect(bind(&GameSpec::send_update, this, p.get()));
 }
 
 void GameSpec :: deregister_player(Player* p)
@@ -57,17 +58,21 @@ void GameSpec :: deregister_player(Player* p)
 
 void GameSpec :: register_pickup_with_player(std::shared_ptr<Mesh> item, Player* player)
 {
+    auto _this = this;
     auto part = m_pPartitioner;
-    m_pPartitioner->on_touch(item, player->shape(), [part, player](Node* a, Node* b){
+    m_pPartitioner->on_touch(item, player->shape(), [_this, part, player](Node* a, Node* b){
         assert(a && b);
         if(not a->attached() && not a->detaching())
             return;
         // spawn item with spawn
-        a->config()->set<string>("name", a->name());
-        player->give(a->config());
-        a->detach();
-        //part->deregister_object(a->as_node());
+        _this->weapon_pickup(player, a);
     });
+}
+
+void GameSpec :: weapon_pickup(Player* p, Node* item)
+{
+    item->config()->set<string>("name", item->name());
+    p->give(item->config());
 }
 
 void GameSpec :: setup()
@@ -209,6 +214,7 @@ void GameSpec :: setup()
         m_SpawnCon = m_pNet->on_spawn.connect(bind(&GameSpec::client_spawn, this, std::placeholders::_1));
         m_DespawnCon = m_pNet->on_despawn.connect(bind(&GameSpec::client_despawn, this, std::placeholders::_1));
         m_UpdateCon = m_pNet->on_update.connect(bind(&GameSpec::recv_update, this, std::placeholders::_1));
+        m_PlayerEventCon = m_pNet->on_player_event.connect(bind(&GameSpec::recv_player_event, this, std::placeholders::_1));
     }
 }
 
@@ -570,6 +576,55 @@ void GameSpec :: client_done_loading()
     bs.Write((unsigned char)NetSpec::ID_DONE_LOADING);
     m_pNet->socket()->Send(
         &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+    );
+}
+
+void GameSpec :: recv_player_event(Packet* p)
+{
+    
+    BitStream bs(p->data, p->length, false);
+    BitStream bs2(p->data, p->length, false);
+    unsigned char c;
+    bs.Read(c);// ID_PLAYER_EVENT
+    uint32_t id;
+    bs.Read(id);
+    LOGf("recv player event %s",id);
+    shared_ptr<Node> obj;
+    try{
+        obj = m_pNet->object(id);
+    }catch(const std::out_of_range){
+        LOGf("no object of id %s", id);
+        return;
+    }
+    
+    auto player = (Player*)obj->config()->at<void*>("player",nullptr);
+    if(not player)
+        return;
+    
+    bs.Read(c);
+    if(c != Player::PE_SLOT)
+        player->do_event(c);
+    else
+        player->slot(c);
+
+    // rebroadcast
+    if(m_pNet->server())
+    {
+        m_pNet->socket()->Send(
+            &bs2, IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, p->guid, true
+        );
+    }
+}
+
+void GameSpec :: send_player_event(Player* p, unsigned char ev)
+{
+    LOGf("player event %s", int(ev));
+    BitStream bs;
+    bs.Write((unsigned char)NetSpec::ID_PLAYER_EVENT);
+    bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
+    bs.Write(ev);
+    m_pNet->socket()->Send(
+        &bs, IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
     );
 }
 

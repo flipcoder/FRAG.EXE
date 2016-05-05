@@ -40,6 +40,23 @@ class Player:
         
         virtual void logic(Freq::Time t) override;
 
+        enum PlayerEvent
+        {
+            PE_FIRE,
+            PE_NEXT,
+            PE_PREV,
+            PE_RELOAD,
+            PE_HURT,
+            PE_SLOT
+        };
+
+        void do_event(unsigned char ev);
+        void fire_weapon();
+        void reload();
+        void next_weapon();
+        void prev_weapon();
+        bool slot(unsigned);
+        
         const std::shared_ptr<Camera>& camera() { return m_pCamera; }
         const std::shared_ptr<Node>& ortho_root() { return m_pOrthoRoot; }
         const std::shared_ptr<Camera>& ortho_camera() { return m_pOrthoCamera; }
@@ -72,6 +89,9 @@ class Player:
         
         void unpack_transform(glm::mat4 m);
         glm::mat4 pack_transform();
+
+        boost::signals2::signal<void(unsigned char)> on_event;
+        boost::signals2::signal<void(unsigned)> on_slot;
         
     private:
         
