@@ -306,12 +306,13 @@ void Player :: logic(Freq::Time t)
         m_bEnter = true;
     }
 
-    int hp = m_pProfile->temp()->at<int>("hp");
-    
-    if(not hp)
+    if(dead())
     {
         if(not local()){
-            m_pSpec->respawn(this);
+            if(m_pNet->local())
+                m_pSpec->respawn(this);
+            else
+                m_pGameSpec->respawn(this);
             return;
         }else if(
             m_pController->button("fire").pressed_now() ||
@@ -551,7 +552,8 @@ void Player :: fire_weapon()
                     if(n->compositor())
                         n = n->compositor();
                     
-                    if(n->has_event("hit")){
+                    if(n->has_event("hit") && n->config()->at<int>("hp",0) > 0){
+                            
                         if(not m_pNet->remote())
                         {
                             auto hitinfo = make_shared<Meta>();

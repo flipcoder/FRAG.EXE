@@ -1,6 +1,6 @@
 ![FRAG.EXE](https://raw.githubusercontent.com/flipcoder/FRAG.EXE/master/logo.png)
 
-First person shooter.
+Online multiplayer first person shooter.
 Written in C++11 using my own engine (Qor).
 
 Work in progress.
