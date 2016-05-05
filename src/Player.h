@@ -92,6 +92,7 @@ class Player:
 
         boost::signals2::signal<void(unsigned char)> on_event;
         boost::signals2::signal<void(unsigned)> on_slot;
+        boost::signals2::signal<void(int)> on_hurt;
         
     private:
         

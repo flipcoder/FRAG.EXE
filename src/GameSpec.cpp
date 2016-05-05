@@ -39,14 +39,21 @@ void GameSpec :: register_player(shared_ptr<Player> p)
             register_pickup_with_player(item, p.get());
     }
 
-    if(m_pNet->server())
+    if(m_pNet->server()){
         p->on_death.connect(bind(&GameSpec::server_despawn, this, p.get()));
+        p->on_hurt.connect(bind(&GameSpec::send_player_event_hurt, this, p.get(), placeholders::_1));
+    }
+
+    if(m_pNet->remote() && p->local()){
+        p->on_event.connect(bind(&GameSpec::send_player_event, this, p.get(), placeholders::_1));
+        p->on_slot.connect(bind(&GameSpec::send_player_event_slot, this, p.get(), placeholders::_1));
+    }
     
     // if server or this client's own player 
     if(m_pNet->server() || (m_pNet->remote() && p->local())){
         p->shape()->on_move.connect(bind(&GameSpec::send_update, this, p.get()));
-        p->on_event.connect(bind(&GameSpec::send_player_event, this, p.get(), placeholders::_1));
     }
+    
 }
 
 void GameSpec :: deregister_player(Player* p)
@@ -206,6 +213,7 @@ void GameSpec :: setup()
         m_DoneLoadingCon = m_pNet->on_done_loading.connect(bind(
             &GameSpec::server_notify_spawn, this, std::placeholders::_1, false
         ));
+        m_PlayerEventCon = m_pNet->on_player_event.connect(bind(&GameSpec::recv_player_event, this, std::placeholders::_1));
     }
     else if(m_pNet->remote())
     {
@@ -581,14 +589,12 @@ void GameSpec :: client_done_loading()
 
 void GameSpec :: recv_player_event(Packet* p)
 {
-    
     BitStream bs(p->data, p->length, false);
-    BitStream bs2(p->data, p->length, false);
     unsigned char c;
     bs.Read(c);// ID_PLAYER_EVENT
+    assert(c == NetSpec::ID_PLAYER_EVENT);
     uint32_t id;
     bs.Read(id);
-    LOGf("recv player event %s",id);
     shared_ptr<Node> obj;
     try{
         obj = m_pNet->object(id);
@@ -598,18 +604,35 @@ void GameSpec :: recv_player_event(Packet* p)
     }
     
     auto player = (Player*)obj->config()->at<void*>("player",nullptr);
-    if(not player)
+    if(not player){
+        LOG("no such player");
         return;
+    }
     
     bs.Read(c);
-    if(c != Player::PE_SLOT)
-        player->do_event(c);
+    LOGf("recv player event %s",int(c));
+    if(c == Player::PE_SLOT)
+    {
+        uint32_t sl;
+        bs.Read(sl);
+        player->slot(sl);
+    }
+    else if(c == Player::PE_HURT)
+    {
+        int32_t dmg;
+        bs.Read(dmg);
+        player->hurt(dmg);
+    }
     else
-        player->slot(c);
+    {
+        player->do_event(c);
+    }
 
     // rebroadcast
     if(m_pNet->server())
     {
+        LOG("rebroadcast player event")
+        BitStream bs2(p->data, p->length, false);
         m_pNet->socket()->Send(
             &bs2, IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, p->guid, true
         );
@@ -623,6 +646,33 @@ void GameSpec :: send_player_event(Player* p, unsigned char ev)
     bs.Write((unsigned char)NetSpec::ID_PLAYER_EVENT);
     bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
     bs.Write(ev);
+    m_pNet->socket()->Send(
+        &bs, IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+    );
+}
+
+void GameSpec :: send_player_event_slot(Player* p, unsigned slot)
+{
+    //LOGf("player event slot %s", int(ev));
+    LOG("player event slot");
+    BitStream bs;
+    bs.Write((unsigned char)NetSpec::ID_PLAYER_EVENT);
+    bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
+    bs.Write((unsigned char)Player::PE_SLOT);
+    bs.Write((uint32_t)slot);
+    m_pNet->socket()->Send(
+        &bs, IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+    );
+}
+
+void GameSpec :: send_player_event_hurt(Player* p, int dmg)
+{
+    LOG("player event hurt");
+    BitStream bs;
+    bs.Write((unsigned char)NetSpec::ID_PLAYER_EVENT);
+    bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
+    bs.Write((unsigned char)Player::PE_HURT);
+    bs.Write((int32_t)dmg);
     m_pNet->socket()->Send(
         &bs, IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
     );

@@ -72,6 +72,8 @@ class GameSpec:
         void client_done_loading();
         void recv_player_event(RakNet::Packet* p);
         void send_player_event(Player* p, unsigned char ev);
+        void send_player_event_slot(Player* p, unsigned slot);
+        void send_player_event_hurt(Player* p, int dmg);
         
         void weapon_pickup(Player* p, Node* item);
         

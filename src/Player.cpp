@@ -552,11 +552,14 @@ void Player :: fire_weapon()
                         n = n->compositor();
                     
                     if(n->has_event("hit")){
-                        auto hitinfo = make_shared<Meta>();
-                        hitinfo->set<int>("damage", m_WeaponStash.active()->spec()->damage());
-                        hitinfo->set<Player*>("owner", this);
-                        player_hit = true;
-                        n->event("hit", hitinfo);
+                        if(not m_pNet->remote())
+                        {
+                            auto hitinfo = make_shared<Meta>();
+                            hitinfo->set<int>("damage", m_WeaponStash.active()->spec()->damage());
+                            hitinfo->set<Player*>("owner", this);
+                            player_hit = true;
+                            n->event("hit", hitinfo);
+                        }
                         
                         auto blood = make_shared<Particle>("blood.png", m_pCache);
                         m_pRoot->add(blood);
@@ -570,7 +573,9 @@ void Player :: fire_weapon()
                             rand() % 100 / 100.0f));
                         blood->acceleration(glm::vec3(0.0f, -9.8f, 0.0f));
                         blood->scale(0.25f + rand()%10/10.0f*0.5f);
-                        blood->life(Freq::Time::seconds(0.5f));
+                        
+                        if(not m_pNet->remote())
+                            blood->life(Freq::Time::seconds(0.5f));
                     }
                     else
                     {
@@ -774,6 +779,8 @@ void Player :: hurt(int dmg)
 {
     if(dead())
         return;
+
+    on_hurt(dmg);
     
     int hp = m_pProfile->temp()->at<int>("hp");
     
@@ -783,7 +790,10 @@ void Player :: hurt(int dmg)
     m_pProfile->temp()->set<int>("hp", hp);
 
     if(not hp)
-        die();
+    {
+        if(not m_pNet->remote())
+            die();
+    }
     else if(dmg > 0)
     {
         if(local()){
@@ -914,6 +924,7 @@ bool Player :: weapon_priority_cmp(string s1, string s2)
 void Player :: unpack_transform(mat4 m)
 {
     auto r = glm::extractMatrixRotation(m);
+    m_pCamera->set_matrix(r);
     m_pPlayerModel->set_matrix(r);
     m_pPlayerShape->teleport(glm::translate(glm::mat4(), Matrix::translation(m)));
     m_pPlayerShape->pend();
@@ -923,9 +934,9 @@ glm::mat4 Player :: pack_transform()
 {
     mat4 r;
     if(local())
-        r = *m_pCamera->matrix();
+        r = *m_pCamera->matrix(Space::WORLD);
     else
-        r = *m_pPlayerModel->matrix();
+        r = *m_pPlayerModel->matrix(Space::WORLD);
     
     //if(glm::extractMatrixRotation(r) != glm::mat4(1.0f)){
     //}else{
