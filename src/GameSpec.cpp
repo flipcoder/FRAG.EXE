@@ -326,7 +326,7 @@ void GameSpec :: send_spawn(Player* p)
     }
     else
     {
-        LOG("requesting spawn");
+        //LOG("requesting spawn");
     }
     m_pNet->socket()->Send(
         &bs,
@@ -510,7 +510,7 @@ void GameSpec :: server_notify_spawn(Packet* p, bool now)
         //uint32_t obj_id = p->profile()->temp()->at<int>("id");
         uint32_t obj_id = obj.first;
         if(client_id != obj_id) { // player not matching recver
-            LOGf("object id exists: %s", obj.first);
+            //LOGf("object id exists: %s", obj.first);
             BitStream bs;
             bs.Write((unsigned char)NetSpec::ID_SPAWN);
             bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
@@ -532,7 +532,7 @@ void GameSpec :: server_notify_spawn(Packet* p, bool now)
 
 void GameSpec :: client_despawn(Packet* packet)
 {
-    LOG("client_despawn(packet)");
+    //LOG("client_despawn(packet)");
     BitStream bs(packet->data, packet->length, false);
     unsigned char id;
     bs.Read(id); // we already know this is ID_DESPAWN
@@ -573,7 +573,7 @@ void GameSpec :: client_despawn(Packet* packet)
         }
     }
     else{
-        LOGf("detach object %s", id);
+        //LOGf("detach object %s", id);
         auto obj = m_pNet->object(id);
         obj->detach();
         m_pNet->remove_object(id);
@@ -687,7 +687,7 @@ void GameSpec :: recv_player_event(Packet* p)
     }
     
     bs.Read(c);
-    LOGf("recv player event %s",int(c));
+    //LOGf("recv player event %s",int(c));
     if(c == Player::PE_SLOT)
     {
         uint32_t sl;
@@ -708,7 +708,7 @@ void GameSpec :: recv_player_event(Packet* p)
     // rebroadcast
     if(m_pNet->server())
     {
-        LOG("rebroadcast player event")
+        //LOG("rebroadcast player event")
         BitStream bs2(p->data, p->length, false);
         m_pNet->socket()->Send(
             &bs2, IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, p->guid, true
@@ -718,7 +718,7 @@ void GameSpec :: recv_player_event(Packet* p)
 
 void GameSpec :: send_player_event(Player* p, unsigned char ev)
 {
-    LOGf("player event %s", int(ev));
+//LOGf("player event %s", int(ev));
     BitStream bs;
     bs.Write((unsigned char)NetSpec::ID_PLAYER_EVENT);
     bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
@@ -731,7 +731,7 @@ void GameSpec :: send_player_event(Player* p, unsigned char ev)
 void GameSpec :: send_player_event_slot(Player* p, unsigned slot)
 {
     //LOGf("player event slot %s", int(ev));
-    LOG("player event slot");
+    //LOG("player event slot");
     BitStream bs;
     bs.Write((unsigned char)NetSpec::ID_PLAYER_EVENT);
     bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
@@ -744,7 +744,7 @@ void GameSpec :: send_player_event_slot(Player* p, unsigned slot)
 
 void GameSpec :: send_player_event_hurt(Player* p, int dmg)
 {
-    LOG("player event hurt");
+    //LOG("player event hurt");
     BitStream bs;
     bs.Write((unsigned char)NetSpec::ID_PLAYER_EVENT);
     bs.Write((uint32_t)p->shape()->config()->at<int>("id"));

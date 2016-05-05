@@ -319,10 +319,11 @@ void Player :: logic(Freq::Time t)
             if(not m_pNet->server())
                 m_pSpec->respawn(this);
             return;
-        }else if(
-            m_pController->button("fire").pressed_now() ||
-            m_pController->button("use").pressed_now()
-        ){
+        }else{
+        //}else if(
+        //    m_pController->button("fire").pressed_now() ||
+        //    m_pController->button("use").pressed_now()
+        //){
             if(m_pNet->remote())
                 m_pSpec->send_spawn(this);
             else
