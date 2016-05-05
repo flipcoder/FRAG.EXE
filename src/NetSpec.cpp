@@ -198,29 +198,6 @@ void NetSpec :: data(Packet* packet)
     }
 }
 
-void NetSpec :: spawn(RakNet::RakNetGUID guid)
-{
-    // client - request to spawn
-    // server - report spawning of something
-    BitStream bs;
-    bs.Write((unsigned char)ID_SPAWN);
-    bs.Write((unsigned char)OBJ_PLAYER);
-    if(server()){
-        LOG("notifying players of spawn");
-        bs.Write(true); // just now spawned
-        bs.Write((uint32_t)get_object_id_for(guid));
-        bs.Write(RakString(profile(guid)->name().c_str()));
-    }
-    else
-    {
-        LOG("requesting spawn");
-    }
-    m_pNet->socket()->Send(
-        &bs,
-        IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
-    );
-}
-
 string NetSpec :: client_name(RakNetGUID guid) const
 {
     try{

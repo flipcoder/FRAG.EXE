@@ -79,7 +79,7 @@ void Spectator :: logic(Freq::Time t)
         if(m_pNet->local())
             m_pSpec->play();
         else
-            m_pNet->spawn();
+            m_pSpec->send_spawn();
         return;
     }
 }

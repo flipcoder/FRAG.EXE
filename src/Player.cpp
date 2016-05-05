@@ -292,6 +292,13 @@ void Player :: scope(bool b)
 
 void Player :: logic(Freq::Time t)
 {
+    if(m_pController && m_pController->input()->key(SDLK_F12))
+    {
+        // pull up an f12 lawn chair
+        m_pSpec->spectate();
+        return;
+    }
+    
     m_pOrthoRoot->logic(t);
    
     auto _this = this;
@@ -309,16 +316,17 @@ void Player :: logic(Freq::Time t)
     if(dead())
     {
         if(not local()){
-            if(m_pNet->local())
+            if(not m_pNet->server())
                 m_pSpec->respawn(this);
-            else
-                m_pGameSpec->respawn(this);
             return;
         }else if(
             m_pController->button("fire").pressed_now() ||
             m_pController->button("use").pressed_now()
         ){
-            m_pSpec->respawn(this);
+            if(m_pNet->remote())
+                m_pSpec->send_spawn(this);
+            else
+                m_pSpec->respawn(this);
             return;
         }
     }
@@ -376,11 +384,19 @@ void Player :: logic(Freq::Time t)
 
     if(m_pController->button("use").pressed_now())
     {
-        auto hit = m_pPhysics->first_hit(
+        auto hits = m_pPhysics->hits(
             m_pCamera->position(Space::WORLD),
             m_pCamera->to_world(vec3(0.0f, 0.0f, -3.0f))
         );
-        Node* n = std::get<0>(hit);
+        Node* n = nullptr;
+        
+        try{
+            // ignore self
+            n = std::get<0>(hits.at(0));
+            if(n == m_pPlayerShape.get())
+                n = std::get<0>(hits.at(1));
+        }catch(std::out_of_range&){
+        }
         if(n)
         {
             if(n->compositor())
@@ -455,13 +471,6 @@ void Player :: logic(Freq::Time t)
         m_FlashColor,
         (ceil(m_FlashAlarm.fraction_left() * 10)/10) * 0.5f
     ));
-
-    if(m_pController->input()->key(SDLK_F12))
-    {
-        // pull up an f12 lawn chair
-        m_pSpec->spectate();
-        return;
-    }
 }
 
 void Player :: reload()
@@ -552,16 +561,16 @@ void Player :: fire_weapon()
                     if(n->compositor())
                         n = n->compositor();
                     
-                    if(n->has_event("hit") && n->config()->at<int>("hp",0) > 0){
+                    if(n->has_event("hit")){
                             
-                        if(not m_pNet->remote())
-                        {
+                        if(not m_pNet->remote()){
                             auto hitinfo = make_shared<Meta>();
                             hitinfo->set<int>("damage", m_WeaponStash.active()->spec()->damage());
                             hitinfo->set<Player*>("owner", this);
-                            player_hit = true;
                             n->event("hit", hitinfo);
                         }
+                        
+                        player_hit = true;
                         
                         auto blood = make_shared<Particle>("blood.png", m_pCache);
                         m_pRoot->add(blood);
@@ -575,9 +584,7 @@ void Player :: fire_weapon()
                             rand() % 100 / 100.0f));
                         blood->acceleration(glm::vec3(0.0f, -9.8f, 0.0f));
                         blood->scale(0.25f + rand()%10/10.0f*0.5f);
-                        
-                        if(not m_pNet->remote())
-                            blood->life(Freq::Time::seconds(0.5f));
+                        blood->life(Freq::Time::seconds(0.5f));
                     }
                     else
                     {
@@ -925,9 +932,13 @@ bool Player :: weapon_priority_cmp(string s1, string s2)
 
 void Player :: unpack_transform(mat4 m)
 {
+    //LOG(Matrix::to_string(m));
     auto r = glm::extractMatrixRotation(m);
+    auto p = m_pCamera->position();
     m_pCamera->set_matrix(r);
-    m_pPlayerModel->set_matrix(r);
+    m_pCamera->position(p);
+    if(m_pPlayerModel)
+        m_pPlayerModel->set_matrix(r);
     m_pPlayerShape->teleport(glm::translate(glm::mat4(), Matrix::translation(m)));
     m_pPlayerShape->pend();
 }

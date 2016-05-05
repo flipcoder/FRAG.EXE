@@ -37,6 +37,7 @@ class GameSpec:
         std::shared_ptr<Meta> config() { return m_pConfig; };
         
         Player* play(std::shared_ptr<Profile> prof = nullptr);
+        void spawn(Player* player);
         void respawn(Player* player);
         bool teleport_to_spawn(Player* p);
         void despawn(Player* p);
@@ -74,6 +75,7 @@ class GameSpec:
         void send_player_event(Player* p, unsigned char ev);
         void send_player_event_slot(Player* p, unsigned slot);
         void send_player_event_hurt(Player* p, int dmg);
+        void send_spawn(Player* p = nullptr);
         
         void weapon_pickup(Player* p, Node* item);
         
