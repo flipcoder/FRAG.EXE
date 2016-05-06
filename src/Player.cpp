@@ -189,10 +189,13 @@ Player :: Player(
 
 Player :: ~Player()
 {
-    //m_pSpec->despawn(this);
+    clear();
+}
+
+void Player :: clear()
+{
     m_pPlayerShape->detach();
     m_pViewModel->detach();
-    //m_pInterface->unplug();
 }
 
 void Player :: jump()
@@ -338,28 +341,28 @@ void Player :: logic(Freq::Time t)
     if(m_LockIf && m_LockIf())
         return;
 
-    if(m_pController->input()->key(SDLK_v).pressed_now()) {
-        m_pSpec->play(m_pProfile->session()->dummy_profile("Bot"));
-    }
+    //if(m_pController->input()->key(SDLK_v).pressed_now()) {
+    //    m_pSpec->play(m_pProfile->session()->dummy_profile("Bot"));
+    //}
     
-    if(m_pController->input()->key(SDLK_z).pressed_now()) {
-        hurt(1);
-    }
-    if(m_pController->input()->key(SDLK_b).pressed_now()){
+    //if(m_pController->input()->key(SDLK_z).pressed_now()) {
+    //    hurt(1);
+    //}
+    if(m_pController->input()->key(SDLK_F1).pressed_now()){
         m_WeaponStash.give_all();
         refresh_weapon();
     }
     
-    if(m_pController->input()->key(SDLK_x).pressed_now()) {
-        m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
-            R"({"message": "RED TEAM SCORES", "color": "FF0000"})"
-        ));
-    }
-    if(m_pController->input()->key(SDLK_c).pressed_now()) {
-        m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
-            R"({"message": "BLUE TEAM SCORES", "color": "0000FF"})"
-        ));
-    }
+    //if(m_pController->input()->key(SDLK_x).pressed_now()) {
+    //    m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
+    //        R"({"message": "RED TEAM SCORES", "color": "FF0000"})"
+    //    ));
+    //}
+    //if(m_pController->input()->key(SDLK_c).pressed_now()) {
+    //    m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
+    //        R"({"message": "BLUE TEAM SCORES", "color": "0000FF"})"
+    //    ));
+    //}
     
     if(m_pController->button("zoom").pressed_now()){
         bool zoomed = not m_pViewModel->zoomed(); // opposite of what it is now

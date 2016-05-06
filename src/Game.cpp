@@ -138,7 +138,7 @@ void Game :: preload()
     //    m_pCamera
     //);
     
-    m_Map = m_pQor->session()->meta()->at("m_Map",string());
+    m_Map = m_pQor->session()->meta()->at("map",string());
     if(m_Map.empty())
         m_Map = m_pQor->args().filenames(-1, "test");
     std::shared_ptr<Node> scene_root;

@@ -78,6 +78,7 @@ class Player:
         void give(const std::shared_ptr<Meta>& item);
         void update_hud();
         void add_frags(Player* target, int f = 1);
+        void clear();
 
         bool local() const { return !!m_pController; }
 
