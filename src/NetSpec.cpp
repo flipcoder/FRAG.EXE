@@ -53,26 +53,44 @@ void NetSpec :: server_recv_disconnect(Packet* packet)
 {
     try{
         LOGf("%s disconnected.", m_Profiles.at(packet->guid)->name());
-    }catch(const std::out_of_range&){}
+    }catch(...){
+        LOG("no such profile");
+        return;
+    }
     
     uint32_t obj_id;
     try{
         obj_id = get_object_id_for(packet->guid);
-    }catch(const std::out_of_range&){}
+    }catch(const std::out_of_range&){
+        LOG("no such object");
+        return;
+    }
     BitStream bs;
     bs.Write((unsigned char)ID_DESPAWN);
     bs.Write((uint32_t)obj_id);
     m_pNet->socket()->Send(
         &bs,
-        MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+        HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
     );
     
+    for(auto&& prof: *m_pSession)
+    {
+        try{
+            if(prof.second->temp()->at<int>("id") == obj_id){
+                m_pSession->unplug(prof.first);
+                return;
+            }
+        }catch(...){
+        }
+    }
+
     m_Nodes.clear(obj_id);
     m_Profiles.erase(packet->guid);
 }
 
 void NetSpec :: client_recv_disconnect(Packet* packet)
-{   
+{
+    LOG("client_recv_disconnect");
     BitStream bs(packet->data, packet->length, false);
     unsigned char id;
     bs.Read(id);
@@ -179,6 +197,8 @@ void NetSpec :: data(Packet* packet)
     }
     else if(id == ID_DESPAWN)
     {
+        if(not server())
+            client_recv_disconnect(packet);
         on_despawn(packet);
         return;
     }
