@@ -20,8 +20,6 @@
             "mouse scrolldown": "next",
             "w": "use",
             "mouse right": "zoom",
-            "k": "shoot",
-            "j": "strafe",
             "left shift": "sprint",
             "i": "action",
             "t": "reload",

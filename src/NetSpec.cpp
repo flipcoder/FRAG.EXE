@@ -58,15 +58,23 @@ void NetSpec :: server_recv_disconnect(Packet* packet)
         return;
     }
     
+    bool has_object = false;
+    
     uint32_t obj_id;
     try{
         obj_id = get_object_id_for(packet->guid);
-        auto node = m_Nodes.at(obj_id);
-        node->detach();
+        
     }catch(const std::out_of_range&){
-        LOG("no such object");
-        return;
+        has_object = false;
     }
+
+    if(has_object){
+        try{
+            auto node = m_Nodes.at(obj_id);
+            node->detach();
+        }catch(...){}
+    }
+    
     BitStream bs;
     bs.Write((unsigned char)ID_DESPAWN);
     bs.Write((uint32_t)obj_id);

@@ -141,6 +141,7 @@ Player :: Player(
             }
         );
         m_pInterface->speed(16.0f);
+        m_pInterface->allow_sprint(false);
     }
     
     //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerShape->body()->body();
@@ -631,10 +632,30 @@ void Player :: fire_weapon()
             body->applyCentralImpulse(Physics::toBulletVector(dir *
                 m_WeaponStash.active()->spec()->speed()
             ));
+            body->setCcdSweptSphereRadius(0.1f);
             auto vel = m->velocity();
             
             auto mp = m.get();
             auto cache = m_pCache;
+            
+            auto splode = function<void()>([mp,cache](){
+                if(mp->detaching())
+                    return;
+                auto snd = make_shared<Sound>(
+                    cache->transform("explosion.wav"), cache
+                );
+                auto particle = make_shared<Particle>("explosion.png", cache);
+                particle->life(Freq::Time::seconds(0.2f));
+                auto p = particle.get();
+                particle->on_tick.connect([p](Freq::Time t){
+                    p->rescale(p->scale().x + p->scale().x * t.s());
+                });
+                mp->stick(particle);
+                mp->stick(snd);
+                snd->detach_on_done();
+                snd->play();
+                mp->safe_detach();
+            });
             
             if(not m_WeaponStash.active()->spec()->gravity()) {
                 body->setGravity(btVector3(0.0f, 0.0f, 0.0f));
@@ -654,18 +675,21 @@ void Player :: fire_weapon()
                 //        mp->detach();
                 //    }
                 //});
-                m_pPhysics->on_collision(m.get(), [mp,cache](Node*,Node*,vec3,vec3,vec3){
-                    if(mp->detaching())
-                        return;
-                    auto snd = make_shared<Sound>(
-                        cache->transform("explosion.wav"), cache
-                    );
-                    mp->stick(snd);
-                    snd->detach_on_done();
-                    snd->play();
-                    mp->safe_detach();
+                m_pPhysics->on_collision(mp, [splode](Node*,Node*,vec3,vec3,vec3){
+                    splode();
+                });
+            }else{
+                auto timer = make_shared<float>(1.0f);
+                m->on_tick.connect([splode,mp,timer](Freq::Time t){
+                    *timer -= t.s();
+                    if(*timer <= 0.0f){
+                        splode();
+                        mp->detach();
+                    }
                 });
             }
+            
+            
         }else{
             Sound::play(m_pCamera.get(), "empty.wav", m_pQor->resources());
         }
