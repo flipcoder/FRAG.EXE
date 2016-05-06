@@ -80,19 +80,27 @@ void HUD :: redraw()
 
     m_pCanvas->font("Audiowide",40);
     cairo->get_text_extents("1000", extents);
-    cairo->set_source_rgba(1.0f, 0.0f, 0.0f, m_RedPulse < 0.5f ? 0.5f : 1.0f);
+    //cairo->set_source_rgba(1.0f, 0.0f, 0.0f, m_RedPulse < 0.5f ? 0.5f : 1.0f);
+    //m_pCanvas->rectangle(
+    //    win->center().x - extents.width, 0.0f,
+    //    extents.width, extents.height
+    //); m_pCanvas->context()->fill();
+    //cairo->set_source_rgba(0.0f, 0.0f, 1.0f, m_BluePulse < 0.5f ? 0.5f : 1.0f);
+    //m_pCanvas->rectangle(
+    //    win->center().x, 0.0f,
+    //    extents.width, extents.height
+    //); m_pCanvas->context()->fill();
+    
+    cairo->set_source_rgba(0.0f, 0.7f, 0.0f, 1.0f);
     m_pCanvas->rectangle(
-        win->center().x - extents.width, 0.0f,
-        extents.width, extents.height
-    ); m_pCanvas->context()->fill();
-    cairo->set_source_rgba(0.0f, 0.0f, 1.0f, m_BluePulse < 0.5f ? 0.5f : 1.0f);
-    m_pCanvas->rectangle(
-        win->center().x, 0.0f,
+        win->center().x - extents.width/2.0f, 0.0f,
         extents.width, extents.height
     ); m_pCanvas->context()->fill();
 
-    m_pCanvas->text("0", Color::white(), vec2(win->center().x - extents.width/2.0f, extents.height), Canvas::CENTER);
-    m_pCanvas->text("0", Color::white(), vec2(win->center().x + extents.width/2.0f, extents.height), Canvas::CENTER);
+
+    m_pCanvas->text(to_string(m_Frags), Color::white(), vec2(win->center().x, extents.height), Canvas::CENTER);
+    //m_pCanvas->text("0", Color::white(), vec2(win->center().x - extents.width/2.0f, extents.height), Canvas::CENTER);
+    //m_pCanvas->text("0", Color::white(), vec2(win->center().x + extents.width/2.0f, extents.height), Canvas::CENTER);
     
     //layout->set_text("100%");
     //layout->show_in_cairo_context(ctext);
@@ -132,28 +140,28 @@ void HUD :: logic_self(Freq::Time t)
         }
     }
 
-    if(m_RedPulsing){
-        float redpulse = m_RedPulse;
-        m_RedPulse = std::fmod(m_RedPulse+t.s()*2.0f, 1.0f);
-        if((redpulse < 0.5f && m_RedPulse > 0.5f) || (redpulse > 0.5f && m_RedPulse < 0.5f))
-            m_bDirty = true;
-    } else {
-        if(m_RedPulse != 0.0f){
-            m_RedPulse = 0.0f;
-            m_bDirty = true;
-        }
-    }
-    if(m_BluePulsing){
-        float bluepulse = m_BluePulse;
-        m_BluePulse = std::fmod(m_BluePulse+t.s()*2.0f, 1.0f);
-        if((bluepulse < 0.5f && m_BluePulse > 0.5f) || (bluepulse > 0.5f && m_BluePulse < 0.5f))
-            m_bDirty = true;
-    } else {
-        if(m_BluePulse != 0.0f){
-            m_BluePulse = 0.0f;
-            m_bDirty = true;
-        }
-    }
+    //if(m_RedPulsing){
+    //    float redpulse = m_RedPulse;
+    //    m_RedPulse = std::fmod(m_RedPulse+t.s()*2.0f, 1.0f);
+    //    if((redpulse < 0.5f && m_RedPulse > 0.5f) || (redpulse > 0.5f && m_RedPulse < 0.5f))
+    //        m_bDirty = true;
+    //} else {
+    //    if(m_RedPulse != 0.0f){
+    //        m_RedPulse = 0.0f;
+    //        m_bDirty = true;
+    //    }
+    //}
+    //if(m_BluePulsing){
+    //    float bluepulse = m_BluePulse;
+    //    m_BluePulse = std::fmod(m_BluePulse+t.s()*2.0f, 1.0f);
+    //    if((bluepulse < 0.5f && m_BluePulse > 0.5f) || (bluepulse > 0.5f && m_BluePulse < 0.5f))
+    //        m_bDirty = true;
+    //} else {
+    //    if(m_BluePulse != 0.0f){
+    //        m_BluePulse = 0.0f;
+    //        m_bDirty = true;
+    //    }
+    //}
 
     if(m_bFadeDirty) {
         redraw_fade();
@@ -175,6 +183,12 @@ void HUD :: ammo(int value, int max)
 {
     m_Clip = value;
     m_Ammo = max;
+    m_bDirty = true;
+}
+
+void HUD :: frags(int value)
+{
+    m_Frags = value;
     m_bDirty = true;
 }
 

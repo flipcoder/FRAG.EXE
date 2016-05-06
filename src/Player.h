@@ -43,6 +43,7 @@ class Player:
         enum PlayerEvent
         {
             PE_FIRE,
+            PE_DIE,
             PE_NEXT,
             PE_PREV,
             PE_RELOAD,

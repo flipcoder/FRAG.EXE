@@ -342,9 +342,9 @@ void Player :: logic(Freq::Time t)
     if(m_LockIf && m_LockIf())
         return;
 
-    //if(m_pController->input()->key(SDLK_v).pressed_now()) {
-    //    m_pSpec->play(m_pProfile->session()->dummy_profile("Bot"));
-    //}
+    if(m_pController->input()->key(SDLK_F2).pressed_now()) {
+        m_pSpec->play(m_pProfile->session()->dummy_profile("Bot"));
+    }
     
     //if(m_pController->input()->key(SDLK_z).pressed_now()) {
     //    hurt(1);
@@ -931,7 +931,8 @@ void Player :: give(const shared_ptr<Meta>& item)
 void Player :: add_frags(Player* target, int f)
 {
     int frags = m_pProfile->temp()->at<int>("frags");
-    m_pProfile->temp()->at<int>("frags", frags + 1);
+    m_pProfile->temp()->set<int>("frags", frags + 1);
+    m_pHUD->frags(frags + 1);
     auto msg = (boost::format("%s fragged %s.") % name() % target->name()).str();
     if(not m_pNet->remote()){ // server or local player
         LOG(msg);
@@ -1033,6 +1034,8 @@ void Player :: do_event(unsigned char ev)
         next_weapon();
     else if(ev == PE_PREV)
         prev_weapon();
+    else if(ev == PE_DIE)
+        die();
 }
 
 bool Player :: slot(unsigned i)

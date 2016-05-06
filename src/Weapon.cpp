@@ -20,7 +20,7 @@ WeaponSpecEntry :: WeaponSpecEntry(
     m_Delay(Freq::Time::seconds(m_pConfig->at<double>("delay",1.0f))),
     m_bScope(m_pConfig->at<bool>("scope",false)),
     m_Speed(m_pConfig->at<double>("speed",0.0f)),
-    m_Ammo(m_pConfig->at<int>("ammo",0)), // 0 == unlimited
+    m_Ammo(m_pConfig->at<int>("ammo",-1)), // -1 == unlimited ammo
     m_Clip(m_pConfig->at<int>("clip",0)), // = no reload needed
     m_Damage(m_pConfig->at<int>("damage",1))
 {
@@ -258,9 +258,12 @@ bool Weapon :: fill()
 
 bool Weapon :: can_reload() const
 {
-    return m_pSpec->clip() > 0 && // no reload needed
-        m_Ammo > 0 &&
-        m_Clip != m_pSpec->clip(); // clip full?
+    return m_Ammo == -1 ||
+        (
+            m_pSpec->clip() > 0 && // no reload needed
+            m_Ammo > 0 &&
+            m_Clip != m_pSpec->clip()
+        ); // clip full?
 }
 
 bool Weapon :: reload()
@@ -270,7 +273,8 @@ bool Weapon :: reload()
     int needed = m_pSpec->clip() - m_Clip;
     int transfer = std::min<int>(needed, m_Ammo);
     m_Clip = m_Clip + transfer;
-    m_Ammo = m_Ammo - transfer;
+    if(m_Ammo >= 0) // limited ammo?
+        m_Ammo = m_Ammo - transfer;
     return true;
 }
 

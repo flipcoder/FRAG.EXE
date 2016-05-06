@@ -40,7 +40,7 @@ void GameSpec :: register_player(shared_ptr<Player> p)
     }
 
     if(m_pNet->server()){
-        //p->on_death.connect(bind(&GameSpec::server_despawn, this, p.get()));
+        p->on_death.connect(bind(&GameSpec::send_player_event, this, p.get(), Player::PE_DIE));
         p->on_hurt.connect(bind(&GameSpec::send_player_event_hurt, this, p.get(), placeholders::_1));
     }
 
@@ -762,4 +762,5 @@ void GameSpec :: send_player_event_hurt(Player* p, int dmg)
         &bs, IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
     );
 }
+
 
