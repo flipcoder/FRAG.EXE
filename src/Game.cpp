@@ -191,7 +191,7 @@ void Game :: preload()
     if(not m_Map.empty())
         m_pScript->execute_file("mods/FRAG.EXE/data/maps/"+ m_Map +".py");
 
-    // gamespec deals with players, items, weapons, anything that can differ bpk3d on game rules
+    // gamespec deals with players, items, weapons, anything that can differ based on game rules
     m_GameSpec.setup();
 
     // cache player model now so we don't lag when it spawns the first time

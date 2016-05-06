@@ -44,7 +44,8 @@ Player :: Player(
     m_FlashAlarm(state->timeline()),
     m_pNet(net),
     m_LockIf(lock_if),
-    m_NetTransform(glm::mat4(1.0f))
+    m_NetTransform(glm::mat4(1.0f)),
+    m_HurtSoundAlarm(state->timeline())
 {
     auto _this = this;
     
@@ -186,6 +187,8 @@ Player :: Player(
     });
 
     state->partitioner()->register_object(m_pPlayerShape, 0);
+
+    m_HurtSoundAlarm.set(Freq::Time::seconds(0.0f)); //elapse immediately
 }
 
 Player :: ~Player()
@@ -836,10 +839,17 @@ void Player :: hurt(int dmg)
         if(local()){
             m_FlashColor = Color::red();
             m_FlashAlarm.set(Freq::Time::seconds(2.0f * dmg*1.0f/10));
-            Sound::play(m_pCamera.get(), "hurt.wav", m_pQor->resources());
+            if(m_HurtSoundAlarm.elapsed()){
+                Sound::play(m_pCamera.get(), "hurt.wav", m_pQor->resources());
+                m_HurtSoundAlarm.set(Freq::Time::seconds(0.5f));
+            }
         }
-        else
-            Sound::play(m_pCamera.get(), "grunt.wav", m_pQor->resources());
+        else{
+            if(m_HurtSoundAlarm.elapsed()){
+                Sound::play(m_pCamera.get(), "grunt.wav", m_pQor->resources());
+                m_HurtSoundAlarm.set(Freq::Time::seconds(0.5f));
+            }
+        }
     }
     else if(dmg < 0)
     {
@@ -849,7 +859,7 @@ void Player :: hurt(int dmg)
             Sound::play(m_pCamera.get(), "health.wav", m_pQor->resources());
         }
         else
-            Sound::play(m_pCamera.get(), "grunt.wav", m_pQor->resources());
+            Sound::play(m_pCamera.get(), "health.wav", m_pQor->resources());
     }
     
     update_hud();

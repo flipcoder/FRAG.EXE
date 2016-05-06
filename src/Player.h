@@ -148,6 +148,8 @@ class Player:
         glm::mat4 m_NetTransform;
         
         std::string m_DeathMsg;
+
+        Freq::Alarm m_HurtSoundAlarm;
 };
 
 #endif
