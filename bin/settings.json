@@ -4,7 +4,7 @@
         "vsync": false
     },
     "audio": {
-        "volume": 100,
+        "volume": 20,
         "sound-volume": 100,
         "music-volume": 100
     }

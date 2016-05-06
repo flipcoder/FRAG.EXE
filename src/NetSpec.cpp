@@ -2,6 +2,8 @@
 #include "NetSpec.h"
 #include "Qor/Session.h"
 #include <functional>
+#include "Player.h"
+#include "Qor/Session.h"
 using namespace std;
 using namespace RakNet;
 
@@ -10,20 +12,28 @@ NetSpec :: NetSpec(Qor* engine, bool server, int connections):
     m_pSession(engine->session())
 {
     m_DataCon = m_pNet->on_data.connect(std::bind(&NetSpec::data, this, placeholders::_1));
-    m_DisconnectCon = m_pNet->on_disconnect.connect(std::bind(&NetSpec::disconnect, this, placeholders::_1));
+    if(server){
+        m_DisconnectCon = m_pNet->on_disconnect.connect(std::bind(&NetSpec::server_recv_disconnect, this, placeholders::_1));
+        m_ConnectionLostCon = m_pNet->on_connection_lost.connect(std::bind(&NetSpec::server_recv_disconnect, this, placeholders::_1));
+        m_TimeoutCon = m_pNet->on_connection_lost.connect(std::bind(&NetSpec::server_recv_disconnect, this, placeholders::_1));
+    }else{
+        m_DisconnectCon = m_pNet->on_disconnect.connect(std::bind(&NetSpec::client_recv_disconnect, this, placeholders::_1));
+        m_ConnectionLostCon = m_pNet->on_connection_lost.connect(std::bind(&NetSpec::client_recv_disconnect, this, placeholders::_1));
+        m_TimeoutCon = m_pNet->on_connection_lost.connect(std::bind(&NetSpec::client_recv_disconnect, this, placeholders::_1));
+    }
     auto _this = this;
-    if(server)
-        m_TimeoutCon = m_pNet->on_connection_lost.connect([_this](Packet* packet){
-            try{
-                LOGf("%s timed out.", _this->profile(packet->guid)->name());
-            }catch(...){
-                LOG("Client timed out.");
-            }
-        });
-    else
-        m_TimeoutCon = m_pNet->on_connection_lost.connect([_this](Packet* packet){
-            LOG("Server timed out.");
-        });
+    //if(server)
+    //    m_TimeoutCon = m_pNet->on_connection_lost.connect([_this](Packet* packet){
+    //        try{
+    //            LOGf("%s timed out.", _this->profile(packet->guid)->name());
+    //        }catch(...){
+    //            LOG("Client timed out.");
+    //        }
+    //    });
+    //else
+    //    m_TimeoutCon = m_pNet->on_connection_lost.connect([_this](Packet* packet){
+    //        LOG("Server timed out.");
+    //    });
 }
 
 NetSpec :: ~NetSpec() {}
@@ -39,12 +49,59 @@ void NetSpec :: logic(Freq::Time t)
     
 //}
 
-void NetSpec :: disconnect(Packet* packet)
+void NetSpec :: server_recv_disconnect(Packet* packet)
 {
-    //auto guid = RakNetGUID::ToUint32(packet->guid);
-    //BitStream bs(packet->data, packet->length, false);
     try{
         LOGf("%s disconnected.", m_Profiles.at(packet->guid)->name());
+    }catch(const std::out_of_range&){}
+    
+    uint32_t obj_id;
+    try{
+        obj_id = get_object_id_for(packet->guid);
+    }catch(const std::out_of_range&){}
+    BitStream bs;
+    bs.Write((unsigned char)ID_DESPAWN);
+    bs.Write((uint32_t)obj_id);
+    m_pNet->socket()->Send(
+        &bs,
+        MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+    );
+    
+    m_Nodes.clear(obj_id);
+    m_Profiles.erase(packet->guid);
+}
+
+void NetSpec :: client_recv_disconnect(Packet* packet)
+{   
+    BitStream bs(packet->data, packet->length, false);
+    unsigned char id;
+    bs.Read(id);
+    uint32_t obj_id;
+    bs.Read(obj_id);
+    
+    shared_ptr<Node> n;
+    string name = "Client";
+    try{
+        n = m_Nodes.at(obj_id);
+        Player* p = (Player*)n->config()->at<void*>("player");
+        name = p->name();
+    }catch(const std::out_of_range&){}
+    LOGf("%s disconnected.", name);
+
+    for(auto&& prof: *m_pSession)
+    {
+        try{
+            if(prof.second->temp()->at<int>("id") == obj_id){
+                m_pSession->unplug(prof.first);
+                return;
+            }
+        }catch(...){
+        }
+    }
+    
+    try{
+        m_Nodes.clear(obj_id);
+        m_Profiles.erase(packet->guid);
     }catch(const std::out_of_range&){}
 }
 

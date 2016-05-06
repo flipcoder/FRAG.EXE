@@ -220,6 +220,7 @@ void GameSpec :: setup()
                 //LOG("no player to spawn");
             }
         });
+        //m_ConnectionLostCon = m_pNet->on_connection_lost.connect(bind(&GameSpec::despawn, this, std::placeholders::_1));
         m_UpdateCon = m_pNet->on_update.connect(bind(&GameSpec::recv_update, this, std::placeholders::_1));
         m_DoneLoadingCon = m_pNet->on_done_loading.connect(bind(
             &GameSpec::server_notify_spawn, this, std::placeholders::_1, false
@@ -231,7 +232,7 @@ void GameSpec :: setup()
         auto gamespec = this;
         auto net = m_pNet;
         m_SpawnCon = m_pNet->on_spawn.connect(bind(&GameSpec::client_spawn, this, std::placeholders::_1));
-        m_DespawnCon = m_pNet->on_despawn.connect(bind(&GameSpec::client_despawn, this, std::placeholders::_1));
+        //m_DespawnCon = m_pNet->on_despawn.connect(bind(&GameSpec::client_despawn, this, std::placeholders::_1));
         m_UpdateCon = m_pNet->on_update.connect(bind(&GameSpec::recv_update, this, std::placeholders::_1));
         m_PlayerEventCon = m_pNet->on_player_event.connect(bind(&GameSpec::recv_player_event, this, std::placeholders::_1));
     }
@@ -314,7 +315,7 @@ void GameSpec :: send_spawn(Player* p)
     if(m_pNet->server())
     {
         assert(p);
-        LOG("notifying players of spawn");
+        //LOG("notifying players of spawn");
         bs.Write(true); // just now spawned
         //bs.Write((uint32_t)get_object_id_for(guid));
         bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
@@ -337,6 +338,12 @@ void GameSpec :: send_spawn(Player* p)
 bool GameSpec :: teleport_to_spawn(Player* p)
 {
     auto spawns = m_pRoot->hook(R"([Ss]pawn.*)", Node::Hook::REGEX);
+    if(spawns.empty())
+    {
+        // if no spawns, use team/alternate spawns
+        spawns = m_pRoot->hook(R"(.*[Ss]pawn.*)", Node::Hook::REGEX);
+    }
+    
     if(not spawns.empty())
     {
         auto spawn = spawns[rand() % spawns.size()];
@@ -345,15 +352,16 @@ bool GameSpec :: teleport_to_spawn(Player* p)
         return true;
     }
     
+    
     // TODO: shouldn't spawn w/o spawn point,
     //       but spawning at origin is fine for testing
     return true;
 }
 
-void GameSpec :: despawn(Player* p)
-{
-    deregister_player(p);
-}
+//void GameSpec :: despawn(Player* p)
+//{
+//    deregister_player(p);
+//}
 
 void GameSpec :: spectate(shared_ptr<Profile> prof)
 {
@@ -530,73 +538,73 @@ void GameSpec :: server_notify_spawn(Packet* p, bool now)
 }
 
 
-void GameSpec :: client_despawn(Packet* packet)
-{
-    //LOG("client_despawn(packet)");
-    BitStream bs(packet->data, packet->length, false);
-    unsigned char id;
-    bs.Read(id); // we already know this is ID_DESPAWN
-    bs.Read(id);
-    if(id == NetSpec::OBJ_PLAYER)
-    {
-        bool kill;
-        bs.Read(kill);
-        // kill?
-        shared_ptr<Node> obj;
-        try{
-            obj = m_pNet->object(id);
-        }catch(const std::out_of_range){
-            LOGf("no object of id %s", id);
-            return;
-        }
+//void GameSpec :: client_despawn(Packet* packet)
+//{
+//    //LOG("client_despawn(packet)");
+//    BitStream bs(packet->data, packet->length, false);
+//    unsigned char id;
+//    bs.Read(id); // we already know this is ID_DESPAWN
+//    bs.Read(id);
+//    if(id == NetSpec::OBJ_PLAYER)
+//    {
+//        bool kill;
+//        bs.Read(kill);
+//        // kill?
+//        shared_ptr<Node> obj;
+//        try{
+//            obj = m_pNet->object(id);
+//        }catch(const std::out_of_range){
+//            LOGf("no object of id %s", id);
+//            return;
+//        }
         
-        if(kill)
-        {
-            auto player = (Player*)obj->config()->at<void*>("player",nullptr);
-            if(not player){
-                LOGf("id %s is not a player", id);
-                return;
-            }
-            player->die();
-            m_pNet->remove_object(id);
-        }
-        else
-        {
-            m_pNet->remove_object(id);
-        }
+//        if(kill)
+//        {
+//            auto player = (Player*)obj->config()->at<void*>("player",nullptr);
+//            if(not player){
+//                LOGf("id %s is not a player", id);
+//                return;
+//            }
+//            player->die();
+//            m_pNet->remove_object(id);
+//        }
+//        else
+//        {
+//            m_pNet->remove_object(id);
+//        }
         
-        RakString rs;
-        bs.Read(rs);
-        string s = rs.C_String();
-        if(not s.empty()){
-            LOG(s); // kill message, if any?
-        }
-    }
-    else{
-        //LOGf("detach object %s", id);
-        auto obj = m_pNet->object(id);
-        obj->detach();
-        m_pNet->remove_object(id);
-    }
-}
+//        RakString rs;
+//        bs.Read(rs);
+//        string s = rs.C_String();
+//        if(not s.empty()){
+//            LOG(s); // kill message, if any?
+//        }
+//    }
+//    else{
+//        //LOGf("detach object %s", id);
+//        auto obj = m_pNet->object(id);
+//        obj->detach();
+//        m_pNet->remove_object(id);
+//    }
+//}
 
-void GameSpec :: server_despawn(Player* p)
-{
-    //LOG("server_despawn()");
-    BitStream bs;
-    bs.Write((unsigned char)NetSpec::ID_DESPAWN);
-    bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
-    bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
-    bool killed = true;
-    bs.Write(killed);
-    RakString rs(p->death_msg().c_str());
-    bs.Write(rs);
+//void GameSpec :: server_despawn(Player* p)
+//{
+//    //LOG("server_despawn()");
+//    BitStream bs;
+//    bs.Write((unsigned char)NetSpec::ID_DESPAWN);
+//    bs.Write((unsigned char)NetSpec::OBJ_PLAYER);
+//    bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
+//    bool killed = true;
+//    bs.Write(killed);
+//    RakString rs(p->death_msg().c_str());
+//    bs.Write(rs);
    
-    m_pNet->socket()->Send(
-        &bs,
-        HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
-    );
-}
+//    m_pNet->socket()->Send(
+//        &bs,
+//        HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+//    );
+//}
 
 void GameSpec :: recv_update(Packet* p)
 {

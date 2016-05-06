@@ -92,6 +92,9 @@ class NetSpec:
         }
         
     private:
+
+        void server_recv_disconnect(RakNet::Packet*);
+        void client_recv_disconnect(RakNet::Packet*);
         
         kit::shared_index<Node> m_Nodes;
         std::map<RakNet::RakNetGUID, std::shared_ptr<Profile>> m_Profiles;
@@ -100,6 +103,7 @@ class NetSpec:
         boost::signals2::scoped_connection m_DataCon;
         boost::signals2::scoped_connection m_DisconnectCon;
         boost::signals2::scoped_connection m_TimeoutCon;
+        boost::signals2::scoped_connection m_ConnectionLostCon;
         Session* m_pSession;
 };
 

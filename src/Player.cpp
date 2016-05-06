@@ -168,7 +168,7 @@ Player :: Player(
 
         }
     });
-    m_pPlayerShape->move(vec3(0.0f, 0.6f, 0.0f));
+    m_pPlayerShape->move(vec3(0.0f, 0.8f, 0.0f));
 
     m_pCamera->perspective();
     m_pCamera->listen();

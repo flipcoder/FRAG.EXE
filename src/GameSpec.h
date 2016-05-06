@@ -40,7 +40,7 @@ class GameSpec:
         void spawn(Player* player);
         void respawn(Player* player);
         bool teleport_to_spawn(Player* p);
-        void despawn(Player* p);
+        //void despawn(Player* p);
         void spectate(std::shared_ptr<Profile> prof = nullptr);
 
         void spawn_local_player();
@@ -66,8 +66,8 @@ class GameSpec:
         // spawn something according to packet data
         void client_spawn(RakNet::Packet* packet);
         void server_notify_spawn(RakNet::Packet* p, bool prior);
-        void client_despawn(RakNet::Packet* packet);
-        void server_despawn(Player* p);
+        //void client_despawn(RakNet::Packet* packet);
+        //void server_despawn(Player* p);
         void send_update(Player* p);
         void recv_update(RakNet::Packet* p);
         void client_done_loading();
