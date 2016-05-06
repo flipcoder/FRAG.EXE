@@ -632,7 +632,7 @@ void Player :: fire_weapon()
             body->applyCentralImpulse(Physics::toBulletVector(dir *
                 m_WeaponStash.active()->spec()->speed()
             ));
-            body->setCcdSweptSphereRadius(0.1f);
+            body->setCcdSweptSphereRadius(0.01f);
             auto vel = m->velocity();
             
             auto mp = m.get();
