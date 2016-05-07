@@ -22,7 +22,8 @@ WeaponSpecEntry :: WeaponSpecEntry(
     m_Speed(m_pConfig->at<double>("speed",0.0f)),
     m_Ammo(m_pConfig->at<int>("ammo",-1)), // -1 == unlimited ammo
     m_Clip(m_pConfig->at<int>("clip",0)), // = no reload needed
-    m_Damage(m_pConfig->at<int>("damage",1))
+    m_Damage(m_pConfig->at<int>("damage",1)),
+    m_Radius(m_pConfig->at<double>("radius",1.0))
 {
     auto m = m_pConfig->at<shared_ptr<Meta>>("pos", make_shared<Meta>(MetaFormat::JSON, "[0.0,0.0,0.0]"));
     m_ViewModelPos = glm::vec3(

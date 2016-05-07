@@ -31,7 +31,7 @@ void HUD :: redraw()
     auto win = m_pWindow;
     
     m_pCanvas->clear(Color(0.0f, 0.0f, 0.0f, 0.0f));
-    m_pCanvas->font("Audiowide",80);
+    m_pCanvas->font("Audiowide",60);
     
     string hps = to_string(m_HP);
     float fade = 1.0f * m_HP / 100.0f;

@@ -79,7 +79,7 @@ class Player:
         void jump();
         void give(const std::shared_ptr<Meta>& item);
         void update_hud();
-        void add_frags(Player* target, int f = 1);
+        void add_frag(Player* target);
         void clear();
 
         bool local() const { return !!m_pController; }
@@ -96,7 +96,7 @@ class Player:
         boost::signals2::signal<void(unsigned char)> on_event;
         boost::signals2::signal<void(unsigned)> on_slot;
         boost::signals2::signal<void(int)> on_hurt;
-        boost::signals2::signal<void(std::string)> on_frag;
+        boost::signals2::signal<void(Player* p)> on_frag;
 
         void knockback();
         

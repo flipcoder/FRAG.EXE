@@ -3,6 +3,17 @@ import sys
 import os
 import shutil
 import json
+import uuid
+
+def increment_string(s):
+    num_s = ""
+    while s[-1].isdigit():
+        num_s = s[-1] + num_s
+        s = s[:-1]
+    num_s = str(int(num_s) + 1)
+    return s + num_s
+
+# print increment_string('a')
 
 SCALE = 0.025
 
@@ -57,7 +68,7 @@ old_map_fn = m+".map"
 #         obj_r.write(l)
 
 qmap = open(old_map_fn,'r')
-jsonmap = {"nodes":[]}
+jsonmap = {"nodes":{}}
 node = None
 for l in qmap:
     if l.startswith('\"origin\"'):
@@ -113,9 +124,21 @@ for l in qmap:
                     tokens[i] = tokens[i].replace('\"','')
                 node["distance"] = float(tokens[0]) * SCALE
     elif l.startswith("}") and node:
-        jsonmap["nodes"] += [node]
+        name = ""
+        try:
+            name = node['name']
+        except:
+            prefix = ""
+            try:
+                prefix = node['prefixe'] + '.'
+            except:
+                pass
+            name = prefix + hex(uuid.getnode())[2:]
+        while hasattr(jsonmap['nodes'], name):
+            name = increment_string(name)
+        jsonmap["nodes"][name] = node
         node = None
 
 with open("new_"+m+".json", "w") as f:
     f.write(json.dumps(jsonmap, sort_keys=True, indent=4))
-
+ 

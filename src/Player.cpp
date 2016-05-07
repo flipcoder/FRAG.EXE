@@ -77,7 +77,7 @@ Player :: Player(
             vec3 vec = m->at<vec3>("vec");
             _this->shape()->impulse(vec3(
                 100.0f*vec.x,
-                1000.0f*vec.y,
+                std::min<float>(2000.0f, 1000.0f*vec.y),
                 100.0f*vec.z
             ));
             _this->knockback();
@@ -89,7 +89,7 @@ Player :: Player(
         if(_this->dead()){
             Player* owner = m->at<Player*>("owner", nullptr);
             if(owner)
-                owner->add_frags(_this);
+                owner->add_frag(_this);
         }
     });
     m_StandBox = Box(
@@ -139,7 +139,7 @@ Player :: Player(
 
     //m_WeaponStash.give("glock");
     m_WeaponStash.give_all();
-    m_WeaponStash.slot(2);
+    m_WeaponStash.slot(3);
     refresh_weapon();
     update_hud();
     
@@ -666,11 +666,12 @@ void Player :: fire_weapon()
             auto mp = m.get();
             auto cache = m_pCache;
             auto dmg = m_WeaponStash.active()->spec()->damage();
+            auto radius = m_WeaponStash.active()->spec()->radius();
             auto _this = this;
             auto spec = m_pSpec;
             auto me = shape();
             
-            auto splode = function<void()>([mp,dmg,cache,spec,_this,me](){
+            auto splode = function<void()>([mp,dmg,cache,spec,_this,me,radius](){
                 if(mp->detaching())
                     return;
                 auto snd = make_shared<Sound>(
@@ -690,7 +691,7 @@ void Player :: fire_weapon()
 
                 auto hitinfo = make_shared<Meta>();
                 hitinfo->set<int>("damage", dmg);
-                hitinfo->set<double>("radius", 5.0f);
+                hitinfo->set<double>("radius", radius);
                 hitinfo->set<Player*>("owner", _this);
                 spec->splash(mp, hitinfo);
                 
@@ -859,6 +860,8 @@ void Player :: reset()
     m_pProfile->temp()->set<int>("maxhp", 10); // this won't trigger
     m_pProfile->temp()->set<int>("hp", 10); // ...so do this 2nd
     m_WeaponStash.give_all();
+    m_WeaponStash.slot(3);
+    refresh_weapon();
     m_pPlayerShape->velocity(glm::vec3(0.0f));
     
     m_bEnter = false;
@@ -988,7 +991,7 @@ void Player :: give(const shared_ptr<Meta>& item)
     // Item is something else...
 }
 
-void Player :: add_frags(Player* target, int f)
+void Player :: add_frag(Player* target)
 {
     int frags = m_pProfile->temp()->at<int>("frags");
     m_pProfile->temp()->set<int>("frags", frags + 1);
@@ -1004,7 +1007,7 @@ void Player :: add_frags(Player* target, int f)
             boost::to_upper_copy(target->name()) +
             R"(", "color": "FFFFFF"})"
     ));
-    on_event(PE_FRAG);
+    on_frag(target);
 }
 
 bool Player :: weapon_priority_cmp(string s1, string s2)

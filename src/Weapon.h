@@ -37,6 +37,7 @@ class WeaponSpecEntry
         int clip() const { return m_Clip; }
         int ammo() const { return m_Ammo; }
         int damage() const { return m_Damage; }
+        float radius() const { return m_Radius; }
         
     private:
         
@@ -59,6 +60,7 @@ class WeaponSpecEntry
         int m_Ammo = 0;
         int m_Clip = 0;
         int m_Damage = 1;
+        float m_Radius = 1.0f;
 };
 
 class WeaponSpec

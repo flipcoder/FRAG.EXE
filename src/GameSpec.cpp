@@ -42,6 +42,7 @@ void GameSpec :: register_player(shared_ptr<Player> p)
     if(m_pNet->server()){
         p->on_death.connect(bind(&GameSpec::send_player_event, this, p.get(), Player::PE_DIE));
         p->on_hurt.connect(bind(&GameSpec::send_player_event_hurt, this, p.get(), placeholders::_1));
+        p->on_frag.connect(bind(&GameSpec::send_player_event_frag, this, p.get(), placeholders::_1));
     }
 
     if(m_pNet->remote() && p->local()){
@@ -413,8 +414,9 @@ void GameSpec :: logic(Freq::Time t)
     if(m_pSpectator)
         m_pSpectator->logic(t);
     auto players = m_Players;
-    for(auto&& player: players)
+    for(auto&& player: players){
         player->logic(t);
+    }
 }
 
 std::shared_ptr<Node> GameSpec :: ortho_root() const
@@ -714,6 +716,21 @@ void GameSpec :: recv_player_event(Packet* p)
         bs.Read(dmg);
         player->hurt(dmg);
     }
+    else if(c == Player::PE_FRAG)
+    {
+        LOG("recv event frag");
+        uint32_t t_id;
+        bs.Read(t_id);
+        shared_ptr<Node> t_obj;
+        try{
+            t_obj = m_pNet->object(id);
+        }catch(const std::out_of_range){
+            LOGf("no object of id %s for target", id);
+            return;
+        }
+        Player* target = (Player*)t_obj->config()->at<void*>("player",nullptr);
+        player->add_frag(target);
+    }
     else
     {
         player->do_event(c);
@@ -769,6 +786,18 @@ void GameSpec :: send_player_event_hurt(Player* p, int dmg)
     );
 }
 
+void GameSpec :: send_player_event_frag(Player* p, Player* target)
+{
+    LOG("player event frag");
+    BitStream bs;
+    bs.Write((unsigned char)NetSpec::ID_PLAYER_EVENT);
+    bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
+    bs.Write((unsigned char)Player::PE_FRAG);
+    bs.Write((uint32_t)target->shape()->config()->at<int>("id"));
+    m_pNet->socket()->Send(
+        &bs, IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+    );
+}
 
 void GameSpec :: splash(Node* m, std::shared_ptr<Meta> hitinfo)
 {
