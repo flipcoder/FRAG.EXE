@@ -6,7 +6,6 @@ import json
 import uuid
 
 def increment_string(s):
-    print s
     if s == "":
         s = "0"
         return
@@ -18,8 +17,6 @@ def increment_string(s):
         num_s = 0
     num_s = str(int(num_s) + 1)
     return s + num_s
-
-# print increment_string('a')
 
 SCALE = 0.025
 
@@ -130,7 +127,6 @@ for l in qmap:
                     tokens[i] = tokens[i].replace('\"','')
                 node["distance"] = float(tokens[0]) * SCALE
     elif l.startswith("}") and node:
-        print node
         name = ""
         try:
             name = node['name']
@@ -141,7 +137,6 @@ for l in qmap:
                 name = "empty.0"
         while name in jsonmap['nodes']:
             name = increment_string(name)
-        print name
         jsonmap["nodes"][name] = node
         node = None
 
