@@ -6,10 +6,16 @@ import json
 import uuid
 
 def increment_string(s):
+    print s
+    if s == "":
+        s = "0"
+        return
     num_s = ""
     while s[-1].isdigit():
         num_s = s[-1] + num_s
         s = s[:-1]
+    if num_s == "":
+        num_s = 0
     num_s = str(int(num_s) + 1)
     return s + num_s
 
@@ -124,18 +130,18 @@ for l in qmap:
                     tokens[i] = tokens[i].replace('\"','')
                 node["distance"] = float(tokens[0]) * SCALE
     elif l.startswith("}") and node:
+        print node
         name = ""
         try:
             name = node['name']
         except:
-            prefix = ""
             try:
-                prefix = node['prefixe'] + '.'
+                name = node['type'] + ".0"
             except:
-                pass
-            name = prefix + hex(uuid.getnode())[2:]
-        while hasattr(jsonmap['nodes'], name):
+                name = "empty.0"
+        while name in jsonmap['nodes']:
             name = increment_string(name)
+        print name
         jsonmap["nodes"][name] = node
         node = None
 
