@@ -63,7 +63,20 @@ Player :: Player(
     m_pPlayerShape->event("hit", [_this](std::shared_ptr<Meta> m){
         if(_this->dead())
             return;
-        _this->hurt(m->at<int>("damage"));
+            
+        // splash damage
+        if(m->has("dist"))
+        {
+            float dist = std::max<float>((float)m->at<double>("dist"),1.0f);
+            _this->hurt(kit::round_int(
+                ((float)m->at<int>("damage") * m->at<double>("radius")) /
+                dist
+            ));
+            return;
+        }
+        else{
+            _this->hurt(m->at<int>("damage"));
+        }
         if(_this->dead()){
             Player* owner = m->at<Player*>("owner", nullptr);
             if(owner)
@@ -234,7 +247,7 @@ void Player :: update_hud()
 {
     if(m_WeaponStash.active()) {
         int value = -1;
-        if(m_WeaponStash.active()->spec()->clip() > 0) // 
+        if(m_WeaponStash.active()->spec()->clip() > 0)
             value = m_WeaponStash.active()->clip();
         int maxvalue = m_WeaponStash.active()->ammo();
         m_pHUD->ammo(value, maxvalue);
@@ -640,8 +653,12 @@ void Player :: fire_weapon()
             
             auto mp = m.get();
             auto cache = m_pCache;
+            auto dmg = m_WeaponStash.active()->spec()->damage();
+            auto _this = this;
+            auto spec = m_pSpec;
+            auto me = shape();
             
-            auto splode = function<void()>([mp,cache](){
+            auto splode = function<void()>([mp,dmg,cache,spec,_this,me](){
                 if(mp->detaching())
                     return;
                 auto snd = make_shared<Sound>(
@@ -658,7 +675,26 @@ void Player :: fire_weapon()
                 mp->stick(snd);
                 snd->detach_on_done();
                 snd->play();
+
+                auto hitinfo = make_shared<Meta>();
+                hitinfo->set<int>("damage", dmg);
+                hitinfo->set<double>("radius", 1.0f);
+                hitinfo->set<Player*>("owner", _this);
+                spec->splash(mp, hitinfo);
+                
                 mp->safe_detach();
+                
+                //spec->splash((Node*)mp,hitinfo);
+            });
+            
+            m_pSpec->register_projectile(m, [_this,dmg,spec,splode,mp](Node* n,Node*){
+                //auto player = (Player*)a->at<void*>("player");
+                //auto hitinfo = make_shared<Meta>();
+                //hitinfo->set<int>("damage", dmg);
+                //hitinfo->set<double>("radius", 1.0f);
+                //hitinfo->set<Player*>("owner", _this);
+                ////n->event("hit", hitinfo);
+                splode();
             });
             
             if(not m_WeaponStash.active()->spec()->gravity()) {

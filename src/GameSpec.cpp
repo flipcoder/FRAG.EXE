@@ -56,6 +56,12 @@ void GameSpec :: register_player(shared_ptr<Player> p)
     
 }
 
+void GameSpec :: register_projectile(std::shared_ptr<Node> p, std::function<void(Node*, Node*)> func)
+{
+    for(auto&& player: m_Players)
+        m_pPartitioner->on_touch(player->shape(), p, func);
+}
+
 void GameSpec :: deregister_player(Player* p)
 {
     kit::remove(m_Players, p->shared_from_this());
@@ -763,4 +769,18 @@ void GameSpec :: send_player_event_hurt(Player* p, int dmg)
     );
 }
 
+
+void GameSpec :: splash(Node* m, std::shared_ptr<Meta> hitinfo)
+{
+    for(auto&& player: m_Players)
+    {
+        float dist = glm::length(
+            m->position(Space::WORLD) - player->shape()->position(Space::WORLD)
+        );
+        if(dist <= hitinfo->at<double>("radius")){
+            hitinfo->set<double>("dist", dist);
+            player->shape()->event("hit", hitinfo);
+        }
+    }
+}
 

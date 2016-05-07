@@ -33,6 +33,7 @@ class GameSpec:
         void enter();
         void setup();
         void register_player(std::shared_ptr<Player> p);
+        void register_projectile(std::shared_ptr<Node> p, std::function<void(Node*,Node*)>);
         void deregister_player(Player* p);
         std::shared_ptr<Meta> config() { return m_pConfig; };
         
@@ -78,6 +79,8 @@ class GameSpec:
         void send_spawn(Player* p = nullptr);
         
         void weapon_pickup(Player* p, Node* item);
+        
+        void splash(Node* m, std::shared_ptr<Meta> hitinfo);
         
     private:
         
