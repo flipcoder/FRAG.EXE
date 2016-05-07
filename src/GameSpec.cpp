@@ -774,13 +774,13 @@ void GameSpec :: splash(Node* m, std::shared_ptr<Meta> hitinfo)
 {
     for(auto&& player: m_Players)
     {
+        vec3 vec = player->shape()->position(Space::WORLD) - m->position(Space::WORLD);
         //LOG("splash");
-        float dist = glm::length(
-            m->position(Space::WORLD) - player->shape()->position(Space::WORLD)
-        );
+        float dist = glm::length(vec);
         //LOGf("dist %s", dist);
         if(dist <= hitinfo->at<double>("radius")){
             hitinfo->set<double>("dist", dist);
+            hitinfo->set<vec3>("vec", vec);
             player->shape()->event("hit", hitinfo);
         }
     }

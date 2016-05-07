@@ -48,7 +48,8 @@ class Player:
             PE_PREV,
             PE_RELOAD,
             PE_HURT,
-            PE_SLOT
+            PE_SLOT,
+            PE_FRAG
         };
 
         void do_event(unsigned char ev);
@@ -95,6 +96,9 @@ class Player:
         boost::signals2::signal<void(unsigned char)> on_event;
         boost::signals2::signal<void(unsigned)> on_slot;
         boost::signals2::signal<void(int)> on_hurt;
+        boost::signals2::signal<void(std::string)> on_frag;
+
+        void knockback();
         
     private:
         
@@ -150,6 +154,7 @@ class Player:
         std::string m_DeathMsg;
 
         Freq::Alarm m_HurtSoundAlarm;
+        Freq::Alarm m_KnockbackAlarm;
 };
 
 #endif

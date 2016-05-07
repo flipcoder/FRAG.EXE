@@ -45,7 +45,8 @@ Player :: Player(
     m_pNet(net),
     m_LockIf(lock_if),
     m_NetTransform(glm::mat4(1.0f)),
-    m_HurtSoundAlarm(state->timeline())
+    m_HurtSoundAlarm(state->timeline()),
+    m_KnockbackAlarm(state->timeline())
 {
     auto _this = this;
     
@@ -73,8 +74,13 @@ Player :: Player(
             auto value = (float)m->at<int>("damage")*rad/(dist*dist*dist);
             //LOGf("value: %s", value);
             _this->hurt(kit::round_int(value));
-            _this->shape()->impulse(vec3(0.0f, 2000.0f, 0.0f));
-
+            vec3 vec = m->at<vec3>("vec");
+            _this->shape()->impulse(vec3(
+                100.0f*vec.x,
+                1000.0f*vec.y,
+                100.0f*vec.z
+            ));
+            _this->knockback();
             return;
         }
         else{
@@ -154,7 +160,9 @@ Player :: Player(
             m_pPlayerShape,
             m_pProfile->config(),
             [_this]{
-                return (_this->m_LockIf && _this->m_LockIf()) || _this->dead();
+                return (_this->m_LockIf && _this->m_LockIf())
+                    || _this->dead()
+                    || not _this->m_KnockbackAlarm.elapsed();
             }
         );
         m_pInterface->speed(16.0f);
@@ -205,6 +213,7 @@ Player :: Player(
     state->partitioner()->register_object(m_pPlayerShape, 0);
 
     m_HurtSoundAlarm.set(Freq::Time::seconds(0.0f)); //elapse immediately
+    m_KnockbackAlarm.set(Freq::Time::seconds(0.0f)); //elapse immediately
 }
 
 Player :: ~Player()
@@ -995,6 +1004,7 @@ void Player :: add_frags(Player* target, int f)
             boost::to_upper_copy(target->name()) +
             R"(", "color": "FFFFFF"})"
     ));
+    on_event(PE_FRAG);
 }
 
 bool Player :: weapon_priority_cmp(string s1, string s2)
@@ -1087,6 +1097,8 @@ void Player :: do_event(unsigned char ev)
         prev_weapon();
     else if(ev == PE_DIE)
         die();
+    //else if(ev == PE_FRAG)
+    //    add_frags(1);
 }
 
 bool Player :: slot(unsigned i)
@@ -1105,5 +1117,10 @@ bool Player :: slot(unsigned i)
         return true;
     }
     return false;
+}
+
+void Player :: knockback()
+{
+    m_KnockbackAlarm.set(Freq::Time::seconds(0.5f));
 }
 
