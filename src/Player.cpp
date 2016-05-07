@@ -67,11 +67,14 @@ Player :: Player(
         // splash damage
         if(m->has("dist"))
         {
+            //LOG("splash");
             float dist = std::max<float>((float)m->at<double>("dist"),1.0f);
-            _this->hurt(kit::round_int(
-                ((float)m->at<int>("damage") * m->at<double>("radius")) /
-                dist
-            ));
+            float rad = (float)m->at<double>("radius");
+            auto value = (float)m->at<int>("damage")*rad/(dist*dist*dist);
+            //LOGf("value: %s", value);
+            _this->hurt(kit::round_int(value));
+            _this->shape()->impulse(vec3(0.0f, 2000.0f, 0.0f));
+
             return;
         }
         else{
@@ -678,13 +681,11 @@ void Player :: fire_weapon()
 
                 auto hitinfo = make_shared<Meta>();
                 hitinfo->set<int>("damage", dmg);
-                hitinfo->set<double>("radius", 1.0f);
+                hitinfo->set<double>("radius", 5.0f);
                 hitinfo->set<Player*>("owner", _this);
                 spec->splash(mp, hitinfo);
                 
                 mp->safe_detach();
-                
-                //spec->splash((Node*)mp,hitinfo);
             });
             
             m_pSpec->register_projectile(m, [_this,dmg,spec,splode,mp](Node* n,Node*){
@@ -848,6 +849,9 @@ void Player :: reset()
     
     m_pProfile->temp()->set<int>("maxhp", 10); // this won't trigger
     m_pProfile->temp()->set<int>("hp", 10); // ...so do this 2nd
+    m_WeaponStash.give_all();
+    m_pPlayerShape->velocity(glm::vec3(0.0f));
+    
     m_bEnter = false;
     //}
 }

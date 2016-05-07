@@ -774,9 +774,11 @@ void GameSpec :: splash(Node* m, std::shared_ptr<Meta> hitinfo)
 {
     for(auto&& player: m_Players)
     {
+        //LOG("splash");
         float dist = glm::length(
             m->position(Space::WORLD) - player->shape()->position(Space::WORLD)
         );
+        //LOGf("dist %s", dist);
         if(dist <= hitinfo->at<double>("radius")){
             hitinfo->set<double>("dist", dist);
             player->shape()->event("hit", hitinfo);
