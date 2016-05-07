@@ -635,7 +635,7 @@ void Player :: fire_weapon()
             body->applyCentralImpulse(Physics::toBulletVector(dir *
                 m_WeaponStash.active()->spec()->speed()
             ));
-            body->setCcdSweptSphereRadius(0.01f);
+            body->setCcdSweptSphereRadius(0.001f);
             auto vel = m->velocity();
             
             auto mp = m.get();
@@ -649,6 +649,7 @@ void Player :: fire_weapon()
                 );
                 auto particle = make_shared<Particle>("explosion.png", cache);
                 particle->life(Freq::Time::seconds(0.2f));
+                particle->offset(0.5f);
                 auto p = particle.get();
                 particle->on_tick.connect([p](Freq::Time t){
                     p->rescale(p->scale().x + p->scale().x * t.s());
