@@ -170,6 +170,17 @@ void GameSpec :: setup()
             if(not m_pNet->remote())
                 for(auto&& player: m_Players)
                     register_pickup_with_player(shape, player.get());
+
+            if(item.key == "redflag" || item.key=="blueflag"){
+                auto light = make_shared<Light>();
+                light->dist(3.0f);
+                light->position(vec3(0.0f, 0.5f, 0.0f));
+                if(item.key == "redflag")
+                    light->diffuse(Color::red());
+                else if(item.key == "blueflag")
+                    light->diffuse(Color::blue());
+                shape->stick(light);
+            }
         }
     }
     
