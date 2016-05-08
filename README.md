@@ -10,10 +10,11 @@ Engine here: http://github.com/flipcoder/qor
 Resources (git submodule): https://gitlab.node-3.net/frag/FRAG.EXE_data
 
 ## Screenshots
-
 ![Screenshot 1](http://i.imgur.com/txOx89U.png)
 
-![Screenshot 2](http://i.imgur.com/J9mBu3l.png)
+![Screenshot 2](http://i.imgur.com/Lxicpop.png)
+
+![Screenshot 3](http://i.imgur.com/J9mBu3l.png)
 
 ## Videos
 
