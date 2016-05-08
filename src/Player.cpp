@@ -77,11 +77,10 @@ Player :: Player(
             vec3 vec = m->at<vec3>("vec");
             _this->shape()->impulse(vec3(
                 100.0f*vec.x,
-                std::min<float>(2000.0f, 1000.0f*vec.y),
+                std::min<float>(1500.0f, 1000.0f*vec.y),
                 100.0f*vec.z
             ));
             _this->knockback();
-            return;
         }
         else{
             _this->hurt(m->at<int>("damage"));
