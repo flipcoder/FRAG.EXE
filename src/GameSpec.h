@@ -78,6 +78,7 @@ class GameSpec:
         void send_player_event_hurt(Player* p, int dmg);
         void send_spawn(Player* p = nullptr);
         void send_player_event_frag(Player* p, Player* target);
+        void send_player_event_give(Player* p, std::string what);
         void weapon_pickup(Player* p, Node* item);
         
         void splash(Node* m, std::shared_ptr<Meta> hitinfo);

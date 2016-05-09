@@ -43,6 +43,7 @@ void GameSpec :: register_player(shared_ptr<Player> p)
         p->on_death.connect(bind(&GameSpec::send_player_event, this, p.get(), Player::PE_DIE));
         p->on_hurt.connect(bind(&GameSpec::send_player_event_hurt, this, p.get(), placeholders::_1));
         p->on_frag.connect(bind(&GameSpec::send_player_event_frag, this, p.get(), placeholders::_1));
+        p->on_give.connect(bind(&GameSpec::send_player_event_give, this, p.get(), placeholders::_1));
     }
 
     if(m_pNet->remote() && p->local()){
@@ -85,8 +86,9 @@ void GameSpec :: register_pickup_with_player(std::shared_ptr<Mesh> item, Player*
 
 void GameSpec :: weapon_pickup(Player* p, Node* item)
 {
-    item->config()->set<string>("name", item->name());
-    p->give(item->config());
+    //item->config()->set<string>("name", item->name());
+    p->give(item->name());
+    //p->give(item->config());
 }
 
 void GameSpec :: setup()
@@ -727,6 +729,14 @@ void GameSpec :: recv_player_event(Packet* p)
         bs.Read(dmg);
         player->hurt(dmg);
     }
+    else if(c == Player::PE_GIVE)
+    {
+        std::string what;
+        RakString rs;
+        bs.Read(rs);
+        what = rs.C_String();
+        player->give(what);
+    }
     else if(c == Player::PE_FRAG)
     {
         LOG("recv event frag");
@@ -809,6 +819,20 @@ void GameSpec :: send_player_event_frag(Player* p, Player* target)
         &bs, IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
     );
 }
+
+void GameSpec :: send_player_event_give(Player* p, std::string what)
+{
+    LOG("player event frag");
+    BitStream bs;
+    bs.Write((unsigned char)NetSpec::ID_PLAYER_EVENT);
+    bs.Write((uint32_t)p->shape()->config()->at<int>("id"));
+    bs.Write((unsigned char)Player::PE_GIVE);
+    bs.Write(RakString(what.c_str()));
+    m_pNet->socket()->Send(
+        &bs, IMMEDIATE_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true
+    );
+}
+
 
 void GameSpec :: splash(Node* m, std::shared_ptr<Meta> hitinfo)
 {

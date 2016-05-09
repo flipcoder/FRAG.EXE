@@ -136,8 +136,9 @@ Player :: Player(
     m_pDecal = cache->cache_cast<ITexture>("decal_bullethole1.png");
     m_pSpark = cache->cache_cast<ITexture>("spark.png");
 
-    //m_WeaponStash.give("glock");
-    m_WeaponStash.give_all();
+    m_WeaponStash.give("glock");
+    m_WeaponStash.give("shotgun");
+    //m_WeaponStash.give_all();
     m_WeaponStash.slot(3);
     refresh_weapon();
     update_hud();
@@ -858,9 +859,11 @@ void Player :: reset()
     
     m_pProfile->temp()->set<int>("maxhp", 10); // this won't trigger
     m_pProfile->temp()->set<int>("hp", 10); // ...so do this 2nd
-    m_WeaponStash.give_all();
-    //m_WeaponStash.slot(3);
-    //refresh_weapon();
+    
+    m_WeaponStash.give("glock");
+    m_WeaponStash.give("shotgun");
+    m_WeaponStash.slot(3);
+    refresh_weapon();
     m_pPlayerShape->velocity(glm::vec3(0.0f));
     
     m_bEnter = false;
@@ -936,6 +939,8 @@ void Player :: give(const shared_ptr<Meta>& item)
     auto name = item->at<string>("name", "");
     if(name.empty())
         return;
+
+    on_give(item->at<string>("name"));
     
     std::string cur = m_WeaponStash.active()->spec()->name();
     if(m_WeaponStash.give(item)){
@@ -990,6 +995,13 @@ void Player :: give(const shared_ptr<Meta>& item)
     // Item is something else...
 }
 
+void Player :: give(std::string what)
+{
+    auto meta = make_shared<Meta>();
+    meta->set<string>("name", what);
+    give(meta);
+}
+    
 void Player :: add_frag(Player* target)
 {
     int frags = m_pProfile->temp()->at<int>("frags");

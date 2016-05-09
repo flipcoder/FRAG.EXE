@@ -19,7 +19,7 @@
             ".values": [ 1, 2, 4, 8, 16 ],
             ".desc": "Smooths sharp edges"
         },
-        "AA": {
+        "anisotropy": {
             ".name": "Anisotropic Filtering",
             ".values": [ 1, 2, 4, 8, 16],
             ".desc": "Improves texture quality"

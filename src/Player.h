@@ -49,7 +49,8 @@ class Player:
             PE_RELOAD,
             PE_HURT,
             PE_SLOT,
-            PE_FRAG
+            PE_FRAG,
+            PE_GIVE
         };
 
         void do_event(unsigned char ev);
@@ -78,6 +79,7 @@ class Player:
         bool crouch(bool b);
         void jump();
         void give(const std::shared_ptr<Meta>& item);
+        void give(std::string what);
         void update_hud();
         void add_frag(Player* target);
         void clear();
@@ -97,6 +99,7 @@ class Player:
         boost::signals2::signal<void(unsigned)> on_slot;
         boost::signals2::signal<void(int)> on_hurt;
         boost::signals2::signal<void(Player* p)> on_frag;
+        boost::signals2::signal<void(std::string)> on_give;
 
         void knockback();
         

@@ -1,10 +1,11 @@
 {
     "video": {
         "windowed": false,
-        "vsync": false
+        "vsync": false,
+        "anisotropy": 8
     },
     "audio": {
-        "volume": 20,
+        "volume": 50,
         "sound-volume": 100,
         "music-volume": 100
     }
