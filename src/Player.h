@@ -15,6 +15,7 @@ class Qor;
 class HUD;
 class Game;
 class NetSpec;
+class Session;
 
 class Player:
     public IRealtime,

@@ -7,6 +7,7 @@
 #include "Qor/Interpreter.h"
 
 class Player;
+class Session;
 
 class HUD:
     public Node
@@ -16,6 +17,7 @@ class HUD:
             Player* player,
             Window* window,
             Input* input,
+            Session* session,
             Cache<Resource,std::string>* cache
         );
         virtual ~HUD() {}
@@ -34,8 +36,16 @@ class HUD:
         void fade(Color c);
         Color fade() const { return m_Fade; }
 
-        bool red_pulse(bool b) { m_bDirty=true;return m_RedPulse=b;}
-        bool blue_pulse(bool b) { m_bDirty=true;return m_BluePulse=b;}
+        void dirty();
+        
+        void show_scores(bool b) {
+            if(m_bShowScores != b){
+                m_bShowScores = b;
+                redraw();
+            }
+        }
+        //bool red_pulse(bool b) { m_bDirty=true;return m_RedPulse=b;}
+        //bool blue_pulse(bool b) { m_bDirty=true;return m_BluePulse=b;}
 
     private:
         
@@ -44,6 +54,7 @@ class HUD:
         
         Window* m_pWindow = nullptr;
         Input* m_pInput = nullptr;
+        Session* m_pSession = nullptr;
         std::shared_ptr<Canvas> m_pCanvas;
         std::shared_ptr<Canvas> m_pFadeCanvas;
         Cache<Resource, std::string>* m_pCache;
@@ -51,10 +62,10 @@ class HUD:
         float m_Border = 24.0f;
         Player* m_pPlayer;
         
-        float m_RedPulse = 0.0f;
-        bool m_RedPulsing = false;
-        float m_BluePulse = 0.0f;
-        bool m_BluePulsing = false;
+        //float m_RedPulse = 0.0f;
+        //bool m_RedPulsing = false;
+        //float m_BluePulse = 0.0f;
+        //bool m_BluePulsing = false;
         
         bool m_bInput = false;
         bool m_bDirty = true;
@@ -64,6 +75,7 @@ class HUD:
         int m_Clip = 0;
         int m_Ammo = 0;
         int m_Frags = 0;
+        bool m_bShowScores = false;
         Color m_Fade = Color(1.0f,0.0f,0.0f,0.0f);
         
         std::string m_Msg;

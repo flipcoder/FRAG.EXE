@@ -53,7 +53,7 @@ Player :: Player(
     m_pOrthoCamera = make_shared<Camera>(m_pQor->resources(), m_pQor->window());
     m_pOrthoCamera->ortho();
     m_pOrthoRoot->add(m_pOrthoCamera);
-    m_pHUD = make_shared<HUD>(this, window, m_pController ? m_pController->input() : nullptr, cache);
+    m_pHUD = make_shared<HUD>(this, window, m_pController ? m_pController->input() : nullptr, engine->session(), cache);
     m_pOrthoRoot->add(m_pHUD);
     m_pPlayerShape = make_shared<Mesh>();
     m_pPlayerShape->position(pos);
@@ -266,6 +266,7 @@ void Player :: update_hud()
     }
     else
         m_pHUD->ammo(-1,-1);
+    m_pHUD->dirty();
 }
 
 void Player :: scope(bool b)
@@ -464,6 +465,12 @@ void Player :: logic(Freq::Time t)
     if(m_pController->button("reload").pressed_now())
     {
         reload();
+    }
+    
+    if(m_pController->button("scores").pressed()) {
+        m_pHUD->show_scores(true);
+    }else{
+        m_pHUD->show_scores(false);
     }
 
     if(m_pController->button("fire") &&
@@ -982,13 +989,13 @@ void Player :: give(const shared_ptr<Meta>& item)
         m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
             R"({"message": "RED FLAG TAKEN", "color": "FF0000"})"
         ));
-        m_pHUD->red_pulse(true);
+        //m_pHUD->red_pulse(true);
     } else if (name == "blueflag") {
         Sound::play(m_pCamera.get(), "blueflagtaken.wav", m_pCache);
         m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
             R"({"message": "BLUE FLAG TAKEN", "color": "0000FF"})"
         ));
-        m_pHUD->blue_pulse(true);
+        //m_pHUD->blue_pulse(true);
     }
 
 
@@ -1004,20 +1011,30 @@ void Player :: give(std::string what)
     
 void Player :: add_frag(Player* target)
 {
+    string msg;
     int frags = m_pProfile->temp()->at<int>("frags");
-    m_pProfile->temp()->set<int>("frags", frags + 1);
-    m_pHUD->frags(frags + 1);
-    auto msg = (boost::format("%s fragged %s.") % name() % target->name()).str();
+    if(target == this){
+        // suicide
+        m_pProfile->temp()->set<int>("frags", frags - 1);
+        m_pHUD->frags(frags - 1);
+        msg = name() + " suicided!";
+    }else{
+        // normal frag
+        m_pProfile->temp()->set<int>("frags", frags + 1);
+        m_pHUD->frags(frags + 1);
+        msg = (boost::format("%s fragged %s.") % name() % target->name()).str();
+        m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
+            R"({"message": "YOU FRAGGED )" +
+                boost::to_upper_copy(target->name()) +
+                R"(", "color": "FFFFFF"})"
+        ));
+    }
     if(not m_pNet->remote()){ // server or local player
         LOG(msg);
     }else{
         m_pNet->message(msg);
     }
-    m_pState->event("message", make_shared<Meta>(MetaFormat::JSON,
-        R"({"message": "YOU FRAGGED )" +
-            boost::to_upper_copy(target->name()) +
-            R"(", "color": "FFFFFF"})"
-    ));
+    
     on_frag(target);
 }
 

@@ -39,6 +39,11 @@ void GameSpec :: register_player(shared_ptr<Player> p)
             register_pickup_with_player(item, p.get());
     }
 
+    if(m_pPlayer == p.get()){
+        p->on_frag.connect(bind(&Player::update_hud, p.get()));
+        p->on_death.connect(bind(&Player::update_hud, p.get()));
+    }
+    
     if(m_pNet->server()){
         p->on_death.connect(bind(&GameSpec::send_player_event, this, p.get(), Player::PE_DIE));
         p->on_hurt.connect(bind(&GameSpec::send_player_event_hurt, this, p.get(), placeholders::_1));
@@ -297,9 +302,7 @@ Player* GameSpec :: play(shared_ptr<Profile> prof)
         return nullptr;
     
     player->reset();
-    
-    register_player(player->shared_from_this());
-    
+     
     // local?
     if(not prof->dummy()) {
         m_pSpectator = nullptr;
@@ -308,12 +311,15 @@ Player* GameSpec :: play(shared_ptr<Profile> prof)
         m_pOrthoCamera = m_pPlayer->ortho_camera();
     }
     
+    register_player(player->shared_from_this());
     on_player_spawn(player.get());
     
     //register_player(player->shared_from_this());
     m_pPhysics->generate(player->shape().get());
     
     //LOG("player spawned");
+    if(m_pPlayer)
+        m_pPlayer->update_hud();
     return player.get();
 }
 

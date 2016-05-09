@@ -1,13 +1,15 @@
 #include "HUD.h"
 #include "Player.h"
 #include "Qor/Headless.h"
+#include "Qor/Session.h"
 using namespace std;
 using namespace glm;
 
-HUD :: HUD(Player* player, Window* window, Input* input, Cache<Resource,std::string>* cache):
+HUD :: HUD(Player* player, Window* window, Input* input, Session* session, Cache<Resource,std::string>* cache):
     m_pPlayer(player),
     m_pWindow(window),
     m_pInput(input),
+    m_pSession(session),
     m_pCache(cache)
 {
     auto sw = m_pWindow->size().x;
@@ -99,6 +101,19 @@ void HUD :: redraw()
 
 
     m_pCanvas->text(to_string(m_Frags), Color::white(), vec2(win->center().x, extents.height), Canvas::CENTER);
+    
+    if(m_bShowScores)
+    {
+        int i = 56;
+        for(auto&& prof: *m_pSession){
+            m_pCanvas->text(
+                prof.second->name() + " " + to_string(prof.second->temp()->at<int>("frags",0)) +
+                    " / " + to_string(prof.second->temp()->at<int>("deaths",0)),
+                    Color::white(), vec2(56.0f, sw/3.0f + i), Canvas::LEFT
+            );
+            i += 32;
+        }
+    }
     //m_pCanvas->text("0", Color::white(), vec2(win->center().x - extents.width/2.0f, extents.height), Canvas::CENTER);
     //m_pCanvas->text("0", Color::white(), vec2(win->center().x + extents.width/2.0f, extents.height), Canvas::CENTER);
     
@@ -206,5 +221,10 @@ void HUD :: fade(Color c)
         m_Fade = c;
         m_bFadeDirty=true;
     }
+}
+
+void HUD :: dirty()
+{
+    m_bDirty = true;
 }
 
