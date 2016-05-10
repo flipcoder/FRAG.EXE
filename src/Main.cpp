@@ -6,6 +6,7 @@
 #include "Info.h"
 #include "Game.h"
 #include "Pregame.h"
+#include "Qor/Texture.h"
 
 #include "Qor/kit/log/log.h"
 #include "Qor/kit/async/async.h"
@@ -24,7 +25,7 @@ int main(int argc, const char** argv)
     args.set("title", "FRAG.EXE");
     args.set("no_loading_fade","true");
     
-    Texture::DEFAULT_FLAGS = Texture::TRANSPARENT | Texture::MIPMAP | Texture::FILTER;
+    Texture::DEFAULT_FLAGS = Texture::TRANS | Texture::MIPMAP | Texture::FILTER;
     
 #ifndef DEBUG
     try{

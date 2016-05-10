@@ -172,8 +172,8 @@ Player :: Player(
     //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerShape->body()->body();
     auto pmesh = m_pPlayerShape.get();
     auto camera = m_pCamera.get();
-    auto interface = m_pInterface.get();
-    m_pPhysics->on_generate([_this, physics, pmesh,interface,cache,camera]{
+    auto interface_ = m_pInterface.get();
+    m_pPhysics->on_generate([_this, physics, pmesh,interface_,cache,camera]{
         auto pmesh_body = (btRigidBody*)pmesh->body()->body();
         pmesh_body->setActivationState(DISABLE_DEACTIVATION);
         //pmesh_body->setAngularFactor(btVector3(0,0,0));
@@ -183,12 +183,12 @@ Player :: Player(
         //pmesh_body->setRestitution(0.0f);
         //pmesh_body->setDamping(0.0f, 0.0f);
         ////pmesh_body->setRestitution(0.0f);
-        if(interface){
-            interface->on_jump(std::bind(&Player::jump, _this));
-            interface->on_crouch([_this]{
+        if(interface_){
+            interface_->on_jump(std::bind(&Player::jump, _this));
+            interface_->on_crouch([_this]{
                 _this->crouch(true);
             });
-            interface->on_uncrouch([_this]{
+            interface_->on_uncrouch([_this]{
                 return _this->crouch(false);
             });
 
