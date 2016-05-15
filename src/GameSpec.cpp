@@ -745,7 +745,7 @@ void GameSpec :: recv_player_event(Packet* p)
     }
     else if(c == Player::PE_FRAG)
     {
-        LOG("recv event frag");
+        //LOG("recv event frag");
         uint32_t t_id;
         bs.Read(t_id);
         shared_ptr<Node> t_obj;

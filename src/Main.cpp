@@ -18,9 +18,9 @@
 using namespace std;
 using namespace kit;
 
-int main(int argc, const char** argv)
+int main(int argc, char* argv[])
 {
-    Args args(argc, argv);
+    Args args(argc, (const char**)argv);
     args.set("mod","FRAG.EXE");
     args.set("title", "FRAG.EXE");
     args.set("no_loading_fade","true");

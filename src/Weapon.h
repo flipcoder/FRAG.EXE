@@ -130,6 +130,8 @@ class WeaponStash
         void sort_slot(std::vector<std::shared_ptr<Weapon>>& slot);
 
         unsigned weapon_count() const;
+
+        void clear();
         
     private:
         

@@ -867,6 +867,7 @@ void Player :: reset()
     m_pProfile->temp()->set<int>("maxhp", 10); // this won't trigger
     m_pProfile->temp()->set<int>("hp", 10); // ...so do this 2nd
     
+    m_WeaponStash.clear();
     m_WeaponStash.give("glock");
     m_WeaponStash.give("shotgun");
     m_WeaponStash.slot(3);

@@ -46,6 +46,13 @@ WeaponSpec :: WeaponSpec(const shared_ptr<Meta>& cfg):
 WeaponStash :: WeaponStash(WeaponSpec* spec):
     m_pSpec(spec)
 {
+    clear();
+}
+
+void WeaponStash :: clear()
+{
+    m_pActive = nullptr;
+    m_Slots.clear();
     m_Slots.reserve(10);
     for(int i=0; i<10; ++i)
         m_Slots.emplace_back();
