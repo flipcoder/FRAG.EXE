@@ -4,7 +4,7 @@
 #include "Spectator.h"
 #include "Qor/Qor.h"
 #include "Game.h"
-#include <boost/regex.hpp>
+#include <regex>
 #include "Qor/Profile.h"
 using namespace std;
 using namespace glm;
@@ -142,9 +142,9 @@ void GameSpec :: setup()
                     for(auto&& c: children)
                     {
                         string oldskin = c->material()->texture()->filename();
-                        string skin = boost::regex_replace(
+                        string skin = std::regex_replace(
                             oldskin,
-                            boost::regex(re->at<string>(0), boost::regex_constants::extended),
+                            std::regex(re->at<string>(0), std::regex_constants::extended),
                             re->at<string>(1)
                         );
                         if(oldskin != skin){
@@ -154,9 +154,9 @@ void GameSpec :: setup()
                     }
                 }else{
                     string oldskin = shape->material()->texture()->filename();
-                    string skin = boost::regex_replace(
+                    string skin = std::regex_replace(
                         oldskin,
-                        boost::regex(re->at<string>(0), boost::regex_constants::extended),
+                        std::regex(re->at<string>(0), std::regex_constants::extended),
                         re->at<string>(1)
                     );
                     if(oldskin != skin){

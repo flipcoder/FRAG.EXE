@@ -602,7 +602,7 @@ void Player :: fire_weapon()
                         n = n->compositor();
                     
                     if(n->has_event("hit")){
-                            
+
                         if(not m_pNet->remote()){
                             auto hitinfo = make_shared<Meta>();
                             hitinfo->set<int>("damage", m_WeaponStash.active()->spec()->damage());
