@@ -4,8 +4,6 @@
 #include "Qor/kit/kit.h"
 #include "Qor/Qor.h"
 #include "Info.h"
-#include "Game.h"
-#include "Pregame.h"
 #include "Qor/Texture.h"
 
 #include "Qor/kit/log/log.h"
@@ -15,12 +13,17 @@
     #include <backward/backward.cpp>
 #endif
 
+#include "Game.h"
+#include "MenuScreen.h"
+#include "Pregame.h"
+
 using namespace std;
 using namespace kit;
 
 int main(int argc, char* argv[])
 {
     Args args(argc, (const char**)argv);
+    unsigned args_len = args.size();
     args.set("mod","FRAG.EXE");
     args.set("title", "FRAG.EXE");
     args.set("no_loading_fade","true");
@@ -33,7 +36,12 @@ int main(int argc, char* argv[])
         auto engine = kit::make_unique<Qor>(args);
         engine->states().register_class<Game>("game");
         engine->states().register_class<Pregame>("pregame");
-        engine->run("pregame");
+        engine->states().register_class<MenuScreen>("menu");
+
+        if(args_len > 1)
+            engine->run("pregame");
+        else
+            engine->run("menu");
 #ifndef DEBUG
     }catch(const Error&){
         // already logged
