@@ -77,6 +77,7 @@ class MenuScreen:
         Menu m_MainMenu;
 
         float m_Fade = 1.0f;
+        glm::vec2 m_WrapAccum;
 };
 
 #endif
