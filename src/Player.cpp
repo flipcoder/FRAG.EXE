@@ -197,7 +197,8 @@ Player :: Player(
     m_pPlayerShape->move(vec3(0.0f, 0.8f, 0.0f));
 
     m_pCamera->perspective();
-    m_pCamera->listen();
+    if(not m_pProfile->dummy())
+        m_pCamera->listen();
     
     //m_pInterface->fly();
     //btRigidBody* pmesh_body = (btRigidBody*)m_pPlayerShape->body()->body();
