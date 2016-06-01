@@ -44,7 +44,8 @@ MenuScreen :: MenuScreen(
         1.5f,
         Canvas::LEFT,
         32.0f,
-        MenuGUI::F_BOX
+        MenuGUI::F_BOX,
+        m_pQor->window()
     ))
 {
 }
@@ -60,7 +61,7 @@ void MenuScreen :: preload()
     m_pCamera->listen(true);
     m_pPipeline->blend(true);
     
-    m_pMusic = m_pQor->make<Sound>("loading.ogg");
+    m_pMusic = m_pQor->make<Sound>("frag.ogg");
     m_pRoot->add(m_pMusic);
     
     m_Ambient.on_change.connect([this](const Color& c){
