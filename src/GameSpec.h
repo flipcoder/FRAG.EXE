@@ -3,8 +3,8 @@
 
 #include <memory>
 #include <string>
-#include "Qor/kit/meta/meta.h"
-#include "Qor/kit/cache/cache.h"
+#include "kit/meta/meta.h"
+#include "kit/cache/cache.h"
 #include "Qor/Resource.h"
 #include "Qor/BasicPartitioner.h"
 #include "Weapon.h"

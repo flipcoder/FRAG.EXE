@@ -1,9 +1,9 @@
 #ifndef _WEAPON_H
 #define _WEAPON_H
 
-#include "Qor/kit/meta/meta.h"
+#include "kit/meta/meta.h"
 #include "Qor/Common.h"
-#include "Qor/kit/freq/freq.h"
+#include "kit/freq/freq.h"
 #include <glm/glm.hpp>
 
 class WeaponSpec;

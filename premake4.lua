@@ -58,6 +58,7 @@ solution("FRAG")
             "src/Qor/shaders/**"
         }
         includedirs {
+            "../kit",
             "vendor/include/",
             "/usr/local/include/",
             "/usr/local/include/",

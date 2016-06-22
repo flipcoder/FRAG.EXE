@@ -6,7 +6,7 @@
 #include "Qor/Sound.h"
 #include "Qor/Sprite.h"
 #include "Qor/Particle.h"
-#include "Qor/kit/kit.h"
+#include "kit/kit.h"
 #include <glm/glm.hpp>
 #include <cstdlib>
 #include <chrono>
@@ -14,7 +14,7 @@
 #include "Qor/PlayerInterface3D.h"
 #include "Qor/Light.h"
 #include "Qor/Material.h"
-#include "Qor/kit/log/log.h"
+#include "kit/log/log.h"
 #include <glm/gtx/orthonormalize.hpp>
 #include "Qor/BasicPartitioner.h"
 #include "Qor/Net.h"

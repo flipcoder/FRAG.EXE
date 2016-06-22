@@ -1,7 +1,7 @@
 #ifndef NETSPEC_H
 #define NETSPEC_H
 
-#include "Qor/kit/kit.h"
+#include "kit/kit.h"
 #include "Qor/Session.h"
 #include "Qor/Profile.h"
 #include "Qor/Net.h"

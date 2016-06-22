@@ -5,7 +5,7 @@
 #include "Qor/ScreenFader.h"
 #include "Qor/Sound.h"
 #include "Qor/Particle.h"
-#include "Qor/kit/kit.h"
+#include "kit/kit.h"
 #include <glm/glm.hpp>
 #include <cstdlib>
 #include <chrono>

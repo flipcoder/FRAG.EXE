@@ -1,13 +1,13 @@
 #include <iostream>
 #include <memory>
 #include <thread>
-#include "Qor/kit/kit.h"
+#include "kit/kit.h"
 #include "Qor/Qor.h"
 #include "Info.h"
 #include "Qor/Texture.h"
 
-#include "Qor/kit/log/log.h"
-#include "Qor/kit/async/async.h"
+#include "kit/log/log.h"
+#include "kit/async/async.h"
 
 #ifdef DEBUG
     #include <backward/backward.cpp>
