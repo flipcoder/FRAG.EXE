@@ -598,7 +598,7 @@ void Player :: fire_weapon()
                 Node* n = std::get<0>(hit);
                 if(n)
                 {
-                    //if(not n->hook("#player",Node::Hook::REVERSE).empty())
+                    //if(not n->find("#player",Node::Find::REVERSE).empty())
                     if(n->compositor())
                         n = n->compositor();
                     

@@ -106,7 +106,7 @@ void GameSpec :: setup()
     for(auto&& wpn: m_WeaponSpec)
     {
         // find spawns on map
-        auto spawns = m_pRoot->hook(wpn.second.name() + string(".*"), Node::Hook::REGEX);
+        auto spawns = m_pRoot->find(wpn.second.name() + string(".*"), Node::Find::REGEX);
         for(auto&& spawn: spawns)
         {
             auto m = make_shared<Mesh>(m_pCache->transform(wpn.second.model()), m_pCache);
@@ -129,7 +129,7 @@ void GameSpec :: setup()
         string model = m->at("model", string());
         if(model.empty())
             continue;
-        auto spawns = m_pRoot->hook(item.key + string(".*"), Node::Hook::REGEX);
+        auto spawns = m_pRoot->find(item.key + string(".*"), Node::Find::REGEX);
         for(auto&& spawn: spawns)
         {
             auto shape = make_shared<Mesh>(m_pCache->transform(model), m_pCache);
@@ -138,7 +138,7 @@ void GameSpec :: setup()
             {
                 if(shape->compositor())
                 {
-                    auto children = shape->hook_type<Mesh>();
+                    auto children = shape->find_type<Mesh>();
                     for(auto&& c: children)
                     {
                         string oldskin = c->material()->texture()->filename();
@@ -363,11 +363,11 @@ void GameSpec :: send_spawn(Player* p)
 
 bool GameSpec :: teleport_to_spawn(Player* p)
 {
-    auto spawns = m_pRoot->hook(R"([Ss]pawn.*)", Node::Hook::REGEX);
+    auto spawns = m_pRoot->find(R"([Ss]pawn.*)", Node::Find::REGEX);
     if(spawns.empty())
     {
         // if no spawns, use team/alternate spawns
-        spawns = m_pRoot->hook(R"(.*[Ss]pawn.*)", Node::Hook::REGEX);
+        spawns = m_pRoot->find(R"(.*[Ss]pawn.*)", Node::Find::REGEX);
     }
     
     if(not spawns.empty())
