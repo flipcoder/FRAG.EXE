@@ -1,6 +1,6 @@
 {
     "video": {
-        "windowed": false,
+        "windowed": true,
         "vsync": false,
         "anisotropy": 8
     },

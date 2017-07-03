@@ -1,3 +1,6 @@
 [submodule "bin/mods/FRAG.EXE"]
-	path = bin/mods/FRAG.EXE
+	path = bin/data/FRAG.EXE
     url = https://gitlab.node-3.net/frag/FRAG.EXE_data.git
+[submodule "lib/Qor"]
+	path = lib/Qor
+	url = https://github.com/flipcoder/qor

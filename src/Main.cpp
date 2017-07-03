@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 #ifndef DEBUG
     try{
 #endif
-        auto engine = kit::make_unique<Qor>(args);
+        auto engine = kit::make_unique<Qor>(args, Info::Program);
         engine->states().register_class<Game>("game");
         engine->states().register_class<Pregame>("pregame");
         engine->states().register_class<MenuScreen>("menu");

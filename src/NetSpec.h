@@ -32,6 +32,7 @@ class NetSpec:
             OBJ_PLAYER
         };
         
+        NetSpec() { assert(false); }
         NetSpec(Qor* engine, bool server, int connections = 8);
         virtual ~NetSpec();
         virtual void logic(Freq::Time t) override;

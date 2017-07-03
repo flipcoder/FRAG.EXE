@@ -1,3 +1,4 @@
+#include <winsock2.h>
 #include "Qor/Qor.h"
 #include "NetSpec.h"
 #include "Qor/Session.h"

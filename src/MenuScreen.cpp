@@ -31,21 +31,21 @@ MenuScreen :: MenuScreen(
         engine->window()->size().x, engine->window()->size().y
     )),
     m_pMenuGUI(make_shared<MenuGUI>(
-        engine->session()->profile(0)->controller().get(),
+        engine->session()->active_profile(0)->controller().get(),
         &m_MenuContext,
         &m_MainMenu,
         m_pPipeline->partitioner(),
-        m_pCanvas.get(),
+        m_pQor->window(),
+        //m_pCanvas.get(),
         m_pResources,
-        "Roboto Condensed",
+        "RobotoCondensed-Regular.ttf",
         engine->window()->size().y / 30.0f,
         &m_Fade,
         7,
         1.5f,
-        Canvas::LEFT,
+        Text::LEFT,
         32.0f,
-        MenuGUI::F_BOX,
-        m_pQor->window()
+        MenuGUI::F_BOX
     ))
 {
 }
