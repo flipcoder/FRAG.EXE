@@ -21,7 +21,7 @@ Player :: Player(
     Node* root,
     shared_ptr<Profile> profile,
     //shared_ptr<Controller> controller,
-    Cache<Resource, string>* cache,
+    ResourceCache* cache,
     Physics* physics,
     Window* window,
     Qor* engine,

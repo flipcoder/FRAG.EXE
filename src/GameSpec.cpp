@@ -6,11 +6,12 @@
 #include "Game.h"
 #include <regex>
 #include "Qor/Profile.h"
+#include "Qor/ResourceCache.h"
 using namespace std;
 using namespace glm;
 using namespace RakNet;
 
-GameSpec :: GameSpec(std::string fn, Cache<Resource, std::string>* cache,
+GameSpec :: GameSpec(std::string fn, ResourceCache* cache,
     Node* root, BasicPartitioner* part,
     shared_ptr<Profile> prof,
     Qor* engine, Game* state,
@@ -149,7 +150,7 @@ void GameSpec :: setup()
                         );
                         if(oldskin != skin){
                             c->fork();
-                            c->material(skin, m_pCache);
+                            c->swap_material(oldskin, skin, m_pCache);
                         }
                     }
                 }else{
@@ -161,7 +162,7 @@ void GameSpec :: setup()
                     );
                     if(oldskin != skin){
                         shape->fork();
-                        shape->material(skin, m_pCache);
+                        shape->swap_material(oldskin, skin, m_pCache);
                     }
                 }
             }

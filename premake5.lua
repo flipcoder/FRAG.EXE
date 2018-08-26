@@ -4,9 +4,11 @@ workspace("FRAG")
     configurations {"Debug", "Release"}
 
         defines {
+            "META_SHARED",
             "GLM_FORCE_RADIANS",
+            "GLM_ENABLE_EXPERIMENTAL",
+            "GLM_FORCE_CTOR_INIT",
             "NOMINMAX",
-            "_WINSOCKAPI_",
             "_HAS_ITERATOR_DEBUGGING=0",
             "_SCL_SECURE=0"
         }
@@ -28,6 +30,7 @@ workspace("FRAG")
         configuration "Release"
             defines { "NDEBUG" }
             optimize "speed"
+            floatingpoint "Fast"
             targetname("FRAG_dist")
 
         -- gmake Config
@@ -51,8 +54,9 @@ workspace("FRAG")
                 "boost_coroutine",
                 "boost_python",
                 "boost_regex",
+                "boost_chrono",
                 "jsoncpp",
-                "RakNetDLL",
+                "raknet",
                 --"BulletSoftBody",
                 "BulletDynamics",
                 "BulletCollision",
@@ -63,6 +67,7 @@ workspace("FRAG")
                 "lib/Qor/lib/kit",
                 "/usr/local/include/",
                 "/usr/include/bullet/",
+                "/usr/include/rapidxml/",
                 "/usr/include/raknet/DependentExtensions"
             }
 
@@ -99,6 +104,9 @@ workspace("FRAG")
             toolset "v141"
             flags { "MultiProcessorCompile" }
 
+            defines {
+                "_WINSOCKAPI_"
+            }
             links {
                 "ws2_32",
                 "glibmm.dll.lib",
@@ -191,16 +199,16 @@ workspace("FRAG")
 
         -- Project Files
         files {
-            "src/**.h",
             "src/**.cpp",
-            "lib/Qor/**.h",
-            "lib/Qor/**.cpp",
-            "lib/Qor/lib/kit/**.h",
-            "lib/Qor/lib/kit/**.cpp"
+            "lib/Qor/Qor/**.cpp",
+            "lib/Qor/lib/kit/kit/**.cpp",
+            "lib/Qor/lib/kit/lib/local_shared_ptr/kit/**.cpp",
         }
 
         -- Exluding Files
         excludes {
+            "lib/*~/**",
+            "lib/Qor/lib/*~/**",
             "lib/Qor/Qor/Main.cpp",
             "lib/Qor/Qor/Info.cpp",
             "lib/Qor/Qor/DemoState.*",
@@ -217,6 +225,7 @@ workspace("FRAG")
         includedirs {
             "lib/Qor",
             "lib/Qor/lib/kit",
+            "lib/Qor/lib/kit/lib/local_shared_ptr",
             "/usr/local/include/",
             "/usr/include/bullet/",
             "/usr/include/raknet/DependentExtensions"

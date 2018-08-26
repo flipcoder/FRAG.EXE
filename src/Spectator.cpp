@@ -7,6 +7,7 @@
 #include "Qor/Material.h"
 #include "Game.h"
 #include "Qor/BasicPartitioner.h"
+#include "Qor/ResourceCache.h"
 using namespace std;
 using namespace glm;
 
@@ -14,7 +15,7 @@ Spectator :: Spectator(
     Game* state,
     Node* root,
     shared_ptr<Profile> profile,
-    Cache<Resource, string>* cache,
+    ResourceCache* cache,
     Physics* physics,
     Window* window,
     Qor* engine,

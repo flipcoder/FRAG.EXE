@@ -9,6 +9,7 @@
 #include "Qor/BasicPartitioner.h"
 #include "Weapon.h"
 #include "NetSpec.h"
+class ResourceCache;
 class Node;
 class Player;
 class Qor;
@@ -20,7 +21,7 @@ class GameSpec:
     public IRealtime
 {
     public:
-        GameSpec(std::string fn, Cache<Resource, std::string>* cache,
+        GameSpec(std::string fn, ResourceCache* cache,
             Node* root, BasicPartitioner* part,
             std::shared_ptr<Profile> prof,
             Qor* engine, Game* state,
@@ -88,7 +89,7 @@ class GameSpec:
         void register_pickup_with_player(std::shared_ptr<Mesh> item, Player* player);
         
         std::shared_ptr<Meta> m_pConfig;
-        Cache<Resource, std::string>* m_pCache;
+        ResourceCache* m_pCache;
         WeaponSpec m_WeaponSpec;
         Node* m_pRoot;
         BasicPartitioner* m_pPartitioner;

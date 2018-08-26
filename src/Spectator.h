@@ -13,6 +13,7 @@
 class Qor;
 class HUD;
 class Game;
+class ResourceCache;
 
 class Spectator:
     public IRealtime
@@ -22,7 +23,7 @@ class Spectator:
             Game* state,
             Node* root,
             std::shared_ptr<Profile> profile,
-            Cache<Resource, std::string>* cache,
+            ResourceCache* cache,
             Physics* physics,
             Window* window,
             Qor* engine,
